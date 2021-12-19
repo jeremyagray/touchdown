@@ -1,11 +1,32 @@
-# fluentd-mode.el [![travis badge][travis-badge]][travis-link]
+# touchdown
 
-Major mode of [fluentd](http://www.fluentd.org/) configuration file.
+Major mode for highlighting and editing
+[td-agent/fluentd](http://www.fluentd.org/) configuration files.
 
+## Installation
 
-## Screenshot
+### Git
 
-![fluentd-mode](image/fluentd-mode.png)
+Clone and load `touchdown.el`.
 
-[travis-badge]: https://travis-ci.org/syohex/emacs-fluentd-mode.svg
-[travis-link]: https://travis-ci.org/syohex/emacs-fluentd-mode
+## Developement Requirements
+
+- cask
+- buttercup
+- undercover
+
+Installing cask should be sufficient as it will pull in the elisp
+dependencies as needed.
+
+## History
+
+Fork of [emacs-fluentd-mode](https://github.com/syohex/emacs-fluentd-mode).
+
+## License
+
+Gnu GPL version 3.
+
+## Authors and Copyright
+
+- Copyright (C) 2016 by Syohei YOSHIDA.
+- Copyright (C) 2021 Jeremy A Gray.
