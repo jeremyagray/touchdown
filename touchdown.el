@@ -40,6 +40,10 @@
   "Indent level."
   :type 'integer)
 
+(defconst touchdown--closing-tag-regexp
+  "^\\s-*\\(</[^>]+>\\)\\$"
+  "Regular expression for matching a closing tag.")
+
 (defconst touchdown--tag-regexp
   "^\\s-*\\(</?[^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
 
@@ -75,11 +79,11 @@
     (back-to-indentation)
     (looking-at-p "<[^/][^ \t\r\n>]*")))
 
-(defun touchdown--close-tag-line-p ()
-  "Determine if point is on a closing tag line."
+(defun touchdown--closing-tag-line-p ()
+  "Determine if point is on a line containing a closing tag."
   (save-excursion
     (back-to-indentation)
-    (looking-at-p "</[^>]+>")))
+    (looking-at-p touchdown--closing-tag-regexp)))
 
 (defun touchdown--retrieve-close-tag-name ()
   "Find the current closing tag name."
@@ -101,7 +105,7 @@
   (save-excursion
     (let ((open-tag "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
           (curpoint (point)))
-      (cond ((touchdown--close-tag-line-p)
+      (cond ((touchdown--closing-tag-line-p)
              (let* ((tagname (touchdown--retrieve-close-tag-name))
                     (open-tag1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" tagname)))
                (if (not (re-search-backward open-tag1 nil t))
