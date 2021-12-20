@@ -24,7 +24,7 @@
 
 (ert-deftest tag-and-values-indent ()
   "one tag and values"
-  (with-fluenntd-temp-buffer
+  (with-fluentd-temp-buffer
     "
    foo
    <source>
@@ -59,7 +59,7 @@
 
 (ert-deftest nested-tag-indent ()
   "nestead tags and values"
-  (with-fluenntd-temp-buffer
+  (with-fluentd-temp-buffer
     "
    <match tag>
      type forward

@@ -21,7 +21,7 @@
 
 (require 'ert)
 
-(defmacro with-fluenntd-temp-buffer (code &rest body)
+(defmacro with-fluentd-temp-buffer (code &rest body)
   "Insert `code' and enable `fluentd-mode'. cursor is beginning of buffer"
   (declare (indent 0) (debug t))
   `(with-temp-buffer

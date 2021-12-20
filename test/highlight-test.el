@@ -23,7 +23,7 @@
 
 (ert-deftest tag-and-values-highlight ()
   "highlighting one tag and values"
-  (with-fluenntd-temp-buffer
+  (with-fluentd-temp-buffer
     "
    <source>
      type forward
@@ -48,7 +48,7 @@
 
 (ert-deftest tag-parameter-highlight ()
   "highlighting one tag and values"
-  (with-fluenntd-temp-buffer
+  (with-fluentd-temp-buffer
     "
 <match myapp.access>
   type file
