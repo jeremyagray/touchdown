@@ -1,8 +1,8 @@
-;;; mode.el --- major mode loading tests for fluentd-mode
+;;; mode.el --- major mode loading tests -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021 by Jeremy A Gray
+;; Copyright (C) 2021 by Jeremy A GRAY.
 
-;; Author: Jeremy A Gray <gray@flyquackswim.com>
+;; Author: Jeremy A GRAY <gray@flyquackswim.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 ;;; Commentary:
 
-;; These tests check that the fluentd mode is loaded with both file
+;; These tests check that the touchdown mode is loaded with both file
 ;; variables and upon opening appropriately named files.
 
 ;;; Code:
@@ -27,9 +27,9 @@
 (require 'ert)
 
 (ert-deftest should-select-correct-mode-from-top-file-variables ()
-  "Check that fluentd mode is selected using file variables."
-  (with-fluentd-temp-buffer
-    "-*- mode: fluentd -*-
+  "Check that touchdown mode is selected using file variables."
+  (with-touchdown-temp-buffer
+    "-*- mode: touchdown -*-
 <source>
   type forward
   port 24224
@@ -37,26 +37,26 @@
 "
     (set-auto-mode)
     (should
-     (equal "Fluentd" mode-name))))
+     (equal "Touchdown" mode-name))))
 
 (ert-deftest should-select-correct-mode-from-bottom-file-variables ()
-  "Check that fluentd mode is selected using file variables."
-  (with-fluentd-temp-buffer
+  "Check that touchdown mode is selected using file variables."
+  (with-touchdown-temp-buffer
     "<source>
   type forward
   port 24224
 </source>
 
 # Local Variables:
-# mode: fluentd
+# mode: touchdown
 # End:
 "
     (set-auto-mode)
     (should
-     (equal "Fluentd" mode-name))))
+     (equal "Touchdown" mode-name))))
 
-(ert-deftest should-select-correct-mode-fluentd-conf ()
-  "Check that fluentd mode is selected using auto-mode-alist for file fluentd.conf."
+(ert-deftest should-select-correct-mode-touchdown-conf ()
+  "Check that touchdown mode is selected using auto-mode-alist for file fluentd.conf."
   (with-temp-buffer
     (insert
      "<source>
@@ -67,12 +67,12 @@
     (write-file "fluentd.conf")
     (find-file "fluentd.conf")
     (should
-     (equal "Fluentd" mode-name))
+     (equal "Touchdown" mode-name))
     (delete-file "fluentd.conf")
     (delete-file "fluentd.conf~")))
 
 (ert-deftest should-select-correct-mode-fluent-conf ()
-  "Check that fluentd mode is selected using auto-mode-alist for file fluent.conf."
+  "Check that touchdown mode is selected using auto-mode-alist for file fluent.conf."
   (with-temp-buffer
     (insert
      "<source>
@@ -83,12 +83,12 @@
     (write-file "fluent.conf")
     (find-file "fluent.conf")
     (should
-     (equal "Fluentd" mode-name))
+     (equal "Touchdown" mode-name))
     (delete-file "fluent.conf")
     (delete-file "fluent.conf~")))
 
 (ert-deftest should-select-correct-mode-td-agent-conf ()
-  "Check that fluentd mode is selected using auto-mode-alist for file td-agent.conf."
+  "Check that touchdown mode is selected using auto-mode-alist for file td-agent.conf."
   (with-temp-buffer
     (insert
      "<source>
@@ -99,7 +99,7 @@
     (write-file "td-agent.conf")
     (find-file "td-agent.conf")
     (should
-     (equal "Fluentd" mode-name))
+     (equal "Touchdown" mode-name))
     (delete-file "td-agent.conf")
     (delete-file "td-agent.conf~")))
 

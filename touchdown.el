@@ -1,9 +1,12 @@
-;;; fluentd-mode.el --- Major mode for fluentd configuration file -*- lexical-binding: t; -*-
+;;; touchdown.el --- Major mode for highlighting and editing td-agent/fluentd configuration files. -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016 by Syohei YOSHIDA
+;; Copyright (C) 2016 by Syohei YOSHIDA.
+;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
+;; Author: Jeremy A GRAY <gray@flyquackswim.com>
 ;; URL: https://github.com/syohex/emacs-fluentd-mode
+;; URL: https://github.com/jeremyagray/touchdown
 ;; Version: 0.01
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 
@@ -22,78 +25,79 @@
 
 ;;; Commentary:
 
-;; Major mode for fluentd configuration file
+;; Major mode for highlighting and editing td-agent/fluentd
+;; configuration files.
 
 ;;; Code:
 
 (require 'cl-lib)
 
-(defgroup fluentd nil
+(defgroup touchdown nil
   "Major mode for fluentd configuration file."
   :group 'languages)
 
-(defcustom fluentd-indent-level 2
+(defcustom touchdown-indent-level 2
   "Indent level."
   :type 'integer)
 
-(defconst fluentd--tag-regexp
+(defconst touchdown--tag-regexp
   "^\\s-*\\(</?[^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
 
-(defconst fluentd--parameter-regexp
+(defconst touchdown--parameter-regexp
   "\\([[:word:]_]+\\)\\s-+\\(.+\\)$")
 
-(defface fluentd-tag
+(defface touchdown-tag
   '((t (:inherit font-lock-keyword-face)))
   "Face of TAG")
 
-(defface fluentd-tag-parameter
+(defface touchdown-tag-parameter
   '((t (:inherit font-lock-type-face)))
   "Face of tag parameter")
 
-(defface fluentd-parameter-name
+(defface touchdown-parameter-name
   '((t (:inherit font-lock-variable-name-face)))
   "Face of parameter name")
 
-(defface fluentd-parameter-value
+(defface touchdown-parameter-value
   '((t (:inherit font-lock-constant-face)))
   "Face of parameter value")
 
-(defvar fluentd-font-lock-keywords
-  `((,fluentd--tag-regexp (1 'fluentd-tag)
-                          (2 'fluentd-tag-parameter nil t)
-                          (3 'fluentd-tag nil t))
-    (,fluentd--parameter-regexp (1 'fluentd-parameter-name)
-                                (2 'fluentd-parameter-value))))
+(defvar touchdown-font-lock-keywords
+  `((,touchdown--tag-regexp (1 'touchdown-tag)
+                          (2 'touchdown-tag-parameter nil t)
+                          (3 'touchdown-tag nil t))
+    (,touchdown--parameter-regexp (1 'touchdown-parameter-name)
+                                (2 'touchdown-parameter-value))))
 
-(defun fluentd--open-tag-line-p ()
+(defun touchdown--open-tag-line-p ()
   (save-excursion
     (back-to-indentation)
     (looking-at-p "<[^/][^ \t\r\n>]*")))
 
-(defun fluentd--close-tag-line-p ()
+(defun touchdown--close-tag-line-p ()
   (save-excursion
     (back-to-indentation)
     (looking-at-p "</[^>]+>")))
 
-(defun fluentd--retrieve-close-tag-name ()
+(defun touchdown--retrieve-close-tag-name ()
   (save-excursion
     (back-to-indentation)
     (looking-at "</\\([^>]+\\)>")
     (match-string-no-properties 1)))
 
-(defun fluentd--already-closed-p (tagname curpoint)
+(defun touchdown--already-closed-p (tagname curpoint)
   (save-excursion
     (let ((close-tag (format "</%s>" tagname))
           (curline (line-number-at-pos curpoint)))
       (when (search-forward close-tag curpoint t)
         (< (line-number-at-pos) curline)))))
 
-(defun fluentd--search-open-tag-indentation ()
+(defun touchdown--search-open-tag-indentation ()
   (save-excursion
     (let ((open-tag "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
           (curpoint (point)))
-      (cond ((fluentd--close-tag-line-p)
-             (let* ((tagname (fluentd--retrieve-close-tag-name))
+      (cond ((touchdown--close-tag-line-p)
+             (let* ((tagname (touchdown--retrieve-close-tag-name))
                     (open-tag1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" tagname)))
                (if (not (re-search-backward open-tag1 nil t))
                    (error "open-tag not found")
@@ -102,13 +106,13 @@
              (let (finish)
                (while (and (not finish) (re-search-backward open-tag nil t))
                  (let ((tagname (match-string-no-properties 1)))
-                   (unless (fluentd--already-closed-p tagname curpoint)
+                   (unless (touchdown--already-closed-p tagname curpoint)
                      (setq finish t))))
                (if (not finish)
                    0
-                 (+ (current-indentation) fluentd-indent-level))))))))
+                 (+ (current-indentation) touchdown-indent-level))))))))
 
-(defun fluentd--search-close-tag ()
+(defun touchdown--search-close-tag ()
   (let ((close-tag "</\\([^/]+\\)>")
         (cur-line-end (line-end-position)))
     (save-excursion
@@ -120,12 +124,12 @@
                (close-tag (format "</%s>" tagname)))
           (if (re-search-forward close-tag cur-line-end t)
               indentation
-            (+ indentation fluentd-indent-level)))))))
+            (+ indentation touchdown-indent-level)))))))
 
-(defun fluentd-indent-line ()
+(defun touchdown-indent-line ()
   "Indent current line as fluentd configuration."
   (interactive)
-  (let ((indent-size (fluentd--search-open-tag-indentation)))
+  (let ((indent-size (touchdown--search-open-tag-indentation)))
     (back-to-indentation)
     (when (/= (current-indentation) indent-size)
       (save-excursion
@@ -134,7 +138,7 @@
     (when (< (current-column) (current-indentation))
       (back-to-indentation))))
 
-(defvar fluentd-mode-syntax-table
+(defvar touchdown-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?#  "< b" table)
     (modify-syntax-entry ?\n "> b" table)
@@ -143,21 +147,21 @@
     table))
 
 ;;;###autoload
-(define-derived-mode fluentd-mode fundamental-mode "Fluentd"
+(define-derived-mode touchdown-mode fundamental-mode "Touchdown"
   "Major mode for editing fluentd configuration file."
-  (setq font-lock-defaults '((fluentd-font-lock-keywords)))
+  (setq font-lock-defaults '((touchdown-font-lock-keywords)))
 
   ;; indentation
-  (make-local-variable 'fluentd-indent-level)
-  (set (make-local-variable 'indent-line-function) 'fluentd-indent-line)
+  (make-local-variable 'touchdown-indent-level)
+  (set (make-local-variable 'indent-line-function) 'touchdown-indent-line)
 
   (set (make-local-variable 'comment-start) "#"))
 
 ;;;###autoload
 (add-to-list
  'auto-mode-alist
- '("\\(fluentd?\\.conf\\|td-agent\\.conf\\)\\'" . fluentd-mode))
+ '("\\(fluentd?\\.conf\\|td-agent\\.conf\\)\\'" . touchdown-mode))
 
-(provide 'fluentd-mode)
+(provide 'touchdown-mode)
 
-;;; fluentd-mode.el ends here
+;;; touchdown.el ends here

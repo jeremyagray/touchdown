@@ -1,8 +1,10 @@
-;;; test-helper.el --- helper of fluentd-mode test
+;;; test-helper.el --- touchdown-mode test helper -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016 by Syohei YOSHIDA
+;; Copyright (C) 2016 by Syohei YOSHIDA.
+;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
+;; Author: Jeremy A GRAY <gray@flyquackswim.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,17 +19,19 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
 ;;; Code:
 
 (require 'ert)
 
-(defmacro with-fluentd-temp-buffer (code &rest body)
-  "Insert `code' and enable `fluentd-mode'. cursor is beginning of buffer"
+(defmacro with-touchdown-temp-buffer (code &rest body)
+  "Insert `code' and enable `touchdown-mode'. cursor is beginning of buffer"
   (declare (indent 0) (debug t))
   `(with-temp-buffer
      (insert ,code)
      (goto-char (point-min))
-     (fluentd-mode)
+     (touchdown-mode)
      (font-lock-fontify-buffer)
      ,@body))
 
