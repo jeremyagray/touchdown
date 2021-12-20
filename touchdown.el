@@ -44,6 +44,10 @@
   "^\\s-*\\(</[^>]+>\\)\\$"
   "Regular expression for matching a closing tag.")
 
+(defconst touchdown--closing-tag-name-regexp
+  "^\\s-*</\\([^>]+\\)>\\$"
+  "Regular expression for matching a closing tag name.")
+
 (defconst touchdown--tag-regexp
   "^\\s-*\\(</?[^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
 
@@ -85,12 +89,15 @@
     (back-to-indentation)
     (looking-at-p touchdown--closing-tag-regexp)))
 
-(defun touchdown--retrieve-close-tag-name ()
-  "Find the current closing tag name."
+(defun touchdown--retrieve-closing-tag-name ()
+  "Find the name of the current closing tag."
   (save-excursion
-    (back-to-indentation)
-    (looking-at "</\\([^>]+\\)>")
-    (match-string-no-properties 1)))
+    (if (touchdown--closing-tag-line-p)
+        (let ()
+          (back-to-indentation)
+          (looking-at touchdown--closing-tag-name-regexp)
+          (match-string-no-properties 1))
+      nil)))
 
 (defun touchdown--already-closed-p (tagname curpoint)
   "Determine if tag TAGNAME is closed after CURPOINT."
