@@ -20,7 +20,7 @@
 ;;; Code:
 
 (require 'ert)
-(require 'fluentd-mode)
+(require 'fluentd-mode "touchdown.el")
 
 (ert-deftest tag-and-values-indent ()
   "one tag and values"
