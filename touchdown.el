@@ -33,7 +33,7 @@
 (require 'cl-lib)
 
 (defgroup touchdown nil
-  "Major mode for fluentd configuration file."
+  "Major mode for editing fluentd/td-agent configuration files."
   :group 'languages)
 
 (defcustom touchdown-indent-level 2
@@ -70,22 +70,26 @@
                                 (2 'touchdown-parameter-value))))
 
 (defun touchdown--open-tag-line-p ()
+  "Determine if point is on an opening tag line."
   (save-excursion
     (back-to-indentation)
     (looking-at-p "<[^/][^ \t\r\n>]*")))
 
 (defun touchdown--close-tag-line-p ()
+  "Determine if point is on a closing tag line."
   (save-excursion
     (back-to-indentation)
     (looking-at-p "</[^>]+>")))
 
 (defun touchdown--retrieve-close-tag-name ()
+  "Find the current closing tag name."
   (save-excursion
     (back-to-indentation)
     (looking-at "</\\([^>]+\\)>")
     (match-string-no-properties 1)))
 
 (defun touchdown--already-closed-p (tagname curpoint)
+  "Determine if tag TAGNAME is closed after CURPOINT."
   (save-excursion
     (let ((close-tag (format "</%s>" tagname))
           (curline (line-number-at-pos curpoint)))
@@ -93,6 +97,7 @@
         (< (line-number-at-pos) curline)))))
 
 (defun touchdown--search-open-tag-indentation ()
+  "Get the indentation of the current opening tag."
   (save-excursion
     (let ((open-tag "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
           (curpoint (point)))
@@ -100,7 +105,7 @@
              (let* ((tagname (touchdown--retrieve-close-tag-name))
                     (open-tag1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" tagname)))
                (if (not (re-search-backward open-tag1 nil t))
-                   (error "open-tag not found")
+                   (error "Opening tag not found")
                  (current-indentation))))
             (t
              (let (finish)
@@ -113,6 +118,7 @@
                  (+ (current-indentation) touchdown-indent-level))))))))
 
 (defun touchdown--search-close-tag ()
+  "Find the current closing tag."
   (let ((close-tag "</\\([^/]+\\)>")
         (cur-line-end (line-end-position)))
     (save-excursion
@@ -148,10 +154,9 @@
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
-  "Major mode for editing fluentd configuration file."
+  "Major mode for editing fluentd/td-agent configuration files."
   (setq font-lock-defaults '((touchdown-font-lock-keywords)))
 
-  ;; indentation
   (make-local-variable 'touchdown-indent-level)
   (set (make-local-variable 'indent-line-function) 'touchdown-indent-line)
 
