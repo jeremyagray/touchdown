@@ -40,13 +40,25 @@
   "Indent level."
   :type 'integer)
 
-(defconst touchdown--closing-tag-regexp
-  "^\\s-*\\(</[^>]+>\\)\\$"
-  "Regular expression for matching a closing tag.")
+(defconst touchdown--opening-xml-directive-regexp
+  "^\\s-*\\(<[^/>[:space:]]+\\(?:[:space:]+[^>]+\\)?>\\)[:space:]*\\$"
+  "Regular expression for matching an opening XML directive.")
 
-(defconst touchdown--closing-tag-name-regexp
+(defconst touchdown--opening-xml-directive-name-regexp
+  "^\\s-*<\\([^/>[:space:]]+\\)\\(?:[:space:]+[^>]+\\)?>[:space:]*\\$"
+  "Regular expression for matching an opening XML directive name.")
+
+(defconst touchdown--opening-xml-directive-tag-regexp
+  "^\\s-*<[^/>[:space:]]+\\(?:[:space:]+\\([^>]+\\)\\)?>[:space:]*\\$"
+  "Regular expression for matching an opening XML directive tag/label.")
+
+(defconst touchdown--closing-xml-directive-regexp
+  "^\\s-*\\(</[^>]+>\\)\\$"
+  "Regular expression for matching a closing XML directive.")
+
+(defconst touchdown--closing-xml-directive-name-regexp
   "^\\s-*</\\([^>]+\\)>\\$"
-  "Regular expression for matching a closing tag name.")
+  "Regular expression for matching a closing XML directive name.")
 
 (defconst touchdown--tag-regexp
   "^\\s-*\\(</?[^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
@@ -77,76 +89,77 @@
     (,touchdown--parameter-regexp (1 'touchdown-parameter-name)
                                 (2 'touchdown-parameter-value))))
 
-(defun touchdown--open-tag-line-p ()
-  "Determine if point is on an opening tag line."
+(defun touchdown--opening-xml-directive-line-p ()
+  "Determine if point is on an opening XML directive line."
   (save-excursion
     (back-to-indentation)
-    (looking-at-p "<[^/][^ \t\r\n>]*")))
+    (looking-at-p touchdown--opening-xml-directive-regexp)))
 
-(defun touchdown--closing-tag-line-p ()
-  "Determine if point is on a line containing a closing tag."
+(defun touchdown--closing-xml-directive-line-p ()
+  "Determine if point is on a line containing a closing XML directive."
   (save-excursion
     (back-to-indentation)
-    (looking-at-p touchdown--closing-tag-regexp)))
+    (looking-at-p touchdown--closing-xml-directive-regexp)))
 
-(defun touchdown--retrieve-closing-tag-name ()
-  "Find the name of the current closing tag."
+(defun touchdown--get-closing-xml-directive-name ()
+  "Get the name of the current closing XML directive."
   (save-excursion
-    (if (touchdown--closing-tag-line-p)
+    (if (touchdown--closing-xml-directive-line-p)
         (let ()
           (back-to-indentation)
-          (looking-at touchdown--closing-tag-name-regexp)
+          (looking-at touchdown--closing-xml-directive-name-regexp)
           (match-string-no-properties 1))
       nil)))
 
-(defun touchdown--already-closed-p (tagname curpoint)
-  "Determine if tag TAGNAME is closed after CURPOINT."
+(defun touchdown--already-closed-p (directive curpoint)
+  "Determine if XML directive DIRECTIVE is closed before CURPOINT."
   (save-excursion
-    (let ((close-tag (format "</%s>" tagname))
+    (let ((close-directive (format "</%s>" directive))
           (curline (line-number-at-pos curpoint)))
-      (when (search-forward close-tag curpoint t)
+      (when (search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
 
-(defun touchdown--search-open-tag-indentation ()
-  "Get the indentation of the current opening tag."
+(defun touchdown--get-opening-xml-directive-indentation ()
+  "Get the indentation of the current opening XML directive."
   (save-excursion
-    (let ((open-tag "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
+    (let ((opening-directive "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
           (curpoint (point)))
-      (cond ((touchdown--closing-tag-line-p)
-             (let* ((tagname (touchdown--retrieve-close-tag-name))
-                    (open-tag1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" tagname)))
-               (if (not (re-search-backward open-tag1 nil t))
-                   (error "Opening tag not found")
+      (cond ((touchdown--closing-xml-directive-line-p)
+             (let* ((directive (touchdown--get-closing-xml-directive-name))
+                    (opening-directive1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" directive)))
+               (if (not (re-search-backward opening-directive1 nil t))
+                   (error "Opening XML directive not found")
                  (current-indentation))))
             (t
              (let (finish)
-               (while (and (not finish) (re-search-backward open-tag nil t))
-                 (let ((tagname (match-string-no-properties 1)))
-                   (unless (touchdown--already-closed-p tagname curpoint)
+               (while (and (not finish)
+                           (re-search-backward opening-directive nil t))
+                 (let ((directive (match-string-no-properties 1)))
+                   (unless (touchdown--already-closed-p directive curpoint)
                      (setq finish t))))
                (if (not finish)
                    0
                  (+ (current-indentation) touchdown-indent-level))))))))
 
-(defun touchdown--search-close-tag ()
-  "Find the current closing tag."
-  (let ((close-tag "</\\([^/]+\\)>")
+(defun touchdown--search-closing-xml-directive ()
+  "Find the current closing XML directive."
+  (let ((closing-xml-directive "</\\([^/]+\\)>")
         (cur-line-end (line-end-position)))
     (save-excursion
-      (if (re-search-forward open-tag nil t)
-          (let ((open-tag (concat "<" (match-string-no-properties 1) 2)))
+      (if (re-search-forward opening-directive nil t)
+          (let ((opening-directive (concat "<" (match-string-no-properties 1) 2)))
             (match-string-no-properties 1))
         (let* ((indentation (current-indentation))
-               (tagname (match-string-no-properties 1))
-               (close-tag (format "</%s>" tagname)))
-          (if (re-search-forward close-tag cur-line-end t)
+               (directive (match-string-no-properties 1))
+               (closing-xml-directive (format "</%s>" directive)))
+          (if (re-search-forward closing-xml-directive cur-line-end t)
               indentation
             (+ indentation touchdown-indent-level)))))))
 
 (defun touchdown-indent-line ()
   "Indent current line as fluentd configuration."
   (interactive)
-  (let ((indent-size (touchdown--search-open-tag-indentation)))
+  (let ((indent-size (touchdown--get-opening-xml-directive-indentation)))
     (back-to-indentation)
     (when (/= (current-indentation) indent-size)
       (save-excursion
