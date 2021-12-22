@@ -38,6 +38,10 @@ test : elpa
 		-l test/mode.el \
 		-f ert-run-tests-batch-and-exit
 
+.PHONY : buttercup
+buttercup :
+	$(CASK) exec buttercup -L .
+
 elpa : $(ELPA_DIR)
 
 $(ELPA_DIR) : Cask
