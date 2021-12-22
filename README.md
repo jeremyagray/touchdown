@@ -3,11 +3,24 @@
 Major mode for highlighting and editing
 [td-agent/fluentd](http://www.fluentd.org/) configuration files.
 
+## Roadmap
+
+- [] fix bug that treats commented <...> as a directive
+- [] move testing to buttercup
+- [] find a local coverage report generator
+- [] rename lisp variables and functions to reflect the names in the
+     fluentd configuration file syntax
+- [] add explicit regular expressions for top-level directives
+- [] add explicit regular expressions for second-level directives
+- [] add explicit regular expressions for core plugin parameters
+- [] run dry-run on file
+
 ## Installation
 
 ### Git
 
-Clone this [repo](https://github.com/jeremyagray/touchdown) and load [`touchdown.el`](touchdown.el).
+Clone this [repo](https://github.com/jeremyagray/touchdown) and load
+[`touchdown.el`](touchdown.el).
 
 ## Developement Requirements
 
@@ -29,4 +42,4 @@ Fork of [emacs-fluentd-mode](https://github.com/syohex/emacs-fluentd-mode).
 ## Authors and Copyright
 
 - Copyright (C) 2016 by Syohei YOSHIDA.
-- Copyright (C) 2021 Jeremy A Gray.
+- Copyright (C) 2021 Jeremy A GRAY.

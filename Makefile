@@ -3,7 +3,7 @@
 # touchdown, a major mode for fluentd/td-agent configuration files
 #
 # Copyright (C) 2016 by Syohei YOSHIDA <syohex@gmail.com>.
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright (C) 2021 Jeremy A GRAY <gray@flyquackswim.com>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

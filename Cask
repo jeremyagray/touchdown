@@ -1,7 +1,7 @@
 ;;; Cask --- cask file for touchdown -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA.
-;; Copyright (C) 2021 by Jeremy A Gray.
+;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Author: Jeremy A Gray <gray@flyquackswim.com>
