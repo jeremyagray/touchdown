@@ -42,48 +42,40 @@
 
 (defconst touchdown--opening-xml-directive-regexp
   "^[[:space:]]*\\(<\\(source\\|match\\|filter\\|system\\|label\\)\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*$"
-  "Regular expression for matching an opening XML directive."
-  :type 'string)
+  "Regular expression for matching an opening XML directive.")
 
 (defconst touchdown--opening-xml-directive-name-regexp
   "^[[:space:]]*<\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+[^>]+\\)?>[[:space:]]*$"
-  "Regular expression for matching an opening XML directive name."
-  :type 'string)
+  "Regular expression for matching an opening XML directive name.")
 
 (defconst touchdown--opening-xml-directive-tag-regexp
   "^[[:space:]]*<\\(?:source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?>[[:space:]]*$"
-  "Regular expression for matching an opening XML directive tag/label."
-  :type 'string)
+  "Regular expression for matching an opening XML directive tag/label.")
 
 (defconst touchdown--closing-xml-directive-regexp
   "^[[:space:]]*\\(</\\(?:source\\|match\\|filter\\|system\\|label\\)>\\)$"
-  "Regular expression for matching a closing XML directive."
-  :type 'string)
+  "Regular expression for matching a closing XML directive.")
 
 (defconst touchdown--closing-xml-directive-name-regexp
   "^[[:space:]]*</\\(source\\|match\\|filter\\|system\\|label\\)>$"
-  "Regular expression for matching a closing XML directive name."
-  :type 'string)
+  "Regular expression for matching a closing XML directive name.")
 
 (defconst touchdown--directives-regexp
-  "^[[:space:]]*\\(</?\\(source\\|match\\|filter\\|system\\|label\\)\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*$"
-  "Regular expression for matching a top level directive."
-  :type 'string)
+  "^[[:space:]]*\\(</?\\(?:source\\|match\\|filter\\|system\\|label\\)\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*$"
+  "Regular expression for matching a top level directive.")
 
 (defconst touchdown--file-include-regexp
   "^[[:space:]]*\\(@include\\)[[:space:]]*\\(.*\\)[[:space:]]*$"
-  "Regular expression for matching a file include."
-  :type 'string)
+  "Regular expression for matching a file include.")
 
 (defconst touchdown--parameter-regexp
   "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+\\)[[:space:]]*$"
-  "Regular expression matching fluentd parameters."
-  :type 'string)
+  "Regular expression matching fluentd parameters.")
 
 (defconst touchdown--xml-subdirectives-regexp
   "^[[:space:]]*\\(</?\\(?:buffer\\|parse\\|record\\)>\\)[[:space:]]*$"
-  "Regular expression matching fluentd XML subdirectives."
-  :type 'string)
+  "Regular expression matching fluentd XML subdirectives.")
+
 
 (defface touchdown-directives-face
   '((t (:inherit font-lock-function-name-face)))
@@ -97,26 +89,27 @@
   '((t (:inherit font-lock-string-face)))
   "Face for file include path.")
 
-(defface touchdown-tag-parameter
+(defface touchdown-tag-face
   '((t (:inherit font-lock-variable-name-face)))
   "Face of tag parameter")
 
-(defface touchdown-parameter-name
+(defface touchdown-parameter-name-face
   '((t (:inherit font-lock-keyword-face)))
   "Face of parameter name")
 
-(defface touchdown-parameter-value
+(defface touchdown-parameter-value-face
   '((t (:inherit font-lock-constant-face)))
   "Face of parameter value")
 
 (defvar touchdown-font-lock-keywords
-  `((,touchdown--directives-regexp (1 'touchdown-directives-face)
-                          (2 'touchdown-tag-parameter nil t)
-                          (3 'touchdown-directives-face nil t))
-    (,touchdown--parameter-regexp (1 'touchdown-parameter-name)
-                                (2 'touchdown-parameter-value))
-    (,touchdown--file-include-regexp (1 'touchdown-file-include-face)
-                                     (2 'touchdown-file-include-face))))
+  `((,touchdown--file-include-regexp (1 'touchdown-file-include-face)
+                                     (2 'touchdown-file-include-path-face))
+    (,touchdown--parameter-regexp (1 'touchdown-parameter-name-face)
+                                  (2 'touchdown-parameter-value-face))
+    (,touchdown--directives-regexp (1 'touchdown-directives-face)
+                                   (2 'touchdown-tag-face nil t)
+                                   (3 'touchdown-directives-face nil t))))
+
 
 (defun touchdown--opening-xml-directive-line-p ()
   "Determine if point is on an opening XML directive line."

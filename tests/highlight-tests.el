@@ -60,6 +60,31 @@
 		:to-equal
 		t)))
 
+	  (it "should highlight includes with the includes face"
+	      (with-touchdown-temp-buffer
+	       "@include path/to/the/file
+
+<source>
+  type forward
+  port 24224
+</source>
+
+<match myapp.access>
+  type file
+  path /var/log/fluent/access
+</match>
+"
+	       (forward-cursor-on "@include")
+	       (expect
+		(face-at-cursor-p 'touchdown-file-include-face)
+		:to-equal
+		t)
+	       (forward-cursor-on "path/to/the/file")
+	       (expect
+		(face-at-cursor-p 'touchdown-file-include-path-face)
+		:to-equal
+		t)))
+
 	  (it "should highlight tags/labels with the tag face"
 	      (with-touchdown-temp-buffer
 	       "<source>
@@ -72,9 +97,19 @@
   path /var/log/fluent/access
 </match>
 "
-	       (forward-cursor-on "myapp.access")
+	       (forward-cursor-on "match")
 	       (expect
-		(face-at-cursor-p 'touchdown-tag-parameter)
+		(face-at-cursor-p 'touchdown-directives-face)
+		:to-equal
+		t)
+	       (forward-cursor-on "myapp\\.access")
+	       (expect
+		(face-at-cursor-p 'touchdown-tag-face)
+		:to-equal
+		t)
+	       (forward-cursor-on ">")
+	       (expect
+		(face-at-cursor-p 'touchdown-directives-face)
 		:to-equal
 		t)))
 
@@ -92,22 +127,22 @@
 "
 	       (forward-cursor-on "type")
 	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name)
+		(face-at-cursor-p 'touchdown-parameter-name-face)
 		:to-equal
 		t)
 	       (forward-cursor-on "forward")
 	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value)
+		(face-at-cursor-p 'touchdown-parameter-value-face)
 		:to-equal
 		t)
 	       (forward-cursor-on "port")
 	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name)
+		(face-at-cursor-p 'touchdown-parameter-name-face)
 		:to-equal
 		t)
 	       (forward-cursor-on "24224")
 	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value)
+		(face-at-cursor-p 'touchdown-parameter-value-face)
 		:to-equal
 		t))))
 
