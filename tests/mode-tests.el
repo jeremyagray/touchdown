@@ -26,71 +26,74 @@
 
 
 (require 'touchdown-mode "touchdown.el")
-
-(defun read-config-file (file)
-  "Return contents of FILE."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
+(require 'helpers "tests/helpers.el")
 
 (setq config (read-config-file "tests/fluentd.conf"))
 
-(describe "touchdown-mode mode settings"
+(describe
+ "touchdown-mode mode settings"
 
-	  (it "should load touchdown-mode with file header variables"
-	      (with-touchdown-temp-buffer (concat "-*- mode: touchdown -*-
+ (it
+  "should load touchdown-mode with file header variables"
+  (with-touchdown-temp-buffer
+   (concat "-*- mode: touchdown -*-
 " config)
-	       (set-auto-mode)
-	       (expect
-		"Touchdown"
-		:to-equal
-		mode-name)))
+   (set-auto-mode)
+   (expect
+    "Touchdown"
+    :to-equal
+    mode-name)))
 
-	  (it "should load touchdown-mode with file bottom variables"
-	      (with-touchdown-temp-buffer (concat config "# Local Variables:
+ (it
+  "should load touchdown-mode with file bottom variables"
+  (with-touchdown-temp-buffer
+   (concat config "# Local Variables:
 # mode: touchdown
 # End:
 ")
-	       (set-auto-mode)
-	       (expect
-		"Touchdown"
-		:to-equal
-		mode-name)))
+   (set-auto-mode)
+   (expect
+    "Touchdown"
+    :to-equal
+    mode-name)))
 
-	  (it "should load touchdown-mode for filename fluentd.conf"
-	      (with-temp-buffer
-		(insert config)
-		(write-file "fluentd.conf")
-		(find-file "fluentd.conf")
-		(expect
-		 "Touchdown"
-		 :to-equal
-		 mode-name)
-		(delete-file "fluentd.conf")
-		(delete-file "fluentd.conf~")))
+ (it
+  "should load touchdown-mode for filename fluentd.conf"
+  (with-temp-buffer
+    (insert config)
+    (write-file "fluentd.conf")
+    (find-file "fluentd.conf")
+    (expect
+     "Touchdown"
+     :to-equal
+     mode-name)
+    (delete-file "fluentd.conf")
+    (delete-file "fluentd.conf~")))
 
-	  (it "should load touchdown-mode for filename fluent.conf"
-	      (with-temp-buffer
-		(insert config)
-		(write-file "fluent.conf")
-		(find-file "fluent.conf")
-		(expect
-		 "Touchdown"
-		 :to-equal
-		 mode-name)
-		(delete-file "fluent.conf")
-		(delete-file "fluent.conf~")))
+ (it
+  "should load touchdown-mode for filename fluent.conf"
+  (with-temp-buffer
+    (insert config)
+    (write-file "fluent.conf")
+    (find-file "fluent.conf")
+    (expect
+     "Touchdown"
+     :to-equal
+     mode-name)
+    (delete-file "fluent.conf")
+    (delete-file "fluent.conf~")))
 
-	  (it "should load touchdown-mode for filename td-agent.conf"
-	      (with-temp-buffer
-		(insert config)
-		(write-file "td-agent.conf")
-		(find-file "td-agent.conf")
-		(expect
-		 "Touchdown"
-		 :to-equal
-		 mode-name)
-		(delete-file "td-agent.conf")
-		(delete-file "td-agent.conf~"))))
+ (it
+  "should load touchdown-mode for filename td-agent.conf"
+  (with-temp-buffer
+    (insert config)
+    (write-file "td-agent.conf")
+    (find-file "td-agent.conf")
+    (expect
+     "Touchdown"
+     :to-equal
+     mode-name)
+    (delete-file "td-agent.conf")
+    (delete-file "td-agent.conf~"))))
 
 ;;; mode-tests.el ends here

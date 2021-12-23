@@ -25,20 +25,12 @@ EMACS ?= emacs
 CASK ?= cask
 
 LOADPATH = -L .
-LOAD_HELPER= -l test/test-helper.el
 
 ELPA_DIR = $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
 .PHONY : test
 test : elpa
-	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
-		$(LOAD_HELPER) \
-		-l test/indentation-test.el \
-		-f ert-run-tests-batch-and-exit
-
-.PHONY : buttercup
-buttercup : elpa
-	$(CASK) exec buttercup -L .
+	$(CASK) exec buttercup $(LOADPATH)
 
 elpa : $(ELPA_DIR)
 

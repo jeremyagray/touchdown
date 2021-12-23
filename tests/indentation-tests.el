@@ -22,210 +22,287 @@
 ;;; Code:
 
 (require 'touchdown-mode "touchdown.el")
-
-(defun read-config-file (file)
-  "Return contents of FILE."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
+(require 'helpers "tests/helpers.el")
 
 (setq config (read-config-file "tests/fluentd.conf"))
 
-(describe "touchdown-mode syntax indenting"
+(describe
+ "touchdown-mode line identification functions"
 
-	  (it "should identify opening directive lines"
-	      (with-touchdown-temp-buffer config
+ (it
+  "should identify opening directive lines"
+  (with-touchdown-temp-buffer
+   config
 
-	       (forward-cursor-on "<source>")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		t)
+   (forward-cursor-on "<source>")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    t)
 
-	       (forward-cursor-on "@type")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "@type")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<parse>")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		t)
+   (forward-cursor-on "<parse>")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    t)
 
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "</parse>")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "</source>")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "</source>")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<match")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		t)
+   (forward-cursor-on "<match")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    t)
 
-	       (forward-cursor-on "</match>")
-	       (expect
-		(touchdown--opening-directive-line-p)
-		:to-equal
-		nil)))
+   (forward-cursor-on "</match>")
+   (expect
+    (touchdown--opening-directive-line-p)
+    :to-equal
+    nil)))
 
-	  (it "should find opening directive names"
-	      (with-touchdown-temp-buffer config
+ (it
+  "should find opening directive names"
+  (with-touchdown-temp-buffer
+   config
 
-	       (forward-cursor-on "<source>")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		"source")
+   (forward-cursor-on "<source>")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    "source")
 
-	       (forward-cursor-on "@type")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		nil)
+   (forward-cursor-on "@type")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<parse>")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		"parse")
+   (forward-cursor-on "<parse>")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    "parse")
 
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		nil)
+   (forward-cursor-on "</parse>")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "</source>")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		nil)
+   (forward-cursor-on "</source>")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<match")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		"match")
+   (forward-cursor-on "<match")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    "match")
 
-	       (forward-cursor-on "</match>")
-	       (expect
-		(touchdown--opening-directive-name)
-		:to-equal
-		nil)))
+   (forward-cursor-on "</match>")
+   (expect
+    (touchdown--opening-directive-name)
+    :to-equal
+    nil)))
 
-	  (it "should find opening directive tags"
-	      (with-touchdown-temp-buffer config
+ (it
+  "should find opening directive tags"
+  (with-touchdown-temp-buffer
+   config
 
-	       (forward-cursor-on "<source>")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)
+   (forward-cursor-on "<source>")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "@type")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)
+   (forward-cursor-on "@type")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<parse>")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)
+   (forward-cursor-on "<parse>")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)
+   (forward-cursor-on "</parse>")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "</source>")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)
+   (forward-cursor-on "</source>")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<match")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		"myapp.access")
+   (forward-cursor-on "<match")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    "myapp.access")
 
-	       (forward-cursor-on "</match>")
-	       (expect
-		(touchdown--opening-directive-tag)
-		:to-equal
-		nil)))
+   (forward-cursor-on "</match>")
+   (expect
+    (touchdown--opening-directive-tag)
+    :to-equal
+    nil)))
 
-	  (it "should identify closing directive lines"
-	      (with-touchdown-temp-buffer config
+ (it
+  "should identify closing directive lines"
+  (with-touchdown-temp-buffer
+   config
 
-	       (forward-cursor-on "<source>")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "<source>")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "@type")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "@type")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "<parse>")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		nil)
+   (forward-cursor-on "<parse>")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    nil)
 
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		t)
+   (forward-cursor-on "</parse>")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    t)
 
-	       (forward-cursor-on "</source>")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		t)
+   (forward-cursor-on "</source>")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    t)
 
-	       (forward-cursor-on "</match>")
-	       (expect
-		(touchdown--closing-directive-line-p)
-		:to-equal
-		t)))
+   (forward-cursor-on "</match>")
+   (expect
+    (touchdown--closing-directive-line-p)
+    :to-equal
+    t)))
 
-	  (it "should return closing directive names"
-	      (with-touchdown-temp-buffer config
+ (it
+  "should return closing directive names"
+  (with-touchdown-temp-buffer
+   config
 
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(touchdown--closing-directive-name)
-		:to-equal
-		"parse")
+   (forward-cursor-on "</parse>")
+   (expect
+    (touchdown--closing-directive-name)
+    :to-equal
+    "parse")
 
-	       (forward-cursor-on "</source>")
-	       (expect
-		(touchdown--closing-directive-name)
-		:to-equal
-		"source")
+   (forward-cursor-on "</source>")
+   (expect
+    (touchdown--closing-directive-name)
+    :to-equal
+    "source")
 
-	       (forward-cursor-on "</match>")
-	       (expect
-		(touchdown--closing-directive-name)
-		:to-equal
-		"match"))))
+   (forward-cursor-on "</match>")
+   (expect
+    (touchdown--closing-directive-name)
+    :to-equal
+    "match"))))
+
+(describe
+ "touchdown-mode line identification functions"
+
+ (it
+  "should indent main directives correctly"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "@include")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 0))
+
+   (forward-cursor-on "<source>")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 0))
+
+   (forward-cursor-on "</source>")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 0))
+
+   (forward-cursor-on "<match")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 0))
+
+   (forward-cursor-on "</match>")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 0))))
+
+ (it
+  "should indent main directive parameters correctly"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "@type")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))
+
+   (forward-cursor-on "port")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))
+
+   (forward-cursor-on "tag")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))
+
+   (forward-cursor-on "<match")
+   (forward-cursor-on "@type")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))
+
+   (forward-cursor-on "path")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))))
+
+ (it
+  "should indent nested directives and parameters correctly"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "<parse>")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1))
+
+   (forward-cursor-on "@type")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 2))
+
+   (forward-cursor-on "</parse>")
+   (call-interactively 'indent-for-tab-command)
+   (= (current-indentation) (* touchdown-indent-level 1)))))
 
 ;;; indentation-tests.el ends here

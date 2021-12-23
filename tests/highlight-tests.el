@@ -24,135 +24,141 @@
 ;;; Code:
 
 (require 'touchdown-mode "touchdown.el")
-
-(defun read-config-file (file)
-  "Return contents of FILE."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
+(require 'helpers "tests/helpers.el")
 
 (setq config (read-config-file "tests/fluentd.conf"))
 
-(describe "touchdown-mode syntax highlighting"
+(describe
+ "touchdown-mode syntax highlighting"
 
-	  (it "should highlight directives with the directives face"
-	      (with-touchdown-temp-buffer config
-	       (forward-cursor-on "<source>")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "</source>")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "<match")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "</match>")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)))
+ (it
+  "should highlight directives with the directives face"
+  (with-touchdown-temp-buffer
+   config
+   (forward-cursor-on "<source>")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)
+   (forward-cursor-on "</source>")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)
+   (forward-cursor-on "<match")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)
+   (forward-cursor-on "</match>")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)))
 
-	  (it "should highlight subdirectives with the subdirectives face"
-	      (with-touchdown-temp-buffer config
-	       (forward-cursor-on "<parse>")
-	       (expect
-		(face-at-cursor-p 'touchdown-subdirectives-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "</parse>")
-	       (expect
-		(face-at-cursor-p 'touchdown-subdirectives-face)
-		:to-equal
-		t)))
+ (it
+  "should highlight subdirectives with the subdirectives face"
+  (with-touchdown-temp-buffer
+   config
+   (forward-cursor-on "<parse>")
+   (expect
+    (face-at-cursor-p 'touchdown-subdirectives-face)
+    :to-equal
+    t)
+   (forward-cursor-on "</parse>")
+   (expect
+    (face-at-cursor-p 'touchdown-subdirectives-face)
+    :to-equal
+    t)))
 
-	  (it "should highlight includes with the includes face"
-	      (with-touchdown-temp-buffer config
-	       (forward-cursor-on "@include")
-	       (expect
-		(face-at-cursor-p 'touchdown-file-include-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "path/to/the/file")
-	       (expect
-		(face-at-cursor-p 'touchdown-file-include-path-face)
-		:to-equal
-		t)))
+ (it
+  "should highlight includes with the includes face"
+  (with-touchdown-temp-buffer
+   config
+   (forward-cursor-on "@include")
+   (expect
+    (face-at-cursor-p 'touchdown-file-include-face)
+    :to-equal
+    t)
+   (forward-cursor-on "path/to/the/file")
+   (expect
+    (face-at-cursor-p 'touchdown-file-include-path-face)
+    :to-equal
+    t)))
 
-	  (it "should highlight tags/labels with the tag face"
-	      (with-touchdown-temp-buffer config
-	       (forward-cursor-on "match")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "myapp\\.access")
-	       (expect
-		(face-at-cursor-p 'touchdown-tag-face)
-		:to-equal
-		t)
-	       (forward-cursor-on ">")
-	       (expect
-		(face-at-cursor-p 'touchdown-directives-face)
-		:to-equal
-		t)))
+ (it
+  "should highlight tags/labels with the tag face"
+  (with-touchdown-temp-buffer
+   config
+   (forward-cursor-on "match")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)
+   (forward-cursor-on "myapp\\.access")
+   (expect
+    (face-at-cursor-p 'touchdown-tag-face)
+    :to-equal
+    t)
+   (forward-cursor-on ">")
+   (expect
+    (face-at-cursor-p 'touchdown-directives-face)
+    :to-equal
+    t)))
 
-	  (it "should highlight parameter names and values with their faces"
-	      (with-touchdown-temp-buffer config
-	       (forward-cursor-on "@type")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "syslog")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "port")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "27016")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "@type")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "syslog")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "@type")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "file")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "path")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-name-face)
-		:to-equal
-		t)
-	       (forward-cursor-on "/var/log/fluent/myapp/access")
-	       (expect
-		(face-at-cursor-p 'touchdown-parameter-value-face)
-		:to-equal
-		t))))
+ (it
+  "should highlight parameter names and values with their faces"
+  (with-touchdown-temp-buffer
+   config
+   (forward-cursor-on "@type")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-name-face)
+    :to-equal
+    t)
+   (forward-cursor-on "syslog")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+   (forward-cursor-on "port")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-name-face)
+    :to-equal
+    t)
+   (forward-cursor-on "27016")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+   (forward-cursor-on "@type")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-name-face)
+    :to-equal
+    t)
+   (forward-cursor-on "syslog")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+   (forward-cursor-on "@type")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-name-face)
+    :to-equal
+    t)
+   (forward-cursor-on "file")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+   (forward-cursor-on "path")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-name-face)
+    :to-equal
+    t)
+   (forward-cursor-on "/var/log/fluent/myapp/access")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t))))
 
 ;;; highlight-tests.el ends here
