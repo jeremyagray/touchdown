@@ -5,15 +5,15 @@ Major mode for highlighting and editing
 
 ## Roadmap
 
-- [] fix bug that treats commented <...> as a directive
-- [] move testing to buttercup
+- [-] move testing to buttercup
 - [] find a local coverage report generator
 - [] rename lisp variables and functions to reflect the names in the
      fluentd configuration file syntax
-- [] add explicit regular expressions for top-level directives
-- [] add explicit regular expressions for second-level directives
 - [] add explicit regular expressions for core plugin parameters
 - [] run dry-run on file
+- [x] fix bug that treats commented <...> as a directive
+- [x] add explicit regular expressions for top-level directives
+- [x] add explicit regular expressions for second-level directives
 
 ## Installation
 

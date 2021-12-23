@@ -40,29 +40,108 @@
   "Indent level."
   :type 'integer)
 
-(defconst touchdown--opening-xml-directive-regexp
-  "^[[:space:]]*\\(<\\(source\\|match\\|filter\\|system\\|label\\)\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*$"
-  "Regular expression for matching an opening XML directive.")
+(defconst touchdown--main-directive-regexp
+  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive.
+Matches all parts of a main directive line, including trailing
+comments.  Match groups are:
 
-(defconst touchdown--opening-xml-directive-name-regexp
-  "^[[:space:]]*<\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+[^>]+\\)?>[[:space:]]*$"
-  "Regular expression for matching an opening XML directive name.")
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
 
-(defconst touchdown--opening-xml-directive-tag-regexp
-  "^[[:space:]]*<\\(?:source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?>[[:space:]]*$"
-  "Regular expression for matching an opening XML directive tag/label.")
+(defconst touchdown--sub-directive-regexp
+  "^[[:space:]]*\\(</?\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a subdirective.
+Matches all parts of a subdirective line, including trailing comments.
+Match groups are:
 
-(defconst touchdown--closing-xml-directive-regexp
-  "^[[:space:]]*\\(</\\(?:source\\|match\\|filter\\|system\\|label\\)>\\)$"
-  "Regular expression for matching a closing XML directive.")
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if any.")
 
-(defconst touchdown--closing-xml-directive-name-regexp
-  "^[[:space:]]*</\\(source\\|match\\|filter\\|system\\|label\\)>$"
-  "Regular expression for matching a closing XML directive name.")
+(defconst touchdown--any-directive-regexp
+  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching any directive.
+Matches all parts of a directive line, including trailing comments.
+Match groups are:
 
-(defconst touchdown--directives-regexp
-  "^[[:space:]]*\\(</?\\(?:source\\|match\\|filter\\|system\\|label\\)\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*$"
-  "Regular expression for matching a top level directive.")
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+(defconst touchdown--main-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive opening.
+Matches all parts of a main directive opening line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+(defconst touchdown--sub-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching an opening subdirective.
+Matches all parts of an opening subdirective line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+(defconst touchdown--any-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching any opening directive.
+Matches all parts of an opening directive line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+(defconst touchdown--main-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive closing.
+Matches all parts of a main directive closing line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+(defconst touchdown--sub-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(\\buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a subdirective closing.
+Matches all parts of a closing subdirective line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+(defconst touchdown--any-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive closing.
+Matches all parts of a main directive closing line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
 
 (defconst touchdown--file-include-regexp
   "^[[:space:]]*\\(@include\\)[[:space:]]*\\(.*\\)[[:space:]]*$"
@@ -71,10 +150,6 @@
 (defconst touchdown--parameter-regexp
   "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+\\)[[:space:]]*$"
   "Regular expression matching fluentd parameters.")
-
-(defconst touchdown--subdirectives-regexp
-  "^[[:space:]]*\\(</?\\(?:buffer\\|parse\\|record\\)>\\)[[:space:]]*$"
-  "Regular expression matching fluentd subdirectives.")
 
 
 (defface touchdown-directives-face
@@ -110,32 +185,56 @@
                                      (2 'touchdown-file-include-path-face))
     (,touchdown--parameter-regexp (1 'touchdown-parameter-name-face)
                                   (2 'touchdown-parameter-value-face))
-    (,touchdown--directives-regexp (1 'touchdown-directives-face)
-                                   (2 'touchdown-tag-face nil t)
-                                   (3 'touchdown-directives-face nil t))
-    (,touchdown--subdirectives-regexp (1 'touchdown-subdirectives-face))))
+    (,touchdown--main-directive-regexp (1 'touchdown-directives-face)
+                                       (2 'touchdown-directives-face nil t)
+                                       (3 'touchdown-tag-face nil t)
+                                       (4 'touchdown-directives-face nil t))
+    (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives-face)
+                                      (2 'touchdown-subdirectives-face)
+                                      (3 'touchdown-subdirectives-face))))
 
 
-(defun touchdown--opening-xml-directive-line-p ()
-  "Determine if point is on an opening XML directive line."
+(defun touchdown--opening-directive-line-p ()
+  "Determine if point is on a line containing an opening directive."
   (save-excursion
-    (back-to-indentation)
-    (looking-at-p touchdown--opening-xml-directive-regexp)))
+    ;; (back-to-indentation)
+    (move-beginning-of-line 1)
+    (looking-at-p touchdown--any-directive-opening-regexp)))
 
-(defun touchdown--closing-xml-directive-line-p ()
-  "Determine if point is on a line containing a closing XML directive."
+(defun touchdown--closing-directive-line-p ()
+  "Determine if point is on a line containing a closing directive."
   (save-excursion
-    (back-to-indentation)
-    (looking-at-p touchdown--closing-xml-directive-regexp)))
+    (move-beginning-of-line 1)
+    (looking-at-p touchdown--any-directive-closing-regexp)))
 
-(defun touchdown--get-closing-xml-directive-name ()
-  "Get the name of the current closing XML directive."
+(defun touchdown--closing-directive-name ()
+  "Return the name of the current closing directive."
   (save-excursion
-    (if (touchdown--closing-xml-directive-line-p)
+    (if (touchdown--closing-directive-line-p)
         (let ()
-          (back-to-indentation)
-          (looking-at touchdown--closing-xml-directive-name-regexp)
-          (match-string-no-properties 1))
+          (move-beginning-of-line 1)
+          (looking-at touchdown--any-directive-closing-regexp)
+          (match-string-no-properties 2))
+      nil)))
+
+(defun touchdown--opening-directive-name ()
+  "Return the name of the current opening directive."
+  (save-excursion
+    (if (touchdown--opening-directive-line-p)
+        (let ()
+          (move-beginning-of-line 1)
+          (looking-at touchdown--any-directive-opening-regexp)
+          (match-string-no-properties 2))
+      nil)))
+
+(defun touchdown--opening-directive-tag ()
+  "Return the current opening directive tag/label."
+  (save-excursion
+    (if (touchdown--opening-directive-line-p)
+        (let ()
+          (move-beginning-of-line 1)
+          (looking-at touchdown--any-directive-opening-regexp)
+          (match-string-no-properties 3))
       nil)))
 
 (defun touchdown--already-closed-p (directive curpoint)
@@ -146,13 +245,13 @@
       (when (search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
 
-(defun touchdown--get-opening-xml-directive-indentation ()
-  "Get the indentation of the current opening XML directive."
+(defun touchdown--opening-directive-indentation ()
+  "Return the indentation of the current opening directive."
   (save-excursion
-    (let ((opening-directive "<\\([^/][^ \t\r\n>]+\\)\\(?:\\s-+\\([^>]+\\)\\)?\\(>\\)")
+    (let ((opening-directive touchdown--any-directive-opening-regexp)
           (curpoint (point)))
-      (cond ((touchdown--closing-xml-directive-line-p)
-             (let* ((directive (touchdown--get-closing-xml-directive-name))
+      (cond ((touchdown--closing-directive-line-p)
+             (let* ((directive (touchdown--closing-directive-name))
                     (opening-directive1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" directive)))
                (if (not (re-search-backward opening-directive1 nil t))
                    (error "Opening XML directive not found")
@@ -161,7 +260,7 @@
              (let (finish)
                (while (and (not finish)
                            (re-search-backward opening-directive nil t))
-                 (let ((directive (match-string-no-properties 1)))
+                 (let ((directive (match-string-no-properties 2)))
                    (unless (touchdown--already-closed-p directive curpoint)
                      (setq finish t))))
                (if (not finish)
@@ -184,9 +283,9 @@
             (+ indentation touchdown-indent-level)))))))
 
 (defun touchdown-indent-line ()
-  "Indent current line as fluentd configuration."
+  "Indent current line of a fluentd/td-agent configuration."
   (interactive)
-  (let ((indent-size (touchdown--get-opening-xml-directive-indentation)))
+  (let ((indent-size (touchdown--opening-directive-indentation)))
     (back-to-indentation)
     (when (/= (current-indentation) indent-size)
       (save-excursion
