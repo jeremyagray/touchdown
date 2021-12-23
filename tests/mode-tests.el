@@ -24,9 +24,8 @@
 
 ;;; Code:
 
-
-(require 'touchdown-mode "touchdown.el")
 (require 'helpers "tests/helpers.el")
+(require 'touchdown-mode "touchdown.el")
 
 (setq config (read-config-file "tests/fluentd.conf"))
 

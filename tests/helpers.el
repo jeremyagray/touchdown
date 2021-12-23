@@ -23,7 +23,15 @@
 
 ;;; Code:
 
-(require 'ert)
+(require 'undercover)
+
+(setq undercover-force-coverage t)
+
+(undercover
+ "touchdown.el"
+ (:report-file "coverage/report.json")
+ (:report-format 'simplecov)
+ (:send-report nil))
 
 (defmacro with-touchdown-temp-buffer (string &rest body)
   "Create a temporary buffer in `touchdown-mode'.

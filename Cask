@@ -34,7 +34,6 @@
 (package-file "touchdown.el")
 
 (development
- (depends-on "ert")
  (depends-on "buttercup")
  (depends-on "undercover"))
 

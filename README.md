@@ -5,15 +5,32 @@ Major mode for highlighting and editing
 
 ## Roadmap
 
-- [-] move testing to buttercup
-- [] find a local coverage report generator
-- [] rename lisp variables and functions to reflect the names in the
-     fluentd configuration file syntax
+- [-] rename lisp variables and functions to reflect the names in the
+  fluentd configuration file syntax
+- [] tab completion
+  - [] directives
+  - [] core plugin parameters
+  - [] tags
+  - [] labels
+  - [] parameter values
+    - [] tags
+	- [] paths
+- [] find a local coverage report generator (like coverage,
+  simplecov-html, or istanbul)
 - [] add explicit regular expressions for core plugin parameters
-- [] run dry-run on file
-- [x] fix bug that treats commented <...> as a directive
-- [x] add explicit regular expressions for top-level directives
+- [] run `td-agent --dry-run --config` on file
 - [x] add explicit regular expressions for second-level directives
+- [x] add explicit regular expressions for top-level directives
+- [x] add undercover.el coverage
+- [x] fix bug that treats commented <...> as a directive
+- [x] port tests to buttercup
+
+## Contributing
+
+Check the roadmap for features I would like to implement.  Issues
+involving bugs should include a description, should modify
+`tests/fluentd.conf` with the failing configuration text, and a
+failing buttercup test, that when passed, closes the issue.
 
 ## Installation
 

@@ -27,3 +27,6 @@
 # Emacs trash.
 *.elc
 *~
+
+# Testing trash.
+/coverage/
