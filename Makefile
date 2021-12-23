@@ -34,12 +34,10 @@ test : elpa
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) \
 		$(LOAD_HELPER) \
 		-l test/indentation-test.el \
-		-l test/highlight-test.el \
-		-l test/mode.el \
 		-f ert-run-tests-batch-and-exit
 
 .PHONY : buttercup
-buttercup :
+buttercup : elpa
 	$(CASK) exec buttercup -L .
 
 elpa : $(ELPA_DIR)
