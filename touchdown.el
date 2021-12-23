@@ -72,14 +72,18 @@
   "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+\\)[[:space:]]*$"
   "Regular expression matching fluentd parameters.")
 
-(defconst touchdown--xml-subdirectives-regexp
+(defconst touchdown--subdirectives-regexp
   "^[[:space:]]*\\(</?\\(?:buffer\\|parse\\|record\\)>\\)[[:space:]]*$"
-  "Regular expression matching fluentd XML subdirectives.")
+  "Regular expression matching fluentd subdirectives.")
 
 
 (defface touchdown-directives-face
   '((t (:inherit font-lock-function-name-face)))
-  "Face of XML directive.")
+  "Face of directive.")
+
+(defface touchdown-subdirectives-face
+  '((t (:inherit font-lock-function-name-face)))
+  "Face of subdirective.")
 
 (defface touchdown-file-include-face
   '((t (:inherit font-lock-preprocessor-face)))
@@ -108,7 +112,8 @@
                                   (2 'touchdown-parameter-value-face))
     (,touchdown--directives-regexp (1 'touchdown-directives-face)
                                    (2 'touchdown-tag-face nil t)
-                                   (3 'touchdown-directives-face nil t))))
+                                   (3 'touchdown-directives-face nil t))
+    (,touchdown--subdirectives-regexp (1 'touchdown-subdirectives-face))))
 
 
 (defun touchdown--opening-xml-directive-line-p ()
