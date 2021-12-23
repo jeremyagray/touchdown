@@ -213,7 +213,11 @@
   (make-local-variable 'touchdown-indent-level)
   (set (make-local-variable 'indent-line-function) 'touchdown-indent-line)
 
-  (set (make-local-variable 'comment-start) "#"))
+  (set (make-local-variable 'comment-indent-function) 'touchdown-indent-line)
+  (set (make-local-variable 'comment-start) "#")
+  (set (make-local-variable 'comment-end) "")
+  (set (make-local-variable 'comment-padding) " ")
+  (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*"))
 
 ;;;###autoload
 (add-to-list
