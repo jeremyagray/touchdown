@@ -25,25 +25,15 @@
 
 (require 'touchdown-mode "touchdown.el")
 
+(defun read-config-file (file)
+  "Return contents of FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
+
+(setq config (read-config-file "tests/fluentd.conf"))
+
 (describe "touchdown-mode syntax highlighting"
-
-(setq config "@include path/to/the/file
-
-<source>
-  @type syslog
-  port 27016
-  tag rsyslog
-
-  <parse>
-    @type syslog
-  </parse>
-</source>
-
-<match myapp.access>
-  @type file
-  path /var/log/fluent/myapp/access
-</match>
-")
 
 	  (it "should highlight directives with the directives face"
 	      (with-touchdown-temp-buffer config

@@ -27,16 +27,19 @@
 
 (require 'touchdown-mode "touchdown.el")
 
+(defun read-config-file (file)
+  "Return contents of FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
+
+(setq config (read-config-file "tests/fluentd.conf"))
+
 (describe "touchdown-mode mode settings"
 
 	  (it "should load touchdown-mode with file header variables"
-	      (with-touchdown-temp-buffer
-	       "-*- mode: touchdown -*-
-<source>
-  type forward
-  port 24224
-</source>
-"
+	      (with-touchdown-temp-buffer (concat "-*- mode: touchdown -*-
+" config)
 	       (set-auto-mode)
 	       (expect
 		"Touchdown"
@@ -44,16 +47,10 @@
 		mode-name)))
 
 	  (it "should load touchdown-mode with file bottom variables"
-	      (with-touchdown-temp-buffer
-	       "<source>
-  type forward
-  port 24224
-</source>
-
-;; # Local Variables:
-;; # mode: touchdown
-;; # End:
-"
+	      (with-touchdown-temp-buffer (concat config "# Local Variables:
+# mode: touchdown
+# End:
+")
 	       (set-auto-mode)
 	       (expect
 		"Touchdown"
@@ -62,12 +59,7 @@
 
 	  (it "should load touchdown-mode for filename fluentd.conf"
 	      (with-temp-buffer
-		(insert
-		 "<source>
-  type forward
-  port 24224
-</source>
-")
+		(insert config)
 		(write-file "fluentd.conf")
 		(find-file "fluentd.conf")
 		(expect
@@ -79,12 +71,7 @@
 
 	  (it "should load touchdown-mode for filename fluent.conf"
 	      (with-temp-buffer
-		(insert
-		 "<source>
-  type forward
-  port 24224
-</source>
-")
+		(insert config)
 		(write-file "fluent.conf")
 		(find-file "fluent.conf")
 		(expect
@@ -96,12 +83,7 @@
 
 	  (it "should load touchdown-mode for filename td-agent.conf"
 	      (with-temp-buffer
-		(insert
-		 "<source>
-  type forward
-  port 24224
-</source>
-")
+		(insert config)
 		(write-file "td-agent.conf")
 		(find-file "td-agent.conf")
 		(expect
