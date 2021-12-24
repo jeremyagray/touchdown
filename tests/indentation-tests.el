@@ -238,6 +238,17 @@
  "touchdown-mode line identification functions"
 
  (it
+  "should calculate indentation correctly"
+  (with-touchdown-temp-buffer
+   (concat "</source>
+" config)
+
+   (expect
+    (touchdown--opening-directive-indentation)
+    :to-throw)))
+
+
+ (it
   "should indent main directives correctly"
   (with-touchdown-temp-buffer
    config

@@ -15,14 +15,13 @@ Major mode for highlighting and editing
   - [] parameter values
     - [] tags
 	- [] paths
-- [] find a local coverage report generator (like coverage,
-  simplecov-html, or istanbul)
 - [] add explicit regular expressions for core plugin parameters
 - [] run `td-agent --dry-run --config` on file
 - [x] add explicit regular expressions for second-level directives
 - [x] add explicit regular expressions for top-level directives
 - [x] add undercover.el coverage
 - [x] fix bug that treats commented <...> as a directive
+- [x] hack simplecov to generate a coverage report
 - [x] port tests to buttercup
 
 ## Contributing

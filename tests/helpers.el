@@ -29,7 +29,6 @@
 
 (undercover
  "touchdown.el"
- (:report-file "coverage/report.json")
  (:report-format 'simplecov)
  (:send-report nil))
 
