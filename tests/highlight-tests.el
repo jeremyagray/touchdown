@@ -159,6 +159,124 @@
    (expect
     (face-at-cursor-p 'touchdown-parameter-value-face)
     :to-equal
-    t))))
+    t)))
+
+ (it
+  "should highlight inline comments separated by space"
+  (with-touchdown-temp-buffer
+   config
+
+   ;; Find the right section.
+   (forward-cursor-on "# Leading space comments.")
+
+   (forward-cursor-on "# open directive comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "# directive parameter comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "rsy#log")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "#log")
+   (expect
+    (face-at-cursor-p 'touchdown-parameter-value-face)
+    :to-equal
+    t)
+
+   ;; Expect font-lock-comment-face since the syntactic highlighter
+   ;; picks up the first '#' as the comment delimiter and the
+   ;; following text as the comment.
+   (forward-cursor-on "# parameter with hash comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "# open subdirective comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "# subdirective parameter comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "# close subdirective comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)
+
+   (forward-cursor-on "# close directive comment")
+   (expect
+    (face-at-cursor-p 'font-lock-comment-delimiter-face)
+    :to-equal
+    t)))
+
+ (it
+  "should highlight valid inline comments not separated by space"
+  (with-touchdown-temp-buffer
+   config
+
+   ;; Find the right section.
+   (forward-cursor-on "# No space comments.")
+
+   (forward-cursor-on "# open directive comment")
+   (let ((expected 'font-lock-comment-delimiter-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# directive parameter comment")
+   (let ((expected 'touchdown-parameter-value-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "rsy#log")
+   (let ((expected 'touchdown-parameter-value-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "#log")
+   (let ((expected 'touchdown-parameter-value-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# parameter with hash comment")
+   (let ((expected 'touchdown-parameter-value-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# open subdirective comment")
+   (let ((expected 'font-lock-comment-delimiter-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# subdirective parameter comment")
+   (let ((expected 'touchdown-parameter-value-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# close subdirective comment")
+   (let ((expected 'font-lock-comment-delimiter-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual))
+
+   (forward-cursor-on "# close directive comment")
+   (let ((expected 'font-lock-comment-delimiter-face)
+	 (actual (face-at-point)))
+   (expect expected :to-equal actual)))))
 
 ;;; highlight-tests.el ends here

@@ -21,6 +21,7 @@ Major mode for highlighting and editing
 - [x] add explicit regular expressions for top-level directives
 - [x] add undercover.el coverage
 - [x] fix bug that treats commented <...> as a directive
+- [x] fix comment highlighting in parameter values
 - [x] hack simplecov to generate a coverage report
 - [x] port tests to buttercup
 
@@ -28,8 +29,9 @@ Major mode for highlighting and editing
 
 Check the roadmap for features I would like to implement.  Issues
 involving bugs should include a description, should modify
-`tests/fluentd.conf` with the failing configuration text, and a
-failing buttercup test, that when passed, closes the issue.
+`tests/fluentd.conf` with the failing configuration text, and should
+add one or more failing buttercup tests, that when passed, closes the
+issue.  All tests should pass after any change.
 
 ## Installation
 

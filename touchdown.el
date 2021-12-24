@@ -148,8 +148,15 @@ comments.  Match groups are:
   "Regular expression for matching a file include.")
 
 (defconst touchdown--parameter-regexp
-  "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+\\)[[:space:]]*$"
-  "Regular expression matching fluentd parameters.")
+  "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+  "Regular expression matching fluentd parameters.
+
+Matches all parts of a parameter line, including trailing comments.
+Match groups are:
+
+1. Parameter name.
+2. Parameter value.
+3. Comment, if present.")
 
 
 (defface touchdown-directives-face
@@ -181,10 +188,10 @@ comments.  Match groups are:
   "Face of parameter value")
 
 (defvar touchdown-font-lock-keywords
-  `((,touchdown--file-include-regexp (1 'touchdown-file-include-face)
-                                     (2 'touchdown-file-include-path-face))
-    (,touchdown--parameter-regexp (1 'touchdown-parameter-name-face)
-                                  (2 'touchdown-parameter-value-face))
+  `((,touchdown--parameter-regexp (1 'touchdown-parameter-name-face)
+                                  (2 'touchdown-parameter-value-face t nil))
+    (,touchdown--file-include-regexp (1 'touchdown-file-include-face t nil)
+                                     (2 'touchdown-file-include-path-face t nil))
     (,touchdown--main-directive-regexp (1 'touchdown-directives-face)
                                        (2 'touchdown-directives-face nil t)
                                        (3 'touchdown-tag-face nil t)
