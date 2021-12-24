@@ -314,6 +314,7 @@ comments.  Match groups are:
   (set (make-local-variable 'comment-start) "#")
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'comment-padding) " ")
+  (set (make-local-variable 'comment-inline-offset) 2)
   (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*"))
 
 ;;;###autoload
