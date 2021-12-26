@@ -235,7 +235,7 @@
     "match"))))
 
 (describe
- "touchdown-mode line identification functions"
+ "touchdown-mode line identation functions"
 
  (it
   "should calculate indentation correctly"
