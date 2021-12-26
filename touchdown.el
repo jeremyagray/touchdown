@@ -309,6 +309,7 @@ Match groups are:
     (modify-syntax-entry ?>  ")<"  table)
     table))
 
+;; From s.el.
 (defun s-shared-start (s1 s2)
   "Return the longest prefix S1 and S2 have in common."
   (declare (pure t) (side-effect-free t))
@@ -337,15 +338,16 @@ nil otherwise."
       (let ((directive (car directives)))
 	(if (string-match-p (regexp-quote str) directive)
 	    (setq match-p t
-		  directives ()))))
+		  directives ())
+	  (setq directives (cdr directives)))))
     match-p))
 
-(defun touchdown--try-completion (str predicate)
+(defun touchdown--try-completion (str predicate try)
   "Determine if STR is part of a term in the fluentd syntax.
 
-Return nil if STR has no matches from PREDICATE, t if STR has an exact
-match from PREDICATE, or the longest common initial sequence from all
-possible matches from PREDICATE."
+Return (ignoring TRY) nil if STR has no matches from PREDICATE, t if
+STR has an exact match from PREDICATE, or the longest common initial
+sequence from all possible matches from PREDICATE."
   (let ((matches-data nil))
     (if (funcall predicate str)
 	(let ((directives touchdown--directives)
@@ -367,31 +369,70 @@ possible matches from PREDICATE."
 	    (setq matches-data longest))))
     matches-data))
 
+(defun touchdown--all-completions (str predicate try)
+  "Find all matches for STR in the fluentd syntax.
+
+Return (ignoring PREDICATE and TRY) a list of all possible matches for
+STR in the fluentd syntax."
+  (let ((directives touchdown--directives)
+	(matches nil))
+    (while directives
+      (let ((directive (car directives)))
+        (cond ((string-match-p (regexp-quote str) directive)
+	       (setq directives (cdr directives)
+		     matches (push directive matches)))
+	      (t
+	       (setq directives (cdr directives))))))
+    matches))
+
+(defun touchdown--test-completion (str predicate lmb)
+  "Determine if STR is part of a term in the fluentd syntax.
+
+Returns (ignoring PREDICATE and LMB) non-nil if STR has a match the
+fluentd configuration syntax, nil otherwise."
+  (let ((directives touchdown--directives)
+        (match-p nil))
+    (while directives
+      (let ((directive (car directives)))
+	(if (string-match-p (regexp-quote str) directive)
+	    (setq match-p t
+		  directives ())
+	  (setq directives (cdr directives)))))
+    match-p))
+
 (defun touchdown--completion-at-point-collection (str predicate try)
   "Return completion data for the fluentd configuration syntax.
 
-If TRY is non-nil, acts as a `try-completion' function and returns nil
-if STR has no matches from predicate PREDICATE, t if STR has an exact
+If TRY is t, acts as a `try-completion' function and returns nil if
+STR has no matches from predicate PREDICATE, t if STR has an exact
 match from PREDICATE, or the longest common initial sequence from all
 possible matches from PREDICATE.  If TRY is nil, acts as an
 `all-completions' function and returns all possible completions of STR
-allowed by PREDICATE."
+allowed by PREDICATE.  Otherwise, acts as a `test-completion'
+function."
   (let ((result nil))
-    (if try
-	(setq result (touchdown--try-completion str predicate))
-      (setq result (touchdown--all-completions str predicate)))
+    (cond ((eq try t)
+	   (setq result (touchdown--try-completion str predicate try)))
+	  ((eq try nil)
+	   (setq result (touchdown--all-completions str predicate try)))
+	  (t
+	   (setq result (touchdown--all-completions str predicate try))))
     result))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."
-  ;; return (start end collection . props)
-  (let ((bounds (bounds-of-thing-at-point 'sexp)))
-  ;; (let ((bounds (bounds-of-thing-at-point 'word)))
-    (when bounds
-      (list (car bounds)
-            (cdr bounds)
-            'touchdown--completion-at-point-collection
-	    :predicate 'touchdown--matches-syntax-p))))
+  ;; (let ((bounds (bounds-of-thing-at-point 'sexp)))
+  ;;   (when bounds
+  ;;     (list (car bounds)
+  ;;           (cdr bounds)
+  ;;           'touchdown--completion-at-point-collection
+  ;; 	    :predicate 'touchdown--matches-syntax-p))))
+  (list (save-excursion
+	  (skip-syntax-backward "w_.(")
+	  (point))
+	(point)
+        'touchdown--completion-at-point-collection
+	:predicate 'touchdown--matches-syntax-p))
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
