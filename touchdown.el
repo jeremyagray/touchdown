@@ -309,10 +309,97 @@ Match groups are:
     (modify-syntax-entry ?>  ")<"  table)
     table))
 
+(defun s-shared-start (s1 s2)
+  "Return the longest prefix S1 and S2 have in common."
+  (declare (pure t) (side-effect-free t))
+  (let ((cmp (compare-strings s1 0 (length s1) s2 0 (length s2))))
+    (if (eq cmp t) s1 (substring s1 0 (1- (abs cmp))))))
+
+;; The list here needs to be built from lists of directives,
+;; subdirectives, parameter names, parameter values (especially
+;; booleans), tags, and labels in a context dependent way so that
+;; completion suggests completions from the appropriate set of
+;; possibilities.  It would also be nice if certain completions
+;; inserted templates like a `<source>` directive automatically
+;; inserting an empty `@type` and closing `</source>`.
+(defconst touchdown--directives
+  '("@include" "<source>" "<match" "<filter>" "<system>" "<label " "</source>" "</match>" "</filter>" "</system>" "</label>")
+  "List of fluentd main directives.")
+
+(defun touchdown--matches-syntax-p (str)
+  "Determine if STR is part of a term in the fluentd syntax.
+
+Returns non-nil if STR has a match the fluentd configuration syntax,
+nil otherwise."
+  (let ((directives touchdown--directives)
+        (match-p nil))
+    (while directives
+      (let ((directive (car directives)))
+	(if (string-match-p (regexp-quote str) directive)
+	    (setq match-p t
+		  directives ()))))
+    match-p))
+
+(defun touchdown--try-completion (str predicate)
+  "Determine if STR is part of a term in the fluentd syntax.
+
+Return nil if STR has no matches from PREDICATE, t if STR has an exact
+match from PREDICATE, or the longest common initial sequence from all
+possible matches from PREDICATE."
+  (let ((matches-data nil))
+    (if (funcall predicate str)
+	(let ((directives touchdown--directives)
+	      (longest ""))
+	  (while directives
+	    (let ((directive (car directives)))
+              (cond ((equal str directive)
+		     (setq directives ()
+			   matches-data t))
+		    ((string-match-p (regexp-quote str) directive)
+		     (setq directives (cdr directives))
+		     (if (equal longest "")
+			 (setq longest str)
+                       (setq longest (s-shared-start directive longest))))
+		    (t
+		     (setq directives (cdr directives))))))
+	  (if (equal matches-data t)
+	      t
+	    (setq matches-data longest))))
+    matches-data))
+
+(defun touchdown--completion-at-point-collection (str predicate try)
+  "Return completion data for the fluentd configuration syntax.
+
+If TRY is non-nil, acts as a `try-completion' function and returns nil
+if STR has no matches from predicate PREDICATE, t if STR has an exact
+match from PREDICATE, or the longest common initial sequence from all
+possible matches from PREDICATE.  If TRY is nil, acts as an
+`all-completions' function and returns all possible completions of STR
+allowed by PREDICATE."
+  (let ((result nil))
+    (if try
+	(setq result (touchdown--try-completion str predicate))
+      (setq result (touchdown--all-completions str predicate)))
+    result))
+
+(defun touchdown--completion-at-point ()
+  "Touchdown mode completion at point function."
+  ;; return (start end collection . props)
+  (let ((bounds (bounds-of-thing-at-point 'sexp)))
+  ;; (let ((bounds (bounds-of-thing-at-point 'word)))
+    (when bounds
+      (list (car bounds)
+            (cdr bounds)
+            'touchdown--completion-at-point-collection
+	    :predicate 'touchdown--matches-syntax-p))))
+
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
   "Major mode for editing fluentd/td-agent configuration files."
   (setq font-lock-defaults '((touchdown-font-lock-keywords)))
+
+  (add-hook 'completion-at-point-functions
+            #'touchdown--completion-at-point nil 'local)
 
   (make-local-variable 'touchdown-indent-level)
   (set (make-local-variable 'indent-line-function) 'touchdown-indent-line)
