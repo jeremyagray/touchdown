@@ -204,7 +204,6 @@ Match groups are:
 (defun touchdown--opening-directive-line-p ()
   "Determine if point is on a line containing an opening directive."
   (save-excursion
-    ;; (back-to-indentation)
     (move-beginning-of-line 1)
     (looking-at-p touchdown--any-directive-opening-regexp)))
 
@@ -273,21 +272,6 @@ Match groups are:
                (if (not finish)
                    0
                  (+ (current-indentation) touchdown-indent-level))))))))
-
-(defun touchdown--search-closing-xml-directive ()
-  "Find the current closing XML directive."
-  (let ((closing-xml-directive "</\\([^/]+\\)>")
-        (cur-line-end (line-end-position)))
-    (save-excursion
-      (if (re-search-forward opening-directive nil t)
-          (let ((opening-directive (concat "<" (match-string-no-properties 1) 2)))
-            (match-string-no-properties 1))
-        (let* ((indentation (current-indentation))
-               (directive (match-string-no-properties 1))
-               (closing-xml-directive (format "</%s>" directive)))
-          (if (re-search-forward closing-xml-directive cur-line-end t)
-              indentation
-            (+ indentation touchdown-indent-level)))))))
 
 (defun touchdown-indent-line ()
   "Indent current line of a fluentd/td-agent configuration."
