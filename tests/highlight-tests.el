@@ -247,7 +247,7 @@
    (expect expected :to-equal actual))
 
    (forward-cursor-on "# directive parameter comment")
-   (let ((expected 'touchdown-parameter-value-face)
+   (let ((expected 'font-lock-comment-delimiter-face)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))
 
@@ -272,7 +272,7 @@
    (expect expected :to-equal actual))
 
    (forward-cursor-on "# subdirective parameter comment")
-   (let ((expected 'touchdown-parameter-value-face)
+   (let ((expected 'font-lock-comment-delimiter-face)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))
 
