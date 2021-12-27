@@ -7,8 +7,8 @@ Major mode for highlighting and editing
 
 - [-] rename lisp variables and functions to reflect the names in the
   fluentd configuration file syntax
-- [] tab completion
-  - [] directives
+- [-] tab completion
+  - [x] directives
   - [] core plugin parameters
   - [] tags
   - [] labels
@@ -16,7 +16,6 @@ Major mode for highlighting and editing
     - [] tags
 	- [] paths
 - [] add explicit regular expressions for core plugin parameters
-- [] run `td-agent --dry-run --config` on file
 - [x] add explicit regular expressions for second-level directives
 - [x] add explicit regular expressions for top-level directives
 - [x] add undercover.el coverage
@@ -24,6 +23,7 @@ Major mode for highlighting and editing
 - [x] fix comment highlighting in parameter values
 - [x] hack simplecov to generate a coverage report
 - [x] port tests to buttercup
+- [x] run `td-agent --dry-run --config` on file
 
 ## Contributing
 

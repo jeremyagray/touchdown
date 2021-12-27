@@ -40,6 +40,16 @@
   "Indent level."
   :type 'integer)
 
+(defcustom
+  touchdown-fluentd-dry-run-command
+  "rvm system do /usr/sbin/td-agent --dry-run --config"
+  "Command to execute the fluentd/td-agent dry-run check.
+
+The command, including any rvm or other environment management
+commands necessary, to execute the dry-run check on the file attached
+to the current buffer."
+  :type 'string)
+
 (defconst touchdown--main-directive-regexp
   "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
   "Regular expression for matching a main directive.
@@ -200,6 +210,29 @@ Match groups are:
                                       (2 'touchdown-subdirectives-face)
                                       (3 'touchdown-subdirectives-face))))
 
+(defun touchdown--verify-configuration ()
+  "Verify a configuration with the fluentd/td-agent dry-run check.
+
+Execute command defined in `touchdown-fluentd-dry-run-command' on the
+file attached to the current `touchdown-mode' buffer.  Returns t on
+success.  Displays errors in a new temporary buffer."
+  (interactive)
+  (save-excursion
+    (let ((filename buffer-file-name)
+	  (temp-buffer-name "*fluentd configuration check*"))
+      (get-buffer-create temp-buffer-name)
+      (setq buffer-read-only nil)
+      (let ((retval (call-process-shell-command
+		     (format "%s %s"
+			     touchdown-fluentd-dry-run-command
+			     filename)
+		     nil temp-buffer-name)))
+	(cond ((equal retval 0)
+	       (message "configuration file successfully parsed"))
+	      (t
+	       (switch-to-buffer-other-window temp-buffer-name)
+	       (special-mode)
+	       (setq buffer-read-only nil)))))))
 
 (defun touchdown--opening-directive-line-p ()
   "Determine if point is on a line containing an opening directive."
