@@ -24,100 +24,165 @@
 (require 'helpers "tests/helpers.el")
 (require 'touchdown-mode "touchdown.el")
 
-(setq config (read-config-file "tests/fluentd.conf"))
-
-;; (touchdown--try-completion "@i" nil nil)
-;; (touchdown--try-completion "@inc" nil nil)
-;; (touchdown--try-completion "@include" nil nil)
-;; (touchdown--try-completion "@includes" nil nil)
-;; (touchdown--try-completion "<so" nil nil)
-;; (touchdown--try-completion "<sy" nil nil)
-;; (touchdown--try-completion "<s" nil nil)
-
 (describe
  "touchdown-mode syntax completion"
 
- (it
-  "should `try-completion' match `@i` exactly"
-  (let ((expected (touchdown--try-completion "@i" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+ (describe
+  "touchdown-mode `try-completion'"
 
- (it
-  "should `try-completion' match `@inc` exactly"
-  (let ((expected (touchdown--try-completion "@inc" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `@i` exactly"
+   (let ((expected (touchdown--try-completion "@i" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should `try-completion' match `@include` exactly"
-  (let ((expected (touchdown--try-completion "@include" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `@inc` exactly"
+   (let ((expected (touchdown--try-completion "@inc" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should `try-completion' match `<so` exactly"
-  (let ((expected (touchdown--try-completion "<so" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `@include` exactly"
+   (let ((expected (touchdown--try-completion "@include" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should `try-completion' match `<sy` exactly"
-  (let ((expected (touchdown--try-completion "<sy" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `<so` exactly"
+   (let ((expected (touchdown--try-completion "<so" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should `try-completion' match `<s` with longest match"
-  (let ((expected (touchdown--try-completion "<s" nil nil))
-	(actual "<s"))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `<sy` exactly"
+   (let ((expected (touchdown--try-completion "<sy" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should `try-completion' match `<sy` exactly"
-  (let ((expected (touchdown--try-completion "<sy" nil nil))
-	(actual t))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `<s` with longest match"
+   (let ((expected (touchdown--try-completion "<s" nil nil))
+	 (actual "<s"))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should not `try-completion' match `@includes`"
-  (let ((expected (touchdown--try-completion "@includes" nil nil))
-	(actual nil))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `</so` exactly"
+   (let ((expected (touchdown--try-completion "</so" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
- (it
-  "should not `try-completion' match `@file`"
-  (let ((expected (touchdown--try-completion "@file" nil nil))
-	(actual nil))
-    (expect
-     expected
-     :to-equal
-     actual)))
+  (it
+   "should match `</sy` exactly"
+   (let ((expected (touchdown--try-completion "</sy" nil nil))
+	 (actual t))
+     (expect
+      expected
+      :to-equal
+      actual)))
 
+  (it
+   "should not match `@includes`"
+   (let ((expected (touchdown--try-completion "@includes" nil nil))
+	 (actual nil))
+     (expect
+      expected
+      :to-equal
+      actual)))
+
+  (it
+   "should not match `@file`"
+   (let ((expected (touchdown--try-completion "@file" nil nil))
+	 (actual nil))
+     (expect
+      expected
+      :to-equal
+      actual)))
+
+  )
+
+ (describe
+  "touchdown-mode `test-completion'"
+
+  (it
+   "should return t or nil appropriately"
+   (let ((data (list
+		'("@i". t)
+		'("@inc". t)
+		'("@include". t)
+		'("@includes". nil)
+		'("@file". nil)
+		'("<so". t)
+		'("<sy". t)
+		'("<s". t)
+		'("</so". t)
+		'("</sy". t)
+		'("</s". t)
+		)))
+     (while data
+       (let ((datum (car data)))
+	 (let ((expected (touchdown--test-completion (car datum) nil nil))
+	       (actual (cdr datum)))
+	   (expect
+	    expected
+	    :to-equal
+	    actual)
+	   (setq data (cdr data)))))))
+  )
+
+ (describe
+  "touchdown-mode `all-completions'"
+
+  (it
+   "should find `@include` for `@i`"
+   (let ((expected (touchdown--all-completions "@i" nil nil))
+	 (actual '("@include")))
+     (expect
+      expected
+      :to-equal
+      actual)))
+
+  (it
+   "should find `(\"<system>\" \"<source>\")` for `<s`"
+   (let ((expected (touchdown--all-completions "<s" nil nil))
+	 (actual '("<system>" "<source>")))
+     ;; (print (format "expected:  %s, actual:  %s" expected actual))
+     (expect
+      expected
+      :to-equal
+      actual)))
+
+  (it
+   "should find `(\"</system>\" \"</source>\")` for `<s`"
+   (let ((expected (touchdown--all-completions "</s" nil nil))
+	 (actual '("</system>" "</source>")))
+     ;; (print (format "expected:  %s, actual:  %s" expected actual))
+     (expect
+      expected
+      :to-equal
+      actual)))
+  )
  )
 
 ;;; completion-tests.el ends here
