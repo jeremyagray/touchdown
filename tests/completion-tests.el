@@ -31,18 +31,18 @@
   "touchdown-mode `try-completion'"
 
   (it
-   "should match `@i` exactly"
+   "should match `@i` with the longest match"
    (let ((expected (touchdown--try-completion "@i" nil nil))
-	 (actual t))
+	 (actual "@include"))
      (expect
       expected
       :to-equal
       actual)))
 
   (it
-   "should match `@inc` exactly"
+   "should match `@inc` with the longest match"
    (let ((expected (touchdown--try-completion "@inc" nil nil))
-	 (actual t))
+	 (actual "@include"))
      (expect
       expected
       :to-equal
@@ -58,25 +58,25 @@
       actual)))
 
   (it
-   "should match `<so` exactly"
+   "should match `<so` with the longest match"
    (let ((expected (touchdown--try-completion "<so" nil nil))
-	 (actual t))
+	 (actual "<source>"))
      (expect
       expected
       :to-equal
       actual)))
 
   (it
-   "should match `<sy` exactly"
+   "should match `<sy` with the longest match"
    (let ((expected (touchdown--try-completion "<sy" nil nil))
-	 (actual t))
+	 (actual "<system>"))
      (expect
       expected
       :to-equal
       actual)))
 
   (it
-   "should match `<s` with longest match"
+   "should match `<s` with the longest match"
    (let ((expected (touchdown--try-completion "<s" nil nil))
 	 (actual "<s"))
      (expect
@@ -85,18 +85,18 @@
       actual)))
 
   (it
-   "should match `</so` exactly"
+   "should match `</so` with the longest match"
    (let ((expected (touchdown--try-completion "</so" nil nil))
-	 (actual t))
+	 (actual "</source>"))
      (expect
       expected
       :to-equal
       actual)))
 
   (it
-   "should match `</sy` exactly"
+   "should match `</sy` with the longest match"
    (let ((expected (touchdown--try-completion "</sy" nil nil))
-	 (actual t))
+	 (actual "</system>"))
      (expect
       expected
       :to-equal

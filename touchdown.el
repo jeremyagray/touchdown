@@ -346,7 +346,7 @@ nil otherwise."
 Return (ignoring PREDICATE and TRY) nil if STR does not match the
 fluentd syntax, t if it matches a term exactly, or the longest common
 initial sequence from all possible matches in the fluentd syntax."
-  (message "running try completion")
+  (message "touchdown try completion on string %s" str)
   (let ((matches-data nil)
 	(matches))
     (if (touchdown--matches-syntax-p str)
@@ -360,26 +360,26 @@ initial sequence from all possible matches in the fluentd syntax."
 		     (setq directives (cdr directives)
 			   matches (push directive matches)))
 		    (t
-		     (setq directives (cdr directives))))))
-	  (cond ((equal matches-data t)
-		 t)
-		((equal (length matches) 1)
-		 (setq matches-data t))
-		((> (length matches) 1)
-		 (let ((longest (car matches))
-		       (matches (cdr matches)))
-		   (while matches
-		     (let ((match (car matches)))
-		       (setq longest (s-shared-start match longest)
-			     matches (cdr matches))))
-		   (setq matches-data longest))))))
+		     (setq directives (cdr directives))))))))
+    (if (not (equal matches-data t))
+	(let ((longest (car matches))
+	      (matches (cdr matches)))
+	  (while matches
+	    (let ((match (car matches)))
+	      (setq longest (s-shared-start match longest)
+		    matches (cdr matches))))
+	  (setq matches-data longest)))
+    (message "touchdown try completion on string %s returning %s" str matches-data)
     matches-data))
+
+(touchdown--try-completion "@include" nil nil)
 
 (defun touchdown--all-completions (str predicate try)
   "Find all matches for STR in the fluentd syntax.
 
 Return (ignoring PREDICATE and TRY) a list of all possible matches for
 STR in the fluentd syntax."
+  (message "touchdown all completions on string %s" str)
   (let ((directives touchdown--directives)
 	(matches nil))
     (while directives
@@ -389,6 +389,7 @@ STR in the fluentd syntax."
 		     matches (push directive matches)))
 	      (t
 	       (setq directives (cdr directives))))))
+    (message "touchdown all completions on string %s returning %s" str matches)
     matches))
 
 (defun touchdown--test-completion (str predicate lmb)
@@ -396,6 +397,7 @@ STR in the fluentd syntax."
 
 Returns (ignoring PREDICATE and LMB) non-nil if STR has a match the
 fluentd configuration syntax, nil otherwise."
+  (message "touchdown test completion on string %s" str)
   (let ((directives touchdown--directives)
         (match-p nil))
     (while directives
@@ -404,6 +406,7 @@ fluentd configuration syntax, nil otherwise."
 	    (setq match-p t
 		  directives ())
 	  (setq directives (cdr directives)))))
+    (message "touchdown test completion on string %s returning %s" str match-p)
     match-p))
 
 (defun touchdown--dynamic-completion-table (str)
@@ -432,43 +435,35 @@ possible matches from PREDICATE.  If TRY is nil, acts as an
 allowed by PREDICATE.  Otherwise, acts as a `test-completion'
 function."
   (let ((result nil))
-    (cond ((eq try t)
+    (message "touchdown capc str %s pred %s try %s" str predicate try)
+    (cond ((eq try nil)
 	   (message "touchdown.el:  getting try-completion data")
 	   (setq result (touchdown--try-completion str predicate try)))
-	  ((eq try nil)
+	  ((eq try t)
 	   (message "touchdown.el:  getting all-completions data")
 	   (setq result (touchdown--all-completions str predicate try)))
-	  (t
+	  ((eq try 'lambda)
 	   (message "touchdown.el:  getting test-completion data")
-	   (setq result (touchdown--test-completion str predicate try))))
+	   (setq result (touchdown--test-completion str predicate try)))
+	  ((eq try 'metadata)
+	   (message "touchdown.el:  getting metadata")
+	   (setq result nil))
+	  ((eq (car try) 'boundaries)
+	   (message "touchdown.el:  getting boundaries")
+	   (setq result nil))
+	  (t
+	   (message "touchdown.el:  got unexpected:  %s" try)
+	   (setq result nil)))
     result))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."
-  ;; This inserts the first entry on the `all-completions' list,
-  ;; regardless of uniqueness and throws the error:
-  ;; completion--in-region-1: Wrong type argument: number-or-marker-p, ARG
-  ;; with ARG being the cdr of the completion possibilities.
-  ;; (list (save-excursion
-  ;; 	  (skip-syntax-backward "w_.(")
-  ;; 	  (point))
-  ;; 	(point)
-  ;;       #'touchdown--completion-at-point-collection
-  ;; 	:predicate #'touchdown--matches-syntax-p))
-
-  ;; This works without programmable completion.
-  ;; (list (save-excursion
-  ;; 	  (skip-syntax-backward "w_.(")
-  ;; 	  (point))
-  ;; 	(point)
-  ;;       touchdown--directives))
-
-  ;; This works with emacs mediating programmable completion.
   (list (save-excursion
 	  (skip-syntax-backward "w_.(")
 	  (point))
 	(point)
-        (completion-table-dynamic #'touchdown--dynamic-completion-table)))
+        #'touchdown--completion-at-point-collection
+	:predicate #'touchdown--matches-syntax-p))
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
