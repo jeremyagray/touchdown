@@ -318,11 +318,9 @@ Match groups are:
 
 ;; The list here needs to be built from lists of directives,
 ;; subdirectives, parameter names, parameter values (especially
-;; booleans), tags, and labels in a context dependent way so that
-;; completion suggests completions from the appropriate set of
-;; possibilities.  It would also be nice if certain completions
-;; inserted templates like a `<source>` directive automatically
-;; inserting an empty `@type` and closing `</source>`.
+;; booleans or sets), tags, and labels in a context dependent way so
+;; that completion suggests completions from the appropriate set of
+;; possibilities.
 (defconst touchdown--directives
   '("@include" "<source>" "<match" "<filter>" "<system>" "<label " "</source>" "</match>" "</filter>" "</system>" "</label>")
   "List of fluentd main directives.")
@@ -345,28 +343,36 @@ nil otherwise."
 (defun touchdown--try-completion (str predicate try)
   "Determine if STR is part of a term in the fluentd syntax.
 
-Return (ignoring TRY) nil if STR has no matches from PREDICATE, t if
-STR has an exact match from PREDICATE, or the longest common initial
-sequence from all possible matches from PREDICATE."
-  (let ((matches-data nil))
-    (if (funcall predicate str)
-	(let ((directives touchdown--directives)
-	      (longest ""))
+Return (ignoring PREDICATE and TRY) nil if STR does not match the
+fluentd syntax, t if it matches a term exactly, or the longest common
+initial sequence from all possible matches in the fluentd syntax."
+  (message "running try completion")
+  (let ((matches-data nil)
+	(matches))
+    (if (touchdown--matches-syntax-p str)
+	(let ((directives touchdown--directives))
 	  (while directives
 	    (let ((directive (car directives)))
               (cond ((equal str directive)
 		     (setq directives ()
 			   matches-data t))
 		    ((string-match-p (regexp-quote str) directive)
-		     (setq directives (cdr directives))
-		     (if (equal longest "")
-			 (setq longest str)
-                       (setq longest (s-shared-start directive longest))))
+		     (setq directives (cdr directives)
+			   matches (push directive matches)))
 		    (t
 		     (setq directives (cdr directives))))))
-	  (if (equal matches-data t)
-	      t
-	    (setq matches-data longest))))
+	  (cond ((equal matches-data t)
+		 t)
+		((equal (length matches) 1)
+		 (setq matches-data t))
+		((> (length matches) 1)
+		 (let ((longest (car matches))
+		       (matches (cdr matches)))
+		   (while matches
+		     (let ((match (car matches)))
+		       (setq longest (s-shared-start match longest)
+			     matches (cdr matches))))
+		   (setq matches-data longest))))))
     matches-data))
 
 (defun touchdown--all-completions (str predicate try)
@@ -400,6 +406,21 @@ fluentd configuration syntax, nil otherwise."
 	  (setq directives (cdr directives)))))
     match-p))
 
+(defun touchdown--dynamic-completion-table (str)
+  "Find all matches for STR in the fluentd syntax.
+
+Return a list of all possible matches for STR in the fluentd syntax."
+  (let ((directives touchdown--directives)
+	(matches nil))
+    (while directives
+      (let ((directive (car directives)))
+        (cond ((string-match-p (regexp-quote str) directive)
+	       (setq directives (cdr directives)
+		     matches (push directive matches)))
+	      (t
+	       (setq directives (cdr directives))))))
+    matches))
+
 (defun touchdown--completion-at-point-collection (str predicate try)
   "Return completion data for the fluentd configuration syntax.
 
@@ -412,27 +433,42 @@ allowed by PREDICATE.  Otherwise, acts as a `test-completion'
 function."
   (let ((result nil))
     (cond ((eq try t)
+	   (message "touchdown.el:  getting try-completion data")
 	   (setq result (touchdown--try-completion str predicate try)))
 	  ((eq try nil)
+	   (message "touchdown.el:  getting all-completions data")
 	   (setq result (touchdown--all-completions str predicate try)))
 	  (t
-	   (setq result (touchdown--all-completions str predicate try))))
+	   (message "touchdown.el:  getting test-completion data")
+	   (setq result (touchdown--test-completion str predicate try))))
     result))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."
-  ;; (let ((bounds (bounds-of-thing-at-point 'sexp)))
-  ;;   (when bounds
-  ;;     (list (car bounds)
-  ;;           (cdr bounds)
-  ;;           'touchdown--completion-at-point-collection
-  ;; 	    :predicate 'touchdown--matches-syntax-p))))
+  ;; This inserts the first entry on the `all-completions' list,
+  ;; regardless of uniqueness and throws the error:
+  ;; completion--in-region-1: Wrong type argument: number-or-marker-p, ARG
+  ;; with ARG being the cdr of the completion possibilities.
+  ;; (list (save-excursion
+  ;; 	  (skip-syntax-backward "w_.(")
+  ;; 	  (point))
+  ;; 	(point)
+  ;;       #'touchdown--completion-at-point-collection
+  ;; 	:predicate #'touchdown--matches-syntax-p))
+
+  ;; This works without programmable completion.
+  ;; (list (save-excursion
+  ;; 	  (skip-syntax-backward "w_.(")
+  ;; 	  (point))
+  ;; 	(point)
+  ;;       touchdown--directives))
+
+  ;; This works with emacs mediating programmable completion.
   (list (save-excursion
 	  (skip-syntax-backward "w_.(")
 	  (point))
 	(point)
-        'touchdown--completion-at-point-collection
-	:predicate 'touchdown--matches-syntax-p))
+        (completion-table-dynamic #'touchdown--dynamic-completion-table)))
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
