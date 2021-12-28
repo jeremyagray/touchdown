@@ -168,6 +168,58 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
+(defun touchdown--parameter-symbol-maker (name type default options required)
+  "Create a symbol representing a parameter.
+
+Return a symbol named NAME with the properties type TYPE, default
+DEFAULT (nil is no default), options OPTIONS (nil is no options, use
+TYPE), and required REQUIRED (boolean).  If TYPE is boolean, options
+is automatically set to (t nil).  Parameter lists should be of the
+same format as the argument list to enable use of `apply'."
+  (let ((sym (make-symbol name)))
+    (put sym 'type type)
+    (put sym 'default default)
+    (put sym 'required required)
+    (if (equal 'boolean (get sym 'type))
+	(put sym 'options '(t nil))
+      (put sym 'options options))
+    sym))
+
+(defconst touchdown--plugin-input-tail-parameters
+  '(
+    '("@log_level"
+      'string
+      nil
+      '("fatal" "error" "warn" "info" "debug" "trace")
+      nil)
+    '("@type" 'string nil nil t)
+    '("emit_unmatched_lines" 'boolean nil nil nil)
+    '("enable_stat_watcher" 'boolean t nil nil)
+    '("enable_watch_timer" 'boolean t nil nil)
+    '("encoding" 'string nil nil nil)
+    '("exclude_path" 'string' () nil nil)
+    '("follow_inodes" 'boolean nil nil nil)
+    '("from_encoding" 'string nil nil nil)
+    '("ignore_repeated_permission_error" 'boolean nil nil nil)
+    '("limit_recently_modified" "time" nil nil nil)
+    '("multiline_flush_interval" "time" nil nil nil)
+    '("open_on_every_update" 'boolean nil nil nil)
+    '("path" 'string nil nil t)
+    '("path_key" 'string nil nil nil)
+    '("path_timezone" 'string nil nil nil)
+    '("pos_file" 'string nil nil nil)
+    '("pos_file_compaction_interval" 'time nil nil nil)
+    '("read_bytes_limit_per_second" 'size -1 nil nil)
+    '("read_from_head" 'boolean nil nil nil)
+    '("read_lines_limit" 'integer 1000 nil nil)
+    '("refresh_interval" 'time 60 nil nil)
+    '("rotate_wait" 'time 5 nil nil)
+    '("skip_refresh_on_startup" 'boolean nil nil nil)
+    '("tag" 'string nil nil t)
+    )
+  "List of fluentd tail input plugin parameters.
+
+Order matches the arguments of `touchdown--parameter-symbol-maker'.")
 
 (defface touchdown-directives-face
   '((t (:inherit font-lock-function-name-face)))
