@@ -162,7 +162,7 @@
     (face-at-cursor-p 'touchdown-parameter-name-face)
     :to-equal
     t)
-   (forward-cursor-on "/var/log/fluent/myapp/access")
+   (forward-cursor-on "./tests/access")
    (expect
     (face-at-cursor-p 'touchdown-parameter-value-face)
     :to-equal

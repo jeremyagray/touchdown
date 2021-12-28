@@ -15,7 +15,8 @@ Major mode for highlighting and editing
   - [] parameter values
     - [] tags
 	- [] paths
-- [] add explicit regular expressions for core plugin parameters
+- [] add line identification predicates
+- [] add syntax information for plugins and parameters
 - [x] add explicit regular expressions for second-level directives
 - [x] add explicit regular expressions for top-level directives
 - [x] add undercover.el coverage

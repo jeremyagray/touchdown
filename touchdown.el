@@ -1,14 +1,16 @@
-;;; touchdown.el --- Major mode for highlighting and editing td-agent/fluentd configuration files. -*- lexical-binding: t; -*-
+;;; touchdown.el --- Major mode for editing td-agent/fluentd configuration files. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA.
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
-;; URL: https://github.com/syohex/emacs-fluentd-mode
+;; Maintainer: Jeremy A GRAY <gray@flyquackswim.com>
+;; Created: 2016 as emacs-fluentd-mode, 2021 ported as touchdown-mode
 ;; URL: https://github.com/jeremyagray/touchdown
-;; Version: 0.01
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Version: 0.0.1
+;; Keywords: fluentd, td-agent
+;; Package-Requires: ((emacs "27") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -25,8 +27,7 @@
 
 ;;; Commentary:
 
-;; Major mode for highlighting and editing td-agent/fluentd
-;; configuration files.
+;; Major mode for editing td-agent/fluentd configuration files.
 
 ;;; Code:
 
@@ -36,19 +37,20 @@
   "Major mode for editing fluentd/td-agent configuration files."
   :group 'languages)
 
-(defcustom touchdown-indent-level 2
-  "Indent level."
-  :type 'integer)
+;; Syntax table.
 
-(defcustom
-  touchdown-fluentd-dry-run-command
-  "rvm system do /usr/sbin/td-agent --dry-run --config"
-  "Command to execute the fluentd/td-agent dry-run check.
+(defvar touchdown-mode-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?#  "< b" table)
+    (modify-syntax-entry ?\n "> b" table)
+    (modify-syntax-entry ?<  "(>"  table)
+    (modify-syntax-entry ?>  ")<"  table)
+    table)
+  "Syntax table for `touchdown-mode', derived from `fundamental-mode'.
 
-The command, including any rvm or other environment management
-commands necessary, to execute the dry-run check on the file attached
-to the current buffer."
-  :type 'string)
+Sets the comment delimiters and '<>' as a pair of grouping symbols.")
+
+;; Regular expressions.
 
 (defconst touchdown--main-directive-regexp
   "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
@@ -168,6 +170,8 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
+;; Fluentd syntax symbols.
+
 (defun touchdown--parameter-symbol-maker (name type default options required)
   "Create a symbol representing a parameter.
 
@@ -221,6 +225,8 @@ same format as the argument list to enable use of `apply'."
 
 Order matches the arguments of `touchdown--parameter-symbol-maker'.")
 
+;; Faces and font lock.
+
 (defface touchdown-directives-face
   '((t (:inherit font-lock-function-name-face)))
   "Face of directive.")
@@ -262,6 +268,18 @@ Order matches the arguments of `touchdown--parameter-symbol-maker'.")
                                       (2 'touchdown-subdirectives-face)
                                       (3 'touchdown-subdirectives-face))))
 
+;; Configuration file verification.
+
+(defcustom
+  touchdown-fluentd-dry-run-command
+  "rvm system do /usr/sbin/td-agent --dry-run --config"
+  "Command to execute the fluentd/td-agent dry-run check.
+
+The command, including any rvm or other environment management
+commands necessary, to execute the dry-run check on the file attached
+to the current buffer."
+  :type 'string)
+
 (defun touchdown--verify-configuration ()
   "Verify a configuration with the fluentd/td-agent dry-run check.
 
@@ -286,6 +304,14 @@ success.  Displays errors in a new temporary buffer."
 	       (special-mode)
 	       (setq buffer-read-only nil)))))))
 
+;; Line type and location predicates.
+
+(defun touchdown--file-include-line-p ()
+  "Determine if point is on a line containing file include."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at-p touchdown--file-include-regexp)))
+
 (defun touchdown--opening-directive-line-p ()
   "Determine if point is on a line containing an opening directive."
   (save-excursion
@@ -297,6 +323,16 @@ success.  Displays errors in a new temporary buffer."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at-p touchdown--any-directive-closing-regexp)))
+
+(defun touchdown--already-closed-p (directive curpoint)
+  "Determine if XML directive DIRECTIVE is closed before CURPOINT."
+  (save-excursion
+    (let ((close-directive (format "</%s>" directive))
+          (curline (line-number-at-pos curpoint)))
+      (when (search-forward close-directive curpoint t)
+        (< (line-number-at-pos) curline)))))
+
+;; Line and location data retrieval.
 
 (defun touchdown--closing-directive-name ()
   "Return the name of the current closing directive."
@@ -328,13 +364,11 @@ success.  Displays errors in a new temporary buffer."
           (match-string-no-properties 3))
       nil)))
 
-(defun touchdown--already-closed-p (directive curpoint)
-  "Determine if XML directive DIRECTIVE is closed before CURPOINT."
-  (save-excursion
-    (let ((close-directive (format "</%s>" directive))
-          (curline (line-number-at-pos curpoint)))
-      (when (search-forward close-directive curpoint t)
-        (< (line-number-at-pos) curline)))))
+;; Indentation.
+
+(defcustom touchdown-indent-level 2
+  "Indent level."
+  :type 'integer)
 
 (defun touchdown--opening-directive-indentation ()
   "Return the indentation of the current opening directive."
@@ -370,13 +404,18 @@ success.  Displays errors in a new temporary buffer."
     (when (< (current-column) (current-indentation))
       (back-to-indentation))))
 
-(defvar touchdown-mode-syntax-table
-  (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?#  "< b" table)
-    (modify-syntax-entry ?\n "> b" table)
-    (modify-syntax-entry ?<  "(>"  table)
-    (modify-syntax-entry ?>  ")<"  table)
-    table))
+;; Completion.
+
+;; Completion functions are currently using `touchdown--directives' as
+;; the only source of terms for completion.  The list should be built
+;; from lists of directives, subdirectives, parameter names, parameter
+;; values (especially booleans or sets), tags, and labels in a context
+;; dependent way so that completion suggests completions from the
+;; appropriate set of possibilities.
+
+(defconst touchdown--directives
+  '("@include" "<source>" "<match" "<filter>" "<system>" "<label " "</source>" "</match>" "</filter>" "</system>" "</label>")
+  "List of fluentd main directives.")
 
 ;; From s.el.
 (defun s-shared-start (s1 s2)
@@ -384,15 +423,6 @@ success.  Displays errors in a new temporary buffer."
   (declare (pure t) (side-effect-free t))
   (let ((cmp (compare-strings s1 0 (length s1) s2 0 (length s2))))
     (if (eq cmp t) s1 (substring s1 0 (1- (abs cmp))))))
-
-;; The list here needs to be built from lists of directives,
-;; subdirectives, parameter names, parameter values (especially
-;; booleans or sets), tags, and labels in a context dependent way so
-;; that completion suggests completions from the appropriate set of
-;; possibilities.
-(defconst touchdown--directives
-  '("@include" "<source>" "<match" "<filter>" "<system>" "<label " "</source>" "</match>" "</filter>" "</system>" "</label>")
-  "List of fluentd main directives.")
 
 (defun touchdown--matches-syntax-p (str)
   "Determine if STR is part of a term in the fluentd syntax.

@@ -30,6 +30,33 @@
  "touchdown-mode line identification functions"
 
  (it
+  "should identify file include lines"
+  (with-touchdown-temp-buffer
+   config
+
+   (let ((data (list
+		'("@include path/to/the/file" . t)
+		'("<source>" . nil)
+		'("@type" . nil)
+		'("<parse>" . nil)
+		'("@type" . nil)
+		'("</parse>" . nil)
+		'("</source>" . nil)
+		'("<match myapp.access>" . nil)
+		'("@include path/to/another/file" . t)
+		)))
+     (while data
+       (let ((datum (car data)))
+	 (forward-cursor-on (car datum))
+	 (let ((expected (touchdown--file-include-line-p))
+	       (actual (cdr datum)))
+	   (expect
+	    expected
+	    :to-equal
+	    actual)
+	   (setq data (cdr data))))))))
+
+ (it
   "should identify opening directive lines"
   (with-touchdown-temp-buffer
    config
