@@ -52,6 +52,65 @@ Sets the comment delimiters and '<>' as a pair of grouping symbols.")
 
 ;; Regular expressions.
 
+(defun touchdown--create-directive-regexp (directive)
+  "Return a regular expression matching DIRECTIVE.
+
+Matches any directive type.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present."
+  (format
+   "^[[:space:]]*\\(</?\\)\\(%s\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+   directive))
+
+(defun touchdown--create-opening-directive-regexp (directive)
+  "Return a regular expression matching opening DIRECTIVE.
+
+Matches any opening directive type.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present."
+  (format
+   "^[[:space:]]*\\(<\\)\\(%s\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+   directive))
+
+(defun touchdown--create-closing-directive-regexp (directive)
+  "Return a regular expression matching closing DIRECTIVE.
+
+Matches any closing directive type.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present."
+  (format
+   "^[[:space:]]*\\(</\\)\\(%s\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+   directive))
+
+(defun touchdown--create-options-regexp (options &optional group)
+  "Return a regular expression option group representing OPTIONS.
+
+Convert the list OPTIONS into a regular expression option group.  If
+GROUP is non-nil, wrap OPTIONS in group or a shy group if GROUP is 1."
+  (let ((opts (cdr options))
+	(re (car options)))
+    (while opts
+      (setq re (concat re (format "\\|%s" (car opts)))
+	    opts (cdr opts)))
+    (cond ((and (equal group 'shy) (not (equal re "")))
+	   (setq re (format "\\(?:%s\\)" re)))
+	  ((and group (not (equal re "")))
+	   (setq re (format "\\(%s\\)" re)))
+	  (t
+	   t))
+    re))
+
 (defconst touchdown--main-directive-regexp
   "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
   "Regular expression for matching a main directive.
@@ -324,10 +383,11 @@ success.  Displays errors in a new temporary buffer."
     (move-beginning-of-line 1)
     (looking-at-p touchdown--any-directive-closing-regexp)))
 
-(defun touchdown--already-closed-p (directive curpoint)
-  "Determine if XML directive DIRECTIVE is closed before CURPOINT."
+(defun touchdown--directive-closed-p (directive curpoint)
+  "Determine if DIRECTIVE is closed before CURPOINT."
   (save-excursion
-    (let ((close-directive (format "</%s>" directive))
+    (let ((close-directive
+	   (touchdown--create-closing-directive-regexp directive))
           (curline (line-number-at-pos curpoint)))
       (when (search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
@@ -377,16 +437,17 @@ success.  Displays errors in a new temporary buffer."
           (curpoint (point)))
       (cond ((touchdown--closing-directive-line-p)
              (let* ((directive (touchdown--closing-directive-name))
-                    (opening-directive1 (format "^\\s-*<%s\\(?:\\s-\\|>\\)" directive)))
-               (if (not (re-search-backward opening-directive1 nil t))
-                   (error "Opening XML directive not found")
+                    (opening-directive
+		     (touchdown--create-directive-regexp directive)))
+               (if (not (re-search-backward opening-directive nil t))
+                   (error "Opening directive %s not found" directive)
                  (current-indentation))))
             (t
              (let (finish)
                (while (and (not finish)
                            (re-search-backward opening-directive nil t))
                  (let ((directive (match-string-no-properties 2)))
-                   (unless (touchdown--already-closed-p directive curpoint)
+                   (unless (touchdown--directive-closed-p directive curpoint)
                      (setq finish t))))
                (if (not finish)
                    0

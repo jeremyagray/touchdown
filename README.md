@@ -5,8 +5,6 @@ Major mode for highlighting and editing
 
 ## Roadmap
 
-- [-] rename lisp variables and functions to reflect the names in the
-  fluentd configuration file syntax
 - [-] tab completion
   - [x] directives
   - [] core plugin parameters
@@ -24,6 +22,7 @@ Major mode for highlighting and editing
 - [x] fix comment highlighting in parameter values
 - [x] hack simplecov to generate a coverage report
 - [x] port tests to buttercup
+- [x] rename lisp symbols to match the fluentd configuration file syntax
 - [x] run `td-agent --dry-run --config` on file
 
 ## Contributing
