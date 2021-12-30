@@ -1,4 +1,4 @@
-;;; touchdown.el --- Major mode for editing td-agent/fluentd configuration files. -*- lexical-binding: t; -*-
+;;; touchdown.el --- Major mode for editing td-agent/fluentd configuration files -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA.
 ;; Copyright (C) 2021 by Jeremy A GRAY.
@@ -9,8 +9,8 @@
 ;; Created: 2016 as emacs-fluentd-mode, 2021 ported as touchdown-mode
 ;; URL: https://github.com/jeremyagray/touchdown
 ;; Version: 0.0.1
-;; Keywords: fluentd, td-agent
-;; Package-Requires: ((emacs "27") (cl-lib "0.5"))
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -278,8 +278,7 @@ same format as the argument list to enable use of `apply'."
     '("refresh_interval" 'time 60 nil nil)
     '("rotate_wait" 'time 5 nil nil)
     '("skip_refresh_on_startup" 'boolean nil nil nil)
-    '("tag" 'string nil nil t)
-    )
+    '("tag" 'string nil nil t))
   "List of fluentd tail input plugin parameters.
 
 Order matches the arguments of `touchdown--parameter-symbol-maker'.")
@@ -479,7 +478,7 @@ success.  Displays errors in a new temporary buffer."
   "List of fluentd main directives.")
 
 ;; From s.el.
-(defun s-shared-start (s1 s2)
+(defun touchdown--s-shared-start (s1 s2)
   "Return the longest prefix S1 and S2 have in common."
   (declare (pure t) (side-effect-free t))
   (let ((cmp (compare-strings s1 0 (length s1) s2 0 (length s2))))
@@ -526,7 +525,7 @@ initial sequence from all possible matches in the fluentd syntax."
 	      (matches (cdr matches)))
 	  (while matches
 	    (let ((match (car matches)))
-	      (setq longest (s-shared-start match longest)
+	      (setq longest (touchdown--s-shared-start match longest)
 		    matches (cdr matches))))
 	  (setq matches-data longest)))
     (message "touchdown try completion on string %s returning %s" str matches-data)
@@ -648,6 +647,6 @@ function."
  'auto-mode-alist
  '("\\(fluentd?\\.conf\\|td-agent\\.conf\\)\\'" . touchdown-mode))
 
-(provide 'touchdown-mode)
+(provide 'touchdown)
 
 ;;; touchdown.el ends here

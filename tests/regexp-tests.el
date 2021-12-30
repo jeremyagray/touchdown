@@ -22,7 +22,7 @@
 ;;; Code:
 
 (require 'helpers "tests/helpers.el")
-(require 'touchdown-mode "touchdown.el")
+(require 'touchdown "touchdown.el")
 
 (describe
  "touchdown-mode regular expressions"
