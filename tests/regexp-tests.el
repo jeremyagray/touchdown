@@ -1,8 +1,12 @@
-;;; regexp-tests.el --- regular expression tests -*- lexical-binding: t; -*-
+;;; regexp-tests.el --- Regular expression tests -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
+;; URL: https://github.com/jeremyagray/touchdown
+;; Version: 0.0.1
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,6 +22,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;; Regular expression constant, predicate, and function tests.
 
 ;;; Code:
 
@@ -59,8 +65,7 @@
        (expect
 	expected
 	:to-equal
-	actual))))
-  )
+	actual)))))
 
  (describe
   "touchdown-mode `touchdown--create-directive-regexp'"
@@ -71,8 +76,7 @@
 		   '("match" . "^[[:space:]]*\\(</?\\)\\(match\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("filter" . "^[[:space:]]*\\(</?\\)\\(filter\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("system" . "^[[:space:]]*\\(</?\\)\\(system\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   '("label" . "^[[:space:]]*\\(</?\\)\\(label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   )))
+		   '("label" . "^[[:space:]]*\\(</?\\)\\(label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"))))
 	(while data
 	  (let ((datum (car data)))
 	    (let ((expected (touchdown--create-directive-regexp (car datum)))
@@ -81,8 +85,7 @@
 	       expected
 	       :to-equal
 	       actual)
-	      (setq data (cdr data)))))))
-  )
+	      (setq data (cdr data))))))))
 
  (describe
   "touchdown-mode `touchdown--create-opening-directive-regexp'"
@@ -93,8 +96,7 @@
 		   '("match" . "^[[:space:]]*\\(<\\)\\(match\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("filter" . "^[[:space:]]*\\(<\\)\\(filter\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("system" . "^[[:space:]]*\\(<\\)\\(system\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   '("label" . "^[[:space:]]*\\(<\\)\\(label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   )))
+		   '("label" . "^[[:space:]]*\\(<\\)\\(label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"))))
 	(while data
 	  (let ((datum (car data)))
 	    (let ((expected
@@ -104,8 +106,7 @@
 	       expected
 	       :to-equal
 	       actual)
-	      (setq data (cdr data)))))))
-  )
+	      (setq data (cdr data))))))))
 
  (describe
   "touchdown-mode `touchdown--create-closing-directive-regexp'"
@@ -116,8 +117,7 @@
 		   '("match" . "^[[:space:]]*\\(</\\)\\(match\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("filter" . "^[[:space:]]*\\(</\\)\\(filter\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("system" . "^[[:space:]]*\\(</\\)\\(system\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   '("label" . "^[[:space:]]*\\(</\\)\\(label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
-		   )))
+		   '("label" . "^[[:space:]]*\\(</\\)\\(label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"))))
 	(while data
 	  (let ((datum (car data)))
 	    (let ((expected
@@ -127,8 +127,6 @@
 	       expected
 	       :to-equal
 	       actual)
-	      (setq data (cdr data)))))))
-  )
- )
+	      (setq data (cdr data)))))))))
 
 ;;; regexp-tests.el ends here

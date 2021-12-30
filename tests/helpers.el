@@ -1,10 +1,14 @@
-;;; helpers.el --- touchdown-mode test helpers -*- lexical-binding: t; -*-
+;;; helpers.el --- Touchdown-mode test helpers -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA.
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
+;; URL: https://github.com/jeremyagray/touchdown
+;; Version: 0.0.1
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,6 +24,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;; Touchdown test helpers.
 
 ;;; Code:
 

@@ -1,8 +1,12 @@
-;;; mode-tests.el --- major mode loading tests -*- lexical-binding: t; -*-
+;;; mode-tests.el --- Major mode loading tests -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
+;; URL: https://github.com/jeremyagray/touchdown
+;; Version: 0.0.1
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

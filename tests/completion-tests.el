@@ -1,8 +1,12 @@
-;;; completion-tests.el --- completion tests -*- lexical-binding: t; -*-
+;;; completion-tests.el --- Completion tests -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
+;; URL: https://github.com/jeremyagray/touchdown
+;; Version: 0.0.1
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,6 +22,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;; Completion tests for touchdown.
 
 ;;; Code:
 
@@ -118,9 +124,7 @@
      (expect
       expected
       :to-equal
-      actual)))
-
-  )
+      actual))))
 
  (describe
   "touchdown-mode `test-completion'"
@@ -138,8 +142,7 @@
 		'("<s". t)
 		'("</so". t)
 		'("</sy". t)
-		'("</s". t)
-		)))
+		'("</s". t))))
      (while data
        (let ((datum (car data)))
 	 (let ((expected (touchdown--test-completion (car datum) nil nil))
@@ -148,8 +151,7 @@
 	    expected
 	    :to-equal
 	    actual)
-	   (setq data (cdr data)))))))
-  )
+	   (setq data (cdr data))))))))
 
  (describe
   "touchdown-mode `all-completions'"
@@ -181,8 +183,6 @@
      (expect
       expected
       :to-equal
-      actual)))
-  )
- )
+      actual)))))
 
 ;;; completion-tests.el ends here

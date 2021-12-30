@@ -1,8 +1,12 @@
-;;; indentation-tests.el --- syntax indentation tests -*- lexical-binding: t; -*-
+;;; indentation-tests.el --- Indentation tests -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 by Jeremy A GRAY.
 
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
+;; URL: https://github.com/jeremyagray/touchdown
+;; Version: 0.0.1
+;; Keywords: convenience
+;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,6 +22,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;; Indentation tests for touchdown.
 
 ;;; Code:
 
@@ -43,8 +49,7 @@
 		'("</parse>" . nil)
 		'("</source>" . nil)
 		'("<match myapp.access>" . nil)
-		'("@include path/to/another/file" . t)
-		)))
+		'("@include path/to/another/file" . t))))
      (while data
        (let ((datum (car data)))
 	 (forward-cursor-on (car datum))
