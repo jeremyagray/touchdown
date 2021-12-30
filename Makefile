@@ -32,6 +32,10 @@ ELPA_DIR = $(shell EMACS=$(EMACS) $(CASK) package-directory)
 test : elpa
 	$(CASK) exec buttercup $(LOADPATH)
 
+.PHONY : lint
+lint : elpa
+	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) --eval "(require 'package-lint)" -f package-lint-batch-and-exit touchdown.el
+
 elpa : $(ELPA_DIR)
 
 $(ELPA_DIR) : Cask
