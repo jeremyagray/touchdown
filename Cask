@@ -35,8 +35,10 @@
 
 (development
  (depends-on "buttercup")
+ (depends-on "package-lint")
  (depends-on "undercover"))
 
+;;; Cask ends here
 ;;; Local Variables:
 ;;; mode: emacs-lisp
 ;;; End:
