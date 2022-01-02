@@ -624,6 +624,22 @@ function."
         #'touchdown--completion-at-point-collection
 	:predicate #'touchdown--matches-syntax-p))
 
+(defun touchdown-swap-boolean ()
+  "Swap boolean values."
+  (interactive)
+  (save-excursion
+    (let* ((bounds (if (use-region-p)
+		      (cons (region-beginning) (region-end))
+		     (bounds-of-thing-at-point 'word)))
+	   (text (buffer-substring-no-properties (car bounds) (cdr bounds))))
+      (when bounds
+	(cond ((equal text "true")
+	       (delete-region (car bounds) (cdr bounds))
+	       (insert "false"))
+	      ((equal text "false")
+	       (delete-region (car bounds) (cdr bounds))
+	       (insert "true")))))))
+
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
   "Major mode for editing fluentd/td-agent configuration files."
@@ -640,7 +656,9 @@ function."
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'comment-padding) " ")
   (set (make-local-variable 'comment-inline-offset) 2)
-  (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*"))
+  (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*")
+
+  (define-key touchdown-mode-map "\C-c\C-tt" 'touchdown-swap-boolean))
 
 ;;;###autoload
 (add-to-list
