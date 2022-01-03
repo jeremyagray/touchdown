@@ -296,46 +296,46 @@ Order matches the arguments of `touchdown--parameter-symbol-maker'.")
 
 ;; Faces and font lock.
 
-(defface touchdown-directives-face
+(defface touchdown-directives
   '((t (:inherit font-lock-function-name-face)))
   "Face of directive.")
 
-(defface touchdown-subdirectives-face
+(defface touchdown-subdirectives
   '((t (:inherit font-lock-function-name-face)))
   "Face of subdirective.")
 
-(defface touchdown-file-include-face
+(defface touchdown-file-include
   '((t (:inherit font-lock-preprocessor-face)))
   "Face for file includes.")
 
-(defface touchdown-file-include-path-face
+(defface touchdown-file-include-path
   '((t (:inherit font-lock-string-face)))
   "Face for file include path.")
 
-(defface touchdown-tag-face
+(defface touchdown-tag
   '((t (:inherit font-lock-variable-name-face)))
   "Face of tag parameter")
 
-(defface touchdown-parameter-name-face
+(defface touchdown-parameter-name
   '((t (:inherit font-lock-keyword-face)))
   "Face of parameter name")
 
-(defface touchdown-parameter-value-face
+(defface touchdown-parameter-value
   '((t (:inherit font-lock-constant-face)))
   "Face of parameter value")
 
 (defvar touchdown-font-lock-keywords
-  `((,touchdown--parameter-regexp (1 'touchdown-parameter-name-face)
-                                  (2 'touchdown-parameter-value-face t nil))
-    (,touchdown--file-include-regexp (1 'touchdown-file-include-face t nil)
-                                     (2 'touchdown-file-include-path-face t nil))
-    (,touchdown--main-directive-regexp (1 'touchdown-directives-face)
-                                       (2 'touchdown-directives-face nil t)
-                                       (3 'touchdown-tag-face nil t)
-                                       (4 'touchdown-directives-face nil t))
-    (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives-face)
-                                      (2 'touchdown-subdirectives-face)
-                                      (3 'touchdown-subdirectives-face))))
+  `((,touchdown--parameter-regexp (1 'touchdown-parameter-name)
+                                  (2 'touchdown-parameter-value t nil))
+    (,touchdown--file-include-regexp (1 'touchdown-file-include t nil)
+                                     (2 'touchdown-file-include-path t nil))
+    (,touchdown--main-directive-regexp (1 'touchdown-directives)
+                                       (2 'touchdown-directives nil t)
+                                       (3 'touchdown-tag nil t)
+                                       (4 'touchdown-directives nil t))
+    (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives)
+                                      (2 'touchdown-subdirectives)
+                                      (3 'touchdown-subdirectives))))
 
 ;; Configuration file verification.
 

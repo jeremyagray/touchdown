@@ -43,22 +43,22 @@
    config
    (forward-cursor-on "<source>")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)
    (forward-cursor-on "</source>")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)
    (forward-cursor-on "<match")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)
    (forward-cursor-on "</match>")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)))
 
@@ -68,32 +68,32 @@
    config
    (forward-cursor-on "<parse>")
    (expect
-    (face-at-cursor-p 'touchdown-subdirectives-face)
+    (face-at-cursor-p 'touchdown-subdirectives)
     :to-equal
     t)
    (forward-cursor-on "</parse>")
    (expect
-    (face-at-cursor-p 'touchdown-subdirectives-face)
+    (face-at-cursor-p 'touchdown-subdirectives)
     :to-equal
     t)))
 
  (it
-  "should highlight `@include` with the touchdown-file-include-face"
+  "should highlight `@include` with the touchdown-file-include"
   (with-touchdown-temp-buffer
    config
 
    (forward-cursor-on "@include")
-   (let ((expected 'touchdown-file-include-face)
+   (let ((expected 'touchdown-file-include)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))))
 
  (it
-  "should highlight `@include` paths with touchdown-file-include-path-face"
+  "should highlight `@include` paths with touchdown-file-include-path"
   (with-touchdown-temp-buffer
    config
 
    (forward-cursor-on "path/to/the/file")
-   (let ((expected 'touchdown-file-include-path-face)
+   (let ((expected 'touchdown-file-include-path)
 	 (actual (face-at-point)))
      ;; This prints, but includes the description from `it.'
      ;; (print (format "expected face:  %s, actual face:  %s" expected actual))
@@ -105,17 +105,17 @@
    config
    (forward-cursor-on "match")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)
    (forward-cursor-on "myapp\\.access")
    (expect
-    (face-at-cursor-p 'touchdown-tag-face)
+    (face-at-cursor-p 'touchdown-tag)
     :to-equal
     t)
    (forward-cursor-on ">")
    (expect
-    (face-at-cursor-p 'touchdown-directives-face)
+    (face-at-cursor-p 'touchdown-directives)
     :to-equal
     t)))
 
@@ -125,52 +125,52 @@
    config
    (forward-cursor-on "@type")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-name-face)
+    (face-at-cursor-p 'touchdown-parameter-name)
     :to-equal
     t)
    (forward-cursor-on "syslog")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
    (forward-cursor-on "port")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-name-face)
+    (face-at-cursor-p 'touchdown-parameter-name)
     :to-equal
     t)
    (forward-cursor-on "27016")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
    (forward-cursor-on "@type")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-name-face)
+    (face-at-cursor-p 'touchdown-parameter-name)
     :to-equal
     t)
    (forward-cursor-on "syslog")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
    (forward-cursor-on "@type")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-name-face)
+    (face-at-cursor-p 'touchdown-parameter-name)
     :to-equal
     t)
    (forward-cursor-on "file")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
    (forward-cursor-on "path")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-name-face)
+    (face-at-cursor-p 'touchdown-parameter-name)
     :to-equal
     t)
    (forward-cursor-on "./tests/access")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)))
 
@@ -196,13 +196,13 @@
 
    (forward-cursor-on "rsy#log")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
 
    (forward-cursor-on "#log")
    (expect
-    (face-at-cursor-p 'touchdown-parameter-value-face)
+    (face-at-cursor-p 'touchdown-parameter-value)
     :to-equal
     t)
 
@@ -258,17 +258,17 @@
    (expect expected :to-equal actual))
 
    (forward-cursor-on "rsy#log")
-   (let ((expected 'touchdown-parameter-value-face)
+   (let ((expected 'touchdown-parameter-value)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))
 
    (forward-cursor-on "#log")
-   (let ((expected 'touchdown-parameter-value-face)
+   (let ((expected 'touchdown-parameter-value)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))
 
    (forward-cursor-on "# parameter with hash comment")
-   (let ((expected 'touchdown-parameter-value-face)
+   (let ((expected 'touchdown-parameter-value)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))
 
