@@ -63,6 +63,60 @@
      (expect
       "true"
       :to-equal
-      actual)))))
+      actual))))
+
+(describe
+ "touchdown--parameter-line-p"
+
+ (it
+  "should return nil if not a parameter line"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "# touchdown--parameter-line-p test")
+   (forward-cursor-on "<source>")
+   (expect
+      (touchdown--parameter-line-p)
+      :to-be
+      nil)))
+
+ (it
+  "should return t if line is a parameter line"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "# touchdown--parameter-line-p test")
+   (forward-cursor-on "@type")
+   (expect
+      (touchdown--parameter-line-p)
+      :to-be
+      t))))
+
+(describe
+ "touchdown--boolean-parameter-line-p"
+
+ (it
+  "should return nil if not a boolean parameter line"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "# touchdown--parameter-line-p test")
+   (forward-cursor-on "<source>")
+   (expect
+      (touchdown--boolean-parameter-line-p)
+      :to-be
+      nil)))
+
+ (it
+  "should return t if line is a boolean parameter line"
+  (with-touchdown-temp-buffer
+   config
+
+   (forward-cursor-on "# touchdown--parameter-line-p test")
+   (forward-cursor-on "read_from_head")
+   (expect
+      (touchdown--boolean-parameter-line-p)
+      :to-be
+      t)))))
 
 ;;; utilities-tests.el ends here

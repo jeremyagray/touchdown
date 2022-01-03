@@ -393,6 +393,27 @@ success.  Displays errors in a new temporary buffer."
     (move-beginning-of-line 1)
     (looking-at-p touchdown--any-directive-closing-regexp)))
 
+(defun touchdown--parameter-line-p ()
+  "Determine if the current line is a parameter line.
+
+Determine if the current line is a parameter line by matching the
+line against `touchdown--parameter-regexp'."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (looking-at touchdown--parameter-regexp)))
+
+(defun touchdown--boolean-parameter-line-p ()
+  "Determine if the current line has a boolean parameter.
+
+Determine if the current line has a boolean parameter by matching the
+line against `touchdown--boolean-parameter-regexp', essentially
+looking for a parameter value of `true` or `false`."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (looking-at touchdown--boolean-parameter-regexp)))
+
 (defun touchdown--directive-closed-p (directive curpoint)
   "Determine if DIRECTIVE is closed before CURPOINT."
   (save-excursion
@@ -637,17 +658,6 @@ function."
 
 ;;; Utilities.
 
-(defun touchdown--looking-at-boolean-parameter-line-p ()
-  "Determine if the current line has a boolean parameter.
-
-Determine if the current line has a boolean parameter by matching the
-line against `touchdown--boolean-parameter-regexp', essentially
-looking for a parameter value of `true` or `false`."
-  (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (looking-at touchdown--boolean-parameter-regexp)))
-
 (defun touchdown-swap-boolean ()
   "Swap a boolean parameter value.
 
@@ -655,7 +665,7 @@ Swap the value of a boolean parameter if the point is currently on a
 line containing a parameter with a boolean value."
   (interactive)
   (save-excursion
-    (when (touchdown--looking-at-boolean-parameter-line-p)
+    (when (touchdown--boolean-parameter-line-p)
       (beginning-of-line)
       (cond ((equal "true" (match-string-no-properties 2))
 	     (re-search-forward "\\btrue\\b" nil t 1)
