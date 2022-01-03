@@ -229,6 +229,17 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
+(defconst touchdown--boolean-parameter-regexp
+  "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(true\\|false\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+  "Regular expression matching fluentd parameters.
+
+Matches all parts of a parameter line, including trailing comments.
+Match groups are:
+
+1. Parameter name.
+2. Parameter value.
+3. Comment, if present.")
+
 ;; Fluentd syntax symbols.
 
 (defun touchdown--parameter-symbol-maker (name type default options required)
@@ -624,21 +635,34 @@ function."
         #'touchdown--completion-at-point-collection
 	:predicate #'touchdown--matches-syntax-p))
 
-(defun touchdown-swap-boolean ()
-  "Swap boolean values."
+;;; Utilities.
+
+(defun touchdown--looking-at-boolean-parameter-line-p ()
+  "Determine if the current line has a boolean parameter.
+
+Determine if the current line has a boolean parameter by matching the
+line against `touchdown--boolean-parameter-regexp', essentially
+looking for a parameter value of `true` or `false`."
   (interactive)
   (save-excursion
-    (let* ((bounds (if (use-region-p)
-		      (cons (region-beginning) (region-end))
-		     (bounds-of-thing-at-point 'word)))
-	   (text (buffer-substring-no-properties (car bounds) (cdr bounds))))
-      (when bounds
-	(cond ((equal text "true")
-	       (delete-region (car bounds) (cdr bounds))
-	       (insert "false"))
-	      ((equal text "false")
-	       (delete-region (car bounds) (cdr bounds))
-	       (insert "true")))))))
+    (beginning-of-line)
+    (looking-at touchdown--boolean-parameter-regexp)))
+
+(defun touchdown-swap-boolean ()
+  "Swap a boolean parameter value.
+
+Swap the value of a boolean parameter if the point is currently on a
+line containing a parameter with a boolean value."
+  (interactive)
+  (save-excursion
+    (when (touchdown--looking-at-boolean-parameter-line-p)
+      (beginning-of-line)
+      (cond ((equal "true" (match-string-no-properties 2))
+	     (re-search-forward "\\btrue\\b" nil t 1)
+	     (replace-match "false" nil nil))
+	    ((equal "false" (match-string-no-properties 2))
+	     (re-search-forward "\\bfalse\\b" nil t 1)
+	     (replace-match "true" nil nil))))))
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
