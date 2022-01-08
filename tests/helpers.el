@@ -62,7 +62,7 @@ finally execute any optional statements in BODY."
 Optionally, move forward COUNT occurences of PATTERN.  Place cursor at
 the beginning of PATTERN."
   (let ((case-fold-search nil))
-    (re-search-forward pattern nil nil (or count 1)))
+    (re-search-forward pattern (point-max) t (or count 1)))
   (goto-char (match-beginning 0)))
 
 (defun backward-cursor-on (pattern &optional count)
@@ -70,7 +70,7 @@ the beginning of PATTERN."
 Optionally, move backward COUNT occurences of PATTERN.  Place cursor
 at the beginning of PATTERN."
   (let ((case-fold-search nil))
-    (re-search-backward pattern nil nil (or count 1)))
+    (re-search-backward pattern (point-min) t (or count 1)))
   (goto-char (match-beginning 0)))
 
 (defun face-at-cursor-p (face)
