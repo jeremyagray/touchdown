@@ -658,6 +658,33 @@ function."
 
 ;;; Utilities.
 
+(defun touchdown-insert-source (prefix)
+  "Insert a source block.
+
+Insert an empty source block on the current line, if blank, or the
+next if not.  With PREFIX, insert a source block with a blank `@type`
+and a parse block with a blank `@type`."
+  (interactive "P")
+  (save-excursion
+    (let ((string "<source>
+</source>
+"))
+      (cond (prefix
+	     (setq string "<source>
+  @type # add type
+
+  <parse>
+    @type # add type
+  </parse>
+</source>
+")))
+      (move-beginning-of-line nil)
+      (cond ((looking-at "^$")
+	     (insert string))
+	    (t
+	     (forward-line 1)
+	     (insert string))))))
+
 (defun touchdown-swap-boolean ()
   "Swap a boolean parameter value.
 
@@ -692,6 +719,7 @@ line containing a parameter with a boolean value."
   (set (make-local-variable 'comment-inline-offset) 2)
   (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*")
 
+  (define-key touchdown-mode-map "\C-c\C-tbs" 'touchdown-insert-source)
   (define-key touchdown-mode-map "\C-c\C-tt" 'touchdown-swap-boolean))
 
 ;;;###autoload
