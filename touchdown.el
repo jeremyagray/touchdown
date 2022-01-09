@@ -1,7 +1,7 @@
 ;;; touchdown.el --- Major mode for editing td-agent/fluentd configuration files -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA.
-;; Copyright (C) 2021 by Jeremy A GRAY.
+;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
@@ -422,6 +422,63 @@ looking for a parameter value of `true` or `false`."
           (curline (line-number-at-pos curpoint)))
       (when (search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
+
+(defun touchdown--within-directive-p (directive &optional noisy)
+  "Determine if the point is currently within DIRECTIVE.
+
+Return t if point is on or after the line of the opening tag of
+DIRECTIVE and on or before the line of the closing tag of DIRECTIVE,
+or nil otherwise.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (let ((current-line (line-number-at-pos (point)))
+	  ;; (current-point (point))
+	  (open-label (touchdown--create-opening-directive-regexp directive))
+	  (open-line nil)
+	  (close-label (touchdown--create-closing-directive-regexp directive))
+	  (close-line nil)
+	  (status t))
+      (if noisy
+	  (progn
+	    (message "touchdown--within-directive-p:  current-line %s" current-line)
+	    (message "touchdown--within-directive-p:  open-label %s" open-label)
+	    (message "touchdown--within-directive-p:  close-label %s" close-label)))
+      (beginning-of-line)
+      (cond ((looking-at open-label)
+	     (setq open-line (line-number-at-pos (point))))
+	    ((re-search-backward open-label (point-min) t)
+	     (setq open-line (line-number-at-pos (point))))
+	    (t
+	     (if noisy
+		 (message "touchdown--within-directive-p:  opening tag %s not found" directive))
+	     (setq status nil)))
+      (cond ((re-search-forward close-label (point-max) t)
+	     (setq close-line (line-number-at-pos (point))))
+	    (t
+	     (if noisy
+		 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
+	     (setq status nil)))
+      (when status
+	  (if (and (>= current-line open-line)
+		   (<= current-line close-line))
+	      (setq status t)
+	    (setq status nil)))
+      (if noisy
+	  (message "touchdown--within-directive-p:  final status %s" status))
+      status)))
+
+(defun touchdown--within-label-p (&optional noisy)
+  "Determine if the point is currently within a label directive.
+
+Return t if point is on or after the line containing '<label>' and on
+or before the line containing '</label>', or nil otherwise.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (touchdown--within-directive-p "label" noisy)))
 
 ;; Line and location data retrieval.
 
