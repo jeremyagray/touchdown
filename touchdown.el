@@ -252,59 +252,180 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
-;; Fluentd syntax symbols.
+;;; Fluentd syntax symbols.
 
-(defun touchdown--parameter-symbol-maker (name type default options required)
-  "Create a symbol representing a parameter.
-
-Return a symbol named NAME with the properties type TYPE, default
-DEFAULT (nil is no default), options OPTIONS (nil is no options, use
-TYPE), and required REQUIRED (boolean).  If TYPE is boolean, options
-is automatically set to (t nil).  Parameter lists should be of the
-same format as the argument list to enable use of `apply'."
-  (let ((sym (make-symbol name)))
-    (put sym 'type type)
-    (put sym 'default default)
-    (put sym 'required required)
-    (if (equal 'boolean (get sym 'type))
-	(put sym 'options '(t nil))
-      (put sym 'options options))
-    sym))
+;; An attepted data structure.
+(cl-defstruct
+    (touchdown--parameter (:constructor touchdown--parameter-create)
+			  (:copier nil))
+  name
+  type
+  default
+  options
+  required)
 
 (defconst touchdown--plugin-input-tail-parameters
-  '(
-    '("@log_level"
-      'string
-      nil
-      '("fatal" "error" "warn" "info" "debug" "trace")
-      nil)
-    '("@type" 'string nil nil t)
-    '("emit_unmatched_lines" 'boolean nil nil nil)
-    '("enable_stat_watcher" 'boolean t nil nil)
-    '("enable_watch_timer" 'boolean t nil nil)
-    '("encoding" 'string nil nil nil)
-    '("exclude_path" 'string' () nil nil)
-    '("follow_inodes" 'boolean nil nil nil)
-    '("from_encoding" 'string nil nil nil)
-    '("ignore_repeated_permission_error" 'boolean nil nil nil)
-    '("limit_recently_modified" "time" nil nil nil)
-    '("multiline_flush_interval" "time" nil nil nil)
-    '("open_on_every_update" 'boolean nil nil nil)
-    '("path" 'string nil nil t)
-    '("path_key" 'string nil nil nil)
-    '("path_timezone" 'string nil nil nil)
-    '("pos_file" 'string nil nil nil)
-    '("pos_file_compaction_interval" 'time nil nil nil)
-    '("read_bytes_limit_per_second" 'size -1 nil nil)
-    '("read_from_head" 'boolean nil nil nil)
-    '("read_lines_limit" 'integer 1000 nil nil)
-    '("refresh_interval" 'time 60 nil nil)
-    '("rotate_wait" 'time 5 nil nil)
-    '("skip_refresh_on_startup" 'boolean nil nil nil)
-    '("tag" 'string nil nil t))
-  "List of fluentd tail input plugin parameters.
+  (list
+   (touchdown--parameter-create
+    :name "@log_level"
+    :type 'string
+    :default nil
+    :options '("fatal" "error" "warn" "info" "debug" "trace")
+    :required nil)
+   (touchdown--parameter-create
+    :name "@type"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "emit_unmatched_lines"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_stat_watcher"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_watch_timer"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "encoding"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "exclude_path"
+    :type 'string'
+    :default ()
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "follow_inodes"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "from_encoding"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ignore_repeated_permission_error"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "limit_recently_modified"
+    :type "time"
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "multiline_flush_interval"
+    :type "time"
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "open_on_every_update"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "path"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "path_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "path_timezone"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "pos_file"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "pos_file_compaction_interval"
+    :type 'time
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "read_bytes_limit_per_second"
+    :type 'size
+    :default -1
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "read_from_head"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "read_lines_limit"
+    :type 'integer
+    :default 1000
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "refresh_interval"
+    :type 'time
+    :default 60
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "rotate_wait"
+    :type 'time
+    :default 5
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "skip_refresh_on_startup"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "tag"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)))
 
-Order matches the arguments of `touchdown--parameter-symbol-maker'.")
+(defun touchdown--plugin-input-tail-parameters-names ()
+  "Return tail parameter names as a list."
+  (let ((params touchdown--plugin-input-tail-parameters)
+	(names ()))
+    (message "params: %s" params)
+    (while params
+      (push (touchdown--parameter-name (car params)) names)
+      (setq params (cdr params)))
+    names))
 
 ;; Faces and font lock.
 
