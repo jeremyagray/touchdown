@@ -514,11 +514,30 @@ success.  Displays errors in a new temporary buffer."
 
 ;; Line type and location predicates.
 
+(defun touchdown--blank-line-p ()
+  "Determine if point is on a blank line.
+
+Blank lines include empty lines or lines with only whitespace.  No
+groups are matched."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at "^[[:space:]]*$")))
+
+(defun touchdown--comment-line-p ()
+  "Determine if point is on a line containing only a comment.
+
+Match groups are:
+
+1. Comment."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at "[[:space:]]*#[[:space:]]*\\(.*\\)[[:space:]]*$")))
+
 (defun touchdown--file-include-line-p ()
   "Determine if point is on a line containing file include."
   (save-excursion
     (move-beginning-of-line 1)
-    (looking-at-p touchdown--file-include-regexp)))
+    (looking-at touchdown--file-include-regexp)))
 
 (defun touchdown--opening-directive-line-p ()
   "Determine if point is on a line containing an opening directive."
@@ -526,11 +545,35 @@ success.  Displays errors in a new temporary buffer."
     (move-beginning-of-line 1)
     (looking-at touchdown--any-directive-opening-regexp)))
 
+(defun touchdown--opening-main-directive-line-p ()
+  "Determine if point is on a line containing an opening directive."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--main-directive-opening-regexp)))
+
+(defun touchdown--opening-sub-directive-line-p ()
+  "Determine if point is on a line containing an opening directive."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--sub-directive-opening-regexp)))
+
 (defun touchdown--closing-directive-line-p ()
   "Determine if point is on a line containing a closing directive."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at touchdown--any-directive-closing-regexp)))
+
+(defun touchdown--closing-main-directive-line-p ()
+  "Determine if point is on a line containing a closing directive."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--main-directive-closing-regexp)))
+
+(defun touchdown--closing-sub-directive-line-p ()
+  "Determine if point is on a line containing a closing directive."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--sub-directive-closing-regexp)))
 
 (defun touchdown--parameter-line-p ()
   "Determine if the current line is a parameter line.
