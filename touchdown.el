@@ -111,6 +111,18 @@ GROUP is non-nil, wrap OPTIONS in group or a shy group if GROUP is 1."
 	   t))
     re))
 
+(defun touchdown--create-parameter-regexp (parameter)
+  "Return a regular expression matching a fluentd PARAMETER.
+
+Match groups are:
+
+1. Parameter name.
+2. Parameter value.
+3. Comment, if present."
+  (format
+   "^[[:space:]]*\\(%s\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+   parameter))
+
 (defconst touchdown--main-directive-regexp
   "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
   "Regular expression for matching a main directive.
