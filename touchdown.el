@@ -840,7 +840,7 @@ initial sequence from all possible matches in the fluentd syntax."
 (touchdown--try-completion "@include" nil nil)
 
 (defun touchdown--all-completions (str predicate try)
-  "Find all matches for STR in the fluentd syntax.
+  "Return all possible completions for STR in the fluentd syntax.
 
 Return (ignoring PREDICATE and TRY) a list of all possible matches for
 STR in the fluentd syntax."
@@ -942,8 +942,13 @@ function."
 	  (skip-syntax-backward "w_.(")
 	  (point))
 	(point)
-        #'touchdown--completion-at-point-collection
-	:predicate #'touchdown--matches-syntax-p))
+	;; Implement try, all, test, metadata, and boundaries.
+        ;; #'touchdown--completion-at-point-collection
+	;; :predicate #'touchdown--matches-syntax-p))
+
+	;; Let emacs implement it.
+	(completion-table-dynamic
+         #'touchdown--dynamic-completion-table)))
 
 ;;; Utilities.
 
