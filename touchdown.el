@@ -714,6 +714,98 @@ If NOISY is not nil, `message' status information during execution."
 	  (message "%s" directives))
       directives)))
 
+(cl-defstruct
+    (touchdown--line-description
+     (:constructor touchdown--line-description-create)
+     (:copier nil))
+  type
+  name
+  tag
+  value
+  comment)
+
+(defun touchdown--what-am-i (&optional noisy)
+  "Return a description for the current line.
+
+Return a description for the current line, including the type of line
+\(comment, blank, directive, include, subdirective, parameter\), the
+name \(for directives and parameters\), the tag or label for
+directives, the value \(open or close for directives, parameter value
+for parameters\), and either the whole-line commment or inline-comment
+as comment.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (let ((line-description nil))
+      (cond ((touchdown--opening-main-directive-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "directive"
+		    :name (match-string-no-properties 2)
+		    :tag (match-string-no-properties 3)
+		    :value "open"
+		    :comment (match-string-no-properties 5))))
+	    ((touchdown--opening-sub-directive-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "subdirective"
+		    :name (match-string-no-properties 2)
+		    :tag nil
+		    :value "open"
+		    :comment (match-string-no-properties 4))))
+	    ((touchdown--file-include-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "include"
+		    :name (match-string-no-properties 1)
+		    :tag nil
+		    :value (match-string-no-properties 2)
+		    :comment (match-string-no-properties 3))))
+	    ((touchdown--parameter-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "parameter"
+		    :name (match-string-no-properties 1)
+		    :tag nil
+		    :value (match-string-no-properties 2)
+		    :comment (match-string-no-properties 3))))
+	    ((touchdown--blank-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "blank"
+		    :name nil
+		    :tag nil
+		    :value nil
+		    :comment nil)))
+	    ((touchdown--comment-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "comment"
+		    :name nil
+		    :tag nil
+		    :value nil
+		    :comment (match-string-no-properties 1))))
+	    ((touchdown--closing-main-directive-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "directive"
+		    :name (match-string-no-properties 2)
+		    :tag nil
+		    :value "close"
+		    :comment (match-string-no-properties 4))))
+	    ((touchdown--closing-sub-directive-line-p)
+	     (setq line-description
+		   (touchdown--line-description-create
+		    :type "subdirective"
+		    :name (match-string-no-properties 2)
+		    :tag nil
+		    :value "close"
+		    :comment (match-string-no-properties 4)))))
+      (if t
+	  (message "touchdown--what-am-i:  %s" line-description))
+      line-description)))
+
 (defun touchdown--what-type-am-i (&optional noisy)
   "Return the type for the current directive, or nil for none.
 
