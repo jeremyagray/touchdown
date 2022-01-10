@@ -518,13 +518,13 @@ success.  Displays errors in a new temporary buffer."
   "Determine if point is on a line containing an opening directive."
   (save-excursion
     (move-beginning-of-line 1)
-    (looking-at-p touchdown--any-directive-opening-regexp)))
+    (looking-at touchdown--any-directive-opening-regexp)))
 
 (defun touchdown--closing-directive-line-p ()
   "Determine if point is on a line containing a closing directive."
   (save-excursion
     (move-beginning-of-line 1)
-    (looking-at-p touchdown--any-directive-closing-regexp)))
+    (looking-at touchdown--any-directive-closing-regexp)))
 
 (defun touchdown--parameter-line-p ()
   "Determine if the current line is a parameter line.
@@ -553,7 +553,7 @@ looking for a parameter value of `true` or `false`."
     (let ((close-directive
 	   (touchdown--create-closing-directive-regexp directive))
           (curline (line-number-at-pos curpoint)))
-      (when (search-forward close-directive curpoint t)
+      (when (re-search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
 
 (defun touchdown--within-directive-p (directive &optional noisy)
