@@ -758,6 +758,14 @@ line containing a parameter with a boolean value."
 	     (re-search-forward "\\bfalse\\b" nil t 1)
 	     (replace-match "true" nil nil))))))
 
+(defun touchdown-indent-buffer ()
+  "Indent a touchdown buffer.
+
+Indent the current buffer using the fluentd/td-agent syntax."
+  (interactive)
+  (save-excursion
+    (indent-region (buffer-end -1) (buffer-end 1))))
+
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
   "Major mode for editing fluentd/td-agent configuration files."
@@ -777,6 +785,7 @@ line containing a parameter with a boolean value."
   (set (make-local-variable 'comment-start-skip) "[:space:]*#[:space:]*")
 
   (define-key touchdown-mode-map "\C-c\C-tbs" 'touchdown-insert-source)
+  (define-key touchdown-mode-map "\C-c\C-ti" 'touchdown-indent-buffer)
   (define-key touchdown-mode-map "\C-c\C-tt" 'touchdown-swap-boolean))
 
 ;;;###autoload
