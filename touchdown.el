@@ -613,7 +613,91 @@ If NOISY is not nil, `message' status information during execution."
   (save-excursion
     (touchdown--within-directive-p "label" noisy)))
 
+(defun touchdown--at-root-level-p (&optional noisy)
+  "Determine if the point is currently at the root level.
+
+Determine if the point is currently at the root level, outside of all
+other directives.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (let ((directives (touchdown--where-am-i noisy))
+	  (status nil))
+      (cond ((equal directives nil)
+	     (setq status t))
+	    (t
+	     (setq status nil)))
+      (if noisy
+	  (message "touchdown--at-root-level-p:  %s" status))
+      status)))
+
 ;; Line and location data retrieval.
+
+(defun touchdown--where-am-i (&optional noisy)
+  "Return the current directive list, or nil for none.
+
+Return the list of nested directives currently containing point, or
+nil if the point is not within any directive.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (let ((current-point (point))
+	  (current-line (line-number-at-pos (point)))
+	  (directives ()))
+      (goto-char (point-min))
+      (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
+	(if noisy
+	    (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
+	(when (touchdown--opening-directive-line-p)
+	  (progn
+	    (if noisy
+		(message "found opening %s" (match-string-no-properties 2)))
+	    (push (match-string-no-properties 2) directives)))
+	(when (touchdown--closing-directive-line-p)
+	  (progn
+	    (if noisy
+		(message "found closing %s" (match-string-no-properties 2)))
+	    (setq directives (cdr directives))))
+	(forward-line 1))
+      (if noisy
+	  (message "%s" directives))
+      directives)))
+
+(defun touchdown--what-type-am-i (&optional noisy)
+  "Return the type for the current directive, or nil for none.
+
+Return the type for the directive currently containing point, or nil
+if the point is not within any directive or if the directive does have
+a type.
+
+If NOISY is not nil, `message' status information during execution."
+  (interactive)
+  (save-excursion
+    (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
+	  (type "")
+	  (found nil)
+	  (directives (touchdown--where-am-i)))
+      (cond ((equal directives nil)
+	     (setq type nil))
+	    (t
+	     (if noisy
+		 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
+	     (re-search-backward (touchdown--create-opening-directive-regexp (car directives)))
+	     (beginning-of-line)
+	     (while (and
+		     (not (looking-at (touchdown--create-closing-directive-regexp (car directives))))
+		     (not (eobp))
+		     (not found))
+	       (cond ((looking-at type-regexp)
+		      (setq type (match-string-no-properties 2)
+			    found t))
+		     (t
+		      (forward-line 1))))
+	     (if noisy
+		 (message "touchdown--what-type-am-i:  type %s" type))
+	     type)))))
 
 (defun touchdown--closing-directive-name ()
   "Return the name of the current closing directive."
@@ -790,11 +874,26 @@ fluentd configuration syntax, nil otherwise."
     (message "touchdown test completion on string %s returning %s" str match-p)
     match-p))
 
-(defun touchdown--dynamic-completion-table (str)
-  "Find all matches for STR in the fluentd syntax.
+(defun touchdown--produce-terms ()
+  "Return current valid terms."
+  (let ((location (car (touchdown--where-am-i))))
+    (cond ((equal location nil)
+	   touchdown--directives)
+	  ((equal location "source")
+	   (cond ((equal (touchdown--what-type-am-i) nil)
+		  (list "@type" "tag" "<parse>" "</parse>"))
+		 ((equal (touchdown--what-type-am-i) "tail")
+		  (touchdown--plugin-input-tail-parameters-names))))
+	  ((equal location "parse")
+	   (list "@type"))
+	  (t
+	   touchdown--directives))))
 
-Return a list of all possible matches for STR in the fluentd syntax."
-  (let ((directives touchdown--directives)
+(defun touchdown--dynamic-completion-table (str)
+  "Return all possible completions for STR.
+
+Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
+  (let ((directives (touchdown--produce-terms))
 	(matches nil))
     (while directives
       (let ((directive (car directives)))
