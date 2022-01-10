@@ -423,15 +423,102 @@ Match groups are:
     :options nil
     :required t)))
 
-(defun touchdown--plugin-input-tail-parameters-names ()
-  "Return tail parameter names as a list."
-  (let ((params touchdown--plugin-input-tail-parameters)
+(defun touchdown--parameters-names (parameters)
+  "Return a list of parameter names from a list of parameter structures.
+
+Return a list of parameter names corresponding to the PARAMETERS list
+of `touchdown--parameter' structures."
+  (let ((my-parameters parameters)
 	(names ()))
-    (message "params: %s" params)
-    (while params
-      (push (touchdown--parameter-name (car params)) names)
-      (setq params (cdr params)))
+    (while my-parameters
+      (push (touchdown--parameter-name (car my-parameters)) names)
+      (setq my-parameters (cdr my-parameters)))
     names))
+
+(defconst touchdown--plugin-input-forward-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@type"
+    :type 'string
+    :default "forward"
+    :options '("forward")
+    :required t)
+   (touchdown--parameter-create
+    :name "bind"
+    :type 'string
+    :default "0.0.0.0"
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "tag"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "add_tag_prefix"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "linger_timeout"
+    :type 'integer
+    :default 0
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "resolve_hostname"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "deny_keepalive"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "send_keepalive_packet"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "chunk_size_limit"
+    :type 'size
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "chunk_warn_size_limit"
+    :type 'size
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "skip_invalid_event"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "source_address_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "source_hostname_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil))
+  "List of fluentd forward input plugin parameters.
+
+Currently does not include protocol or the transport and security
+subdirectives and their subdirectives and parameters.")
 
 ;; Faces and font lock.
 
@@ -1024,7 +1111,9 @@ fluentd configuration syntax, nil otherwise."
 	   (cond ((equal (touchdown--what-type-am-i) nil)
 		  (list "@type" "tag" "<parse>" "</parse>"))
 		 ((equal (touchdown--what-type-am-i) "tail")
-		  (touchdown--plugin-input-tail-parameters-names))))
+		  (touchdown--parameters-names touchdown--plugin-input-tail-parameters))
+		 ((equal (touchdown--what-type-am-i) "forward")
+		  (touchdown--parameters-names touchdown--plugin-input-forward-parameters))))
 	  ((equal location "parse")
 	   (list "@type"))
 	  (t
