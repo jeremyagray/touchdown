@@ -227,8 +227,14 @@ comments.  Match groups are:
 4. Comment, if present.")
 
 (defconst touchdown--file-include-regexp
-  "^[[:space:]]*\\(@include\\)[[:space:]]*\\(.*\\)[[:space:]]*$"
-  "Regular expression for matching a file include.")
+  "^[[:space:]]*\\(@include\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+  "Regular expression for matching a file include.
+
+Match groups are:
+
+1. Parameter name (`@include`).
+2. Parameter value (path).
+3. Comment, if present.")
 
 (defconst touchdown--parameter-regexp
   "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
