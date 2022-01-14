@@ -226,6 +226,29 @@ comments.  Match groups are:
 3. Closing bracket.
 4. Comment, if present.")
 
+(defconst touchdown--section-opening-regexp
+  "^[[:space:]]*\\(<\\)\\([[:word:]]+\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching any opening directive.
+Matches all parts of an opening directive line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+(defconst touchdown--section-closing-regexp
+  "^[[:space:]]*\\(</\\)\\([[:word:]]+\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive closing.
+Matches all parts of a main directive closing line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
 (defconst touchdown--file-include-regexp
   "^[[:space:]]*\\(@include\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
   "Regular expression for matching a file include.
@@ -626,6 +649,18 @@ Match groups are:
     (move-beginning-of-line 1)
     (looking-at touchdown--file-include-regexp)))
 
+(defun touchdown--opening-section-line-p ()
+  "Determine if point is on a line opening a section."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--section-opening-regexp)))
+
+(defun touchdown--closing-section-line-p ()
+  "Determine if point is on a line closing a section."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at touchdown--section-closing-regexp)))
+
 (defun touchdown--opening-directive-line-p ()
   "Determine if point is on a line containing an opening directive."
   (save-excursion
@@ -770,28 +805,28 @@ If NOISY is not nil, `message' status information during execution."
 
 ;; Line and location data retrieval.
 
-(defun touchdown--where-am-i (&optional noisy)
+(defun touchdown--where-am-i (noisy)
   "Return the current directive list, or nil for none.
 
 Return the list of nested directives currently containing point, or
 nil if the point is not within any directive.
 
-If NOISY is not nil, `message' status information during execution."
-  (interactive)
+If prefix argument NOISY is not nil, `message' status information
+during execution."
+  (interactive "P")
   (save-excursion
-    (let ((current-point (point))
-	  (current-line (line-number-at-pos (point)))
+    (let ((current-line (line-number-at-pos (point)))
 	  (directives ()))
       (goto-char (point-min))
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
 	(if noisy
 	    (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
-	(when (touchdown--opening-directive-line-p)
+	(when (touchdown--opening-section-line-p)
 	  (progn
 	    (if noisy
 		(message "found opening %s" (match-string-no-properties 2)))
 	    (push (match-string-no-properties 2) directives)))
-	(when (touchdown--closing-directive-line-p)
+	(when (touchdown--closing-section-line-p)
 	  (progn
 	    (if noisy
 		(message "found closing %s" (match-string-no-properties 2)))
@@ -906,7 +941,7 @@ If NOISY is not nil, `message' status information during execution."
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
 	  (type "")
 	  (found nil)
-	  (directives (touchdown--where-am-i)))
+	  (directives (touchdown--where-am-i noisy)))
       (cond ((equal directives nil)
 	     (setq type nil))
 	    (t
@@ -1104,7 +1139,7 @@ fluentd configuration syntax, nil otherwise."
 
 (defun touchdown--produce-terms ()
   "Return current valid terms."
-  (let ((location (car (touchdown--where-am-i))))
+  (let ((location (car (touchdown--where-am-i t))))
     (cond ((equal location nil)
 	   touchdown--directives)
 	  ((equal location "source")
