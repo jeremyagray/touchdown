@@ -247,31 +247,6 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
-;; REVIEW
-(defconst touchdown--main-directive-regexp
-  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive.
-Matches all parts of a main directive line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--sub-directive-regexp
-  "^[[:space:]]*\\(</?\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a subdirective.
-Matches all parts of a subdirective line, including trailing comments.
-Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if any.")
-
 ;;; Fluentd syntax symbols.
 
 ;; Data structures.
@@ -882,13 +857,17 @@ of `touchdown--parameter' structures."
 
 ;; Faces and font lock.
 
-(defface touchdown-directives
+(defface touchdown-section
   '((t (:inherit font-lock-function-name-face)))
-  "Face of directive.")
+  "Face for section.")
 
-(defface touchdown-subdirectives
-  '((t (:inherit font-lock-function-name-face)))
-  "Face of subdirective.")
+;; (defface touchdown-directives
+;;   '((t (:inherit font-lock-function-name-face)))
+;;   "Face of directive.")
+
+;; (defface touchdown-subdirectives
+;;   '((t (:inherit font-lock-function-name-face)))
+;;   "Face of subdirective.")
 
 (defface touchdown-include
   '((t (:inherit font-lock-preprocessor-face)))
@@ -915,13 +894,10 @@ of `touchdown--parameter' structures."
                                   (2 'touchdown-parameter-value t nil))
     (,touchdown--include-regexp (1 'touchdown-include t nil)
                                 (2 'touchdown-include-path t nil))
-    (,touchdown--main-directive-regexp (1 'touchdown-directives)
-                                       (2 'touchdown-directives nil t)
-                                       (3 'touchdown-tag nil t)
-                                       (4 'touchdown-directives nil t))
-    (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives)
-                                      (2 'touchdown-subdirectives)
-                                      (3 'touchdown-subdirectives))))
+    (,touchdown--section-regexp (1 'touchdown-section)
+                                (2 'touchdown-section nil t)
+                                (3 'touchdown-tag nil t)
+                                (4 'touchdown-section nil t))))
 
 ;; Configuration file verification.
 

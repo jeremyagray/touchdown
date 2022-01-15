@@ -43,22 +43,22 @@
    config
    (forward-cursor-on "<source>")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)
    (forward-cursor-on "</source>")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)
    (forward-cursor-on "<match")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)
    (forward-cursor-on "</match>")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)))
 
@@ -68,12 +68,12 @@
    config
    (forward-cursor-on "<parse>")
    (expect
-    (face-at-cursor-p 'touchdown-subdirectives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)
    (forward-cursor-on "</parse>")
    (expect
-    (face-at-cursor-p 'touchdown-subdirectives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)))
 
@@ -105,7 +105,7 @@
    config
    (forward-cursor-on "match")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)
    (forward-cursor-on "myapp\\.access")
@@ -115,7 +115,7 @@
     t)
    (forward-cursor-on ">")
    (expect
-    (face-at-cursor-p 'touchdown-directives)
+    (face-at-cursor-p 'touchdown-section)
     :to-equal
     t)))
 
