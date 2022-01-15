@@ -148,7 +148,7 @@
    (forward-cursor-on "# touchdown--parameter-line-p test")
    (forward-cursor-on "<source>")
    (expect
-      (touchdown--boolean-parameter-line-p)
+      (touchdown--parameter-boolean-line-p)
       :to-be
       nil)))
 
@@ -160,7 +160,7 @@
    (forward-cursor-on "# touchdown--parameter-line-p test")
    (forward-cursor-on "read_from_head")
    (expect
-      (touchdown--boolean-parameter-line-p)
+      (touchdown--parameter-boolean-line-p)
       :to-be
       t)))))
 

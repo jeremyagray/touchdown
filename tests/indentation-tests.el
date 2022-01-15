@@ -53,7 +53,7 @@
      (while data
        (let ((datum (car data)))
 	 (forward-cursor-on (car datum))
-	 (let ((expected (touchdown--file-include-line-p))
+	 (let ((expected (touchdown--include-line-p))
 	       (actual (cdr datum)))
 	   (expect
 	    expected
@@ -68,43 +68,43 @@
 
    (forward-cursor-on "<source>")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     t)
 
    (forward-cursor-on "@type")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "<parse>")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     t)
 
    (forward-cursor-on "</parse>")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "</source>")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "<match")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     t)
 
    (forward-cursor-on "</match>")
    (expect
-    (touchdown--opening-directive-line-p)
+    (touchdown--section-opening-line-p)
     :to-equal
     nil)))
 
@@ -115,43 +115,43 @@
 
    (forward-cursor-on "<source>")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     "source")
 
    (forward-cursor-on "@type")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     nil)
 
    (forward-cursor-on "<parse>")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     "parse")
 
    (forward-cursor-on "</parse>")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     nil)
 
    (forward-cursor-on "</source>")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     nil)
 
    (forward-cursor-on "<match")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     "match")
 
    (forward-cursor-on "</match>")
    (expect
-    (touchdown--opening-directive-name)
+    (touchdown--section-opening-name)
     :to-equal
     nil)))
 
@@ -162,43 +162,43 @@
 
    (forward-cursor-on "<source>")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)
 
    (forward-cursor-on "@type")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)
 
    (forward-cursor-on "<parse>")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)
 
    (forward-cursor-on "</parse>")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)
 
    (forward-cursor-on "</source>")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)
 
    (forward-cursor-on "<match")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     "myapp.access")
 
    (forward-cursor-on "</match>")
    (expect
-    (touchdown--opening-directive-tag)
+    (touchdown--section-opening-tag)
     :to-equal
     nil)))
 
@@ -209,37 +209,37 @@
 
    (forward-cursor-on "<source>")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "@type")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "<parse>")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     nil)
 
    (forward-cursor-on "</parse>")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     t)
 
    (forward-cursor-on "</source>")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     t)
 
    (forward-cursor-on "</match>")
    (expect
-    (touchdown--closing-directive-line-p)
+    (touchdown--section-closing-line-p)
     :to-equal
     t)))
 
@@ -250,19 +250,19 @@
 
    (forward-cursor-on "</parse>")
    (expect
-    (touchdown--closing-directive-name)
+    (touchdown--section-closing-name)
     :to-equal
     "parse")
 
    (forward-cursor-on "</source>")
    (expect
-    (touchdown--closing-directive-name)
+    (touchdown--section-closing-name)
     :to-equal
     "source")
 
    (forward-cursor-on "</match>")
    (expect
-    (touchdown--closing-directive-name)
+    (touchdown--section-closing-name)
     :to-equal
     "match"))))
 

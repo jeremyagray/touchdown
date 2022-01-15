@@ -78,22 +78,22 @@
     t)))
 
  (it
-  "should highlight `@include` with the touchdown-file-include"
+  "should highlight `@include` with the touchdown-include"
   (with-touchdown-temp-buffer
    config
 
    (forward-cursor-on "@include")
-   (let ((expected 'touchdown-file-include)
+   (let ((expected 'touchdown-include)
 	 (actual (face-at-point)))
    (expect expected :to-equal actual))))
 
  (it
-  "should highlight `@include` paths with touchdown-file-include-path"
+  "should highlight `@include` paths with touchdown-include-path"
   (with-touchdown-temp-buffer
    config
 
    (forward-cursor-on "path/to/the/file")
-   (let ((expected 'touchdown-file-include-path)
+   (let ((expected 'touchdown-include-path)
 	 (actual (face-at-point)))
      ;; This prints, but includes the description from `it.'
      ;; (print (format "expected face:  %s, actual face:  %s" expected actual))

@@ -95,6 +95,10 @@ Sets the comment delimiters and '<>' as a pair of grouping symbols.")
 ;; with the former indicating an XML-like section and the latter a
 ;; list of parameters to insert in the current section.
 
+;; Lisp symbols will be named as `touchdown--section-opening-regexp',
+;; with the mode name, the syntax type, any qualification, and finally
+;; its purpose in the mode.
+
 ;; Regular expressions.
 
 ;; Specific regular expression generation functions.
@@ -211,7 +215,7 @@ comments.  Match groups are:
 3. Closing bracket.
 4. Comment, if present.")
 
-(defconst touchdown--file-include-regexp
+(defconst touchdown--include-regexp
   "^[[:space:]]*\\(@include\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
   "Regular expression for matching a file include.
 
@@ -305,42 +309,6 @@ comments.  Match groups are:
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--main-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive closing.
-Matches all parts of a main directive closing line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--sub-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(\\buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a subdirective closing.
-Matches all parts of a closing subdirective line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--any-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive closing.
-Matches all parts of a main directive closing line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
 
 ;;; Fluentd syntax symbols.
 
@@ -960,11 +928,11 @@ of `touchdown--parameter' structures."
   '((t (:inherit font-lock-function-name-face)))
   "Face of subdirective.")
 
-(defface touchdown-file-include
+(defface touchdown-include
   '((t (:inherit font-lock-preprocessor-face)))
   "Face for file includes.")
 
-(defface touchdown-file-include-path
+(defface touchdown-include-path
   '((t (:inherit font-lock-string-face)))
   "Face for file include path.")
 
@@ -983,8 +951,8 @@ of `touchdown--parameter' structures."
 (defvar touchdown-font-lock-keywords
   `((,touchdown--parameter-regexp (1 'touchdown-parameter-name)
                                   (2 'touchdown-parameter-value t nil))
-    (,touchdown--file-include-regexp (1 'touchdown-file-include t nil)
-                                     (2 'touchdown-file-include-path t nil))
+    (,touchdown--include-regexp (1 'touchdown-include t nil)
+                                     (2 'touchdown-include-path t nil))
     (,touchdown--main-directive-regexp (1 'touchdown-directives)
 				       (2 'touchdown-directives nil t)
 				       (3 'touchdown-tag nil t)
@@ -1050,59 +1018,23 @@ Match groups are:
     (move-beginning-of-line 1)
     (looking-at "[[:space:]]*#[[:space:]]*\\(.*\\)[[:space:]]*$")))
 
-(defun touchdown--file-include-line-p ()
+(defun touchdown--include-line-p ()
   "Determine if point is on a line containing file include."
   (save-excursion
     (move-beginning-of-line 1)
-    (looking-at touchdown--file-include-regexp)))
+    (looking-at touchdown--include-regexp)))
 
-(defun touchdown--opening-section-line-p ()
+(defun touchdown--section-opening-line-p ()
   "Determine if point is on a line opening a section."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at touchdown--section-opening-regexp)))
 
-(defun touchdown--closing-section-line-p ()
+(defun touchdown--section-closing-line-p ()
   "Determine if point is on a line closing a section."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at touchdown--section-closing-regexp)))
-
-(defun touchdown--opening-directive-line-p ()
-  "Determine if point is on a line containing an opening directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--any-directive-opening-regexp)))
-
-(defun touchdown--opening-main-directive-line-p ()
-  "Determine if point is on a line containing an opening directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--main-directive-opening-regexp)))
-
-(defun touchdown--opening-sub-directive-line-p ()
-  "Determine if point is on a line containing an opening directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--sub-directive-opening-regexp)))
-
-(defun touchdown--closing-directive-line-p ()
-  "Determine if point is on a line containing a closing directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--any-directive-closing-regexp)))
-
-(defun touchdown--closing-main-directive-line-p ()
-  "Determine if point is on a line containing a closing directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--main-directive-closing-regexp)))
-
-(defun touchdown--closing-sub-directive-line-p ()
-  "Determine if point is on a line containing a closing directive."
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at touchdown--sub-directive-closing-regexp)))
 
 (defun touchdown--parameter-line-p ()
   "Determine if the current line is a parameter line.
@@ -1114,7 +1046,7 @@ line against `touchdown--parameter-regexp'."
     (beginning-of-line)
     (looking-at touchdown--parameter-regexp)))
 
-(defun touchdown--boolean-parameter-line-p ()
+(defun touchdown--parameter-boolean-line-p ()
   "Determine if the current line has a boolean parameter.
 
 Determine if the current line has a boolean parameter by matching the
@@ -1218,12 +1150,12 @@ nil if the point is not within any directive."
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
 	(if touchdown--debug
 	    (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
-	(when (touchdown--opening-section-line-p)
+	(when (touchdown--section-opening-line-p)
 	  (progn
 	    (if touchdown--debug
 		(message "found opening %s" (match-string-no-properties 2)))
 	    (push (match-string-no-properties 2) directives)))
-	(when (touchdown--closing-section-line-p)
+	(when (touchdown--section-closing-line-p)
 	  (progn
 	    (if touchdown--debug
 		(message "found closing %s" (match-string-no-properties 2)))
@@ -1247,31 +1179,22 @@ nil if the point is not within any directive."
   "Return a description for the current line.
 
 Return a description for the current line, including the type of line
-\(comment, blank, directive, include, subdirective, parameter\), the
-name \(for directives and parameters\), the tag or label for
-directives, the value \(open or close for directives, parameter value
-for parameters\), and either the whole-line commment or inline-comment
-as comment."
+\(comment, blank, section, include, parameter\), the name \(for
+sections and parameters\), the tag or label for sections, the value
+\(open or close for sections, parameter value for parameters\), and
+either the whole-line commment or inline-comment as comment."
   (interactive)
   (save-excursion
     (let ((line-description nil))
-      (cond ((touchdown--opening-main-directive-line-p)
+      (cond ((touchdown--section-opening-line-p)
 	     (setq line-description
 		   (touchdown--line-description-create
-		    :type "directive"
+		    :type "section"
 		    :name (match-string-no-properties 2)
 		    :tag (match-string-no-properties 3)
 		    :value "open"
 		    :comment (match-string-no-properties 5))))
-	    ((touchdown--opening-sub-directive-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "subdirective"
-		    :name (match-string-no-properties 2)
-		    :tag nil
-		    :value "open"
-		    :comment (match-string-no-properties 4))))
-	    ((touchdown--file-include-line-p)
+	    ((touchdown--include-line-p)
 	     (setq line-description
 		   (touchdown--line-description-create
 		    :type "include"
@@ -1303,23 +1226,15 @@ as comment."
 		    :tag nil
 		    :value nil
 		    :comment (match-string-no-properties 1))))
-	    ((touchdown--closing-main-directive-line-p)
+	    ((touchdown--section-closing-line-p)
 	     (setq line-description
 		   (touchdown--line-description-create
-		    :type "directive"
-		    :name (match-string-no-properties 2)
-		    :tag nil
-		    :value "close"
-		    :comment (match-string-no-properties 4))))
-	    ((touchdown--closing-sub-directive-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "subdirective"
+		    :type "section"
 		    :name (match-string-no-properties 2)
 		    :tag nil
 		    :value "close"
 		    :comment (match-string-no-properties 4)))))
-      (if t
+      (if touchdown--debug
 	  (message "touchdown--what-am-i:  %s" line-description))
       line-description)))
 
@@ -1355,33 +1270,33 @@ a type."
 		 (message "touchdown--what-type-am-i:  type %s" type))
 	     type)))))
 
-(defun touchdown--closing-directive-name ()
-  "Return the name of the current closing directive."
+(defun touchdown--section-closing-name ()
+  "Return the name of the current section closing."
   (save-excursion
-    (if (touchdown--closing-directive-line-p)
+    (if (touchdown--section-closing-line-p)
         (let ()
           (move-beginning-of-line 1)
-          (looking-at touchdown--any-directive-closing-regexp)
+          (looking-at touchdown--section-closing-regexp)
           (match-string-no-properties 2))
       nil)))
 
-(defun touchdown--opening-directive-name ()
-  "Return the name of the current opening directive."
+(defun touchdown--section-opening-name ()
+  "Return the name of the current section opening."
   (save-excursion
-    (if (touchdown--opening-directive-line-p)
+    (if (touchdown--section-opening-line-p)
         (let ()
           (move-beginning-of-line 1)
-          (looking-at touchdown--any-directive-opening-regexp)
+          (looking-at touchdown--section-opening-regexp)
           (match-string-no-properties 2))
       nil)))
 
-(defun touchdown--opening-directive-tag ()
-  "Return the current opening directive tag/label."
+(defun touchdown--section-opening-tag ()
+  "Return the tag or label of the current section opening."
   (save-excursion
-    (if (touchdown--opening-directive-line-p)
+    (if (touchdown--section-opening-line-p)
         (let ()
           (move-beginning-of-line 1)
-          (looking-at touchdown--any-directive-opening-regexp)
+          (looking-at touchdown--section-opening-regexp)
           (match-string-no-properties 3))
       nil)))
 
@@ -1396,8 +1311,8 @@ a type."
   (save-excursion
     (let ((opening-directive touchdown--any-directive-opening-regexp)
           (curpoint (point)))
-      (cond ((touchdown--closing-directive-line-p)
-             (let* ((directive (touchdown--closing-directive-name))
+      (cond ((touchdown--section-closing-line-p)
+             (let* ((directive (touchdown--section-closing-name))
                     (opening-directive
 		     (touchdown--create-section-regexp directive)))
 	       (if (not (re-search-backward opening-directive nil t))
@@ -1744,7 +1659,7 @@ Swap the value of a boolean parameter if the point is currently on a
 line containing a parameter with a boolean value."
   (interactive)
   (save-excursion
-    (when (touchdown--boolean-parameter-line-p)
+    (when (touchdown--parameter-boolean-line-p)
       (beginning-of-line)
       (cond ((equal "true" (match-string-no-properties 2))
 	     (re-search-forward "\\btrue\\b" nil t 1)
