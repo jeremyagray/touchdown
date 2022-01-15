@@ -69,38 +69,38 @@
   "should correctly identify being within a label"
   (with-touchdown-temp-buffer label-config
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     nil)
    (forward-line 1)
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     nil)
    (forward-cursor-on (regexp-quote "<label"))
    (message "line: %s" (thing-at-point 'line))
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     t)
    (forward-line 1)
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     t)
    (forward-cursor-on (regexp-quote "</label"))
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     t)
    (forward-line 1)
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     nil)
    (forward-cursor-on (regexp-quote "</match"))
    (expect
-    (touchdown--within-label-p nil)
+    (touchdown--within-label-p)
     :to-be
     nil)))))
 

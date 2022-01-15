@@ -33,6 +33,51 @@
 (setq config (read-config-file "tests/fluentd.conf"))
 
 (describe
+ "touchdown-toggle-debug"
+
+ (it
+  "should toggle `touchdown--debug` from t to nil and nil to t"
+
+  (let ((first touchdown--debug)
+	(second nil)
+	(third nil))
+    (touchdown-toggle-debug)
+    (setq second touchdown--debug)
+    (touchdown-toggle-debug)
+    (setq third touchdown--debug)
+    (expect
+     first
+     :to-equal
+     (not second))
+    (expect
+     second
+     :to-equal
+     (not third))
+    (expect
+     first
+     :to-equal
+     third)))
+
+ (it
+  "should return the correct state"
+
+  (let ((first (touchdown-toggle-debug))
+	(second (touchdown-toggle-debug))
+	(third (touchdown-toggle-debug)))
+    (expect
+     first
+     :to-equal
+     (not second))
+    (expect
+     second
+     :to-equal
+     (not third))
+    (expect
+     first
+     :to-equal
+     third))))
+
+(describe
  "touchdown-swap-boolean"
 
  (it

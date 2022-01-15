@@ -37,6 +37,27 @@
   "Major mode for editing fluentd/td-agent configuration files."
   :group 'languages)
 
+;; Mode settings.
+
+(defvar touchdown--debug t
+  "Control debugging messages from touchdown functions.
+
+Default is nil, which suppresses debugging information.  Non-nil
+enables debugging messages.")
+
+(defun touchdown-toggle-debug ()
+  "Toggle the state of `touchdown--debug'.
+
+Toggle the state of `touchdown--debug', message the new state, and
+return the new state value."
+  (interactive)
+  (cond ((equal t touchdown--debug)
+         (setq touchdown--debug nil))
+        (t
+         (setq touchdown--debug t)))
+  (message "touchdown--debug is %s" touchdown--debug)
+  touchdown--debug)
+
 ;; Syntax table.
 
 (defvar touchdown-mode-syntax-table
@@ -1073,24 +1094,21 @@ looking for a parameter value of `true` or `false`."
       (when (re-search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
 
-(defun touchdown--within-directive-p (directive noisy)
+(defun touchdown--within-directive-p (directive)
   "Determine if the point is currently within DIRECTIVE.
 
 Return t if point is on or after the line of the opening tag of
 DIRECTIVE and on or before the line of the closing tag of DIRECTIVE,
-or nil otherwise.
-
-If NOISY is not nil, `message' status information during execution."
+or nil otherwise."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-	  ;; (current-point (point))
 	  (open-label (touchdown--create-opening-directive-regexp directive))
 	  (open-line nil)
 	  (close-label (touchdown--create-closing-directive-regexp directive))
 	  (close-line nil)
 	  (status t))
-      (if noisy
+      (if touchdown--debug
 	  (progn
 	    (message "touchdown--within-directive-p:  current-line %s" current-line)
 	    (message "touchdown--within-directive-p:  open-label %s" open-label)
@@ -1101,13 +1119,13 @@ If NOISY is not nil, `message' status information during execution."
 	    ((re-search-backward open-label (point-min) t)
 	     (setq open-line (line-number-at-pos (point))))
 	    (t
-	     (if noisy
+	     (if touchdown--debug
 		 (message "touchdown--within-directive-p:  opening tag %s not found" directive))
 	     (setq status nil)))
       (cond ((re-search-forward close-label (point-max) t)
 	     (setq close-line (line-number-at-pos (point))))
 	    (t
-	     (if noisy
+	     (if touchdown--debug
 		 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
 	     (setq status nil)))
       (when status
@@ -1115,70 +1133,63 @@ If NOISY is not nil, `message' status information during execution."
 		 (<= current-line close-line))
 	    (setq status t)
 	  (setq status nil)))
-      (if noisy
+      (if touchdown--debug
 	  (message "touchdown--within-directive-p:  final status %s" status))
       status)))
 
-(defun touchdown--within-label-p (noisy)
+(defun touchdown--within-label-p ()
   "Determine if the point is currently within a label directive.
 
 Return t if point is on or after the line containing '<label>' and on
-or before the line containing '</label>', or nil otherwise.
-
-If NOISY is not nil, `message' status information during execution."
-  (interactive "P")
+or before the line containing '</label>', or nil otherwise."
+  (interactive)
   (save-excursion
-    (touchdown--within-directive-p "label" noisy)))
+    (touchdown--within-directive-p "label")))
 
-(defun touchdown--at-root-level-p (noisy)
+(defun touchdown--at-root-level-p ()
   "Determine if the point is currently at the root level.
 
 Determine if the point is currently at the root level, outside of all
-other directives.
-
-If NOISY is not nil, `message' status information during execution."
-  (interactive "P")
+other directives."
+  (interactive)
   (save-excursion
-    (let ((directives (touchdown--where-am-i noisy))
+    (let ((directives (touchdown--where-am-i))
 	  (status nil))
       (cond ((equal directives nil)
 	     (setq status t))
 	    (t
 	     (setq status nil)))
-      (if noisy
+      (if touchdown--debug
 	  (message "touchdown--at-root-level-p:  %s" status))
       status)))
 
 ;; Line and location data retrieval.
 
-(defun touchdown--where-am-i (noisy)
+(defun touchdown--where-am-i ()
   "Return the current directive list, or nil for none.
 
 Return the list of nested directives currently containing point, or
-nil if the point is not within any directive.
-
-If prefix argument NOISY is not nil, `message' status information
-during execution."
-  (interactive "P")
+nil if the point is not within any directive."
+  (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
 	  (directives ()))
       (goto-char (point-min))
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
-	(if noisy
+	(if touchdown--debug
 	    (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
 	(when (touchdown--opening-section-line-p)
 	  (progn
-	    (if noisy
+	    (if touchdown--debug
 		(message "found opening %s" (match-string-no-properties 2)))
 	    (push (match-string-no-properties 2) directives)))
 	(when (touchdown--closing-section-line-p)
 	  (progn
-	    (if noisy
+	    (if touchdown--debug
 		(message "found closing %s" (match-string-no-properties 2)))
 	    (setq directives (cdr directives))))
 	(forward-line 1))
-      (if noisy
+      (if touchdown--debug
 	  (message "%s" directives))
       directives)))
 
@@ -1192,7 +1203,7 @@ during execution."
   value
   comment)
 
-(defun touchdown--what-am-i (noisy)
+(defun touchdown--what-am-i ()
   "Return a description for the current line.
 
 Return a description for the current line, including the type of line
@@ -1200,10 +1211,8 @@ Return a description for the current line, including the type of line
 name \(for directives and parameters\), the tag or label for
 directives, the value \(open or close for directives, parameter value
 for parameters\), and either the whole-line commment or inline-comment
-as comment.
-
-If NOISY is not nil, `message' status information during execution."
-  (interactive "P")
+as comment."
+  (interactive)
   (save-excursion
     (let ((line-description nil))
       (cond ((touchdown--opening-main-directive-line-p)
@@ -1274,24 +1283,22 @@ If NOISY is not nil, `message' status information during execution."
 	  (message "touchdown--what-am-i:  %s" line-description))
       line-description)))
 
-(defun touchdown--what-type-am-i (noisy)
+(defun touchdown--what-type-am-i ()
   "Return the type for the current directive, or nil for none.
 
 Return the type for the directive currently containing point, or nil
 if the point is not within any directive or if the directive does have
-a type.
-
-If NOISY is not nil, `message' status information during execution."
-  (interactive "P")
+a type."
+  (interactive)
   (save-excursion
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
 	  (type "")
 	  (found nil)
-	  (directives (touchdown--where-am-i noisy)))
+	  (directives (touchdown--where-am-i)))
       (cond ((equal directives nil)
 	     (setq type nil))
 	    (t
-	     (if noisy
+	     (if touchdown--debug
 		 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
 	     (re-search-backward (touchdown--create-opening-directive-regexp (car directives)))
 	     (beginning-of-line)
@@ -1304,7 +1311,7 @@ If NOISY is not nil, `message' status information during execution."
 			    found t))
 		     (t
 		      (forward-line 1))))
-	     (if noisy
+	     (if touchdown--debug
 		 (message "touchdown--what-type-am-i:  type %s" type))
 	     type)))))
 
