@@ -877,6 +877,18 @@ and their subdirectives and parameters.")
 		   touchdown--section-system))
   "The touchdown syntax tree.")
 
+(defun touchdown--parameters-names (parameters)
+  "Return a list of parameter names from a list of parameter structures.
+
+Return a list of parameter names corresponding to the PARAMETERS list
+of `touchdown--parameter' structures."
+  (let ((my-parameters parameters)
+	(names ()))
+    (while my-parameters
+      (push (touchdown--parameter-name (car my-parameters)) names)
+      (setq my-parameters (cdr my-parameters)))
+    names))
+
 ;; Faces and font lock.
 
 (defface touchdown-directives
@@ -913,12 +925,12 @@ and their subdirectives and parameters.")
     (,touchdown--file-include-regexp (1 'touchdown-file-include t nil)
                                      (2 'touchdown-file-include-path t nil))
     (,touchdown--main-directive-regexp (1 'touchdown-directives)
-                                       (2 'touchdown-directives nil t)
-                                       (3 'touchdown-tag nil t)
-                                       (4 'touchdown-directives nil t))
+				       (2 'touchdown-directives nil t)
+				       (3 'touchdown-tag nil t)
+				       (4 'touchdown-directives nil t))
     (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives)
-                                      (2 'touchdown-subdirectives)
-                                      (3 'touchdown-subdirectives))))
+				      (2 'touchdown-subdirectives)
+				      (3 'touchdown-subdirectives))))
 
 ;; Configuration file verification.
 
@@ -1099,10 +1111,10 @@ If NOISY is not nil, `message' status information during execution."
 		 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
 	     (setq status nil)))
       (when status
-	  (if (and (>= current-line open-line)
-		   (<= current-line close-line))
-	      (setq status t)
-	    (setq status nil)))
+	(if (and (>= current-line open-line)
+		 (<= current-line close-line))
+	    (setq status t)
+	  (setq status nil)))
       (if noisy
 	  (message "touchdown--within-directive-p:  final status %s" status))
       status)))
@@ -1341,17 +1353,17 @@ If NOISY is not nil, `message' status information during execution."
              (let* ((directive (touchdown--closing-directive-name))
                     (opening-directive
 		     (touchdown--create-directive-regexp directive)))
-               (if (not (re-search-backward opening-directive nil t))
+	       (if (not (re-search-backward opening-directive nil t))
                    (error "Opening directive %s not found" directive)
                  (current-indentation))))
             (t
              (let (finish)
-               (while (and (not finish)
+	       (while (and (not finish)
                            (re-search-backward opening-directive nil t))
                  (let ((directive (match-string-no-properties 2)))
                    (unless (touchdown--directive-closed-p directive curpoint)
                      (setq finish t))))
-               (if (not finish)
+	       (if (not finish)
                    0
                  (+ (current-indentation) touchdown-indent-level))))))))
 
@@ -1415,7 +1427,7 @@ initial sequence from all possible matches in the fluentd syntax."
 	(let ((directives touchdown--directives))
 	  (while directives
 	    (let ((directive (car directives)))
-              (cond ((equal str directive)
+	      (cond ((equal str directive)
 		     (setq directives ()
 			   matches-data t))
 		    ((string-match-p (regexp-quote str) directive)
@@ -1471,6 +1483,101 @@ fluentd configuration syntax, nil otherwise."
     (message "touchdown test completion on string %s returning %s" str match-p)
     match-p))
 
+(defun touchdown--section-subsection (section name)
+  "Return subsection NAME from SECTION."
+  (let ((subsections (touchdown--section-sections section))
+	(found nil)
+	(subsection nil))
+    (message "section: %s" section)
+    (message "subsections: %s" subsections)
+    (while (and subsections (not found))
+      (message "checking subsection: %s" (car subsections))
+      (message "compare %s to subsection %s" name (touchdown--section-name (car subsections)))
+      (cond ((equal name (touchdown--section-name (car subsections)))
+	     (setq found t
+		   subsection (car subsections)))
+	    (t
+	     (setq subsections (cdr subsections)))))
+    subsection))
+
+(defun touchdown--section-completions (section)
+  "Return all valid completion options from SECTION."
+  (let ((subsections (touchdown--section-sections section))
+	(options nil))
+    (let ((params (touchdown--section-parameters section)))
+      (while params
+	(push (touchdown--parameter-name (car params)) options)
+	(setq params (cdr params))))
+    (while subsections
+      (cond ((equal "config" (touchdown--section-type (car subsections)))
+	     (push (concat
+		    "@type "
+		    (touchdown--section-name (car subsections)))
+		   options))
+	    ((equal "contain" (touchdown--section-type (car subsections)))
+	     (push (format
+		    "<%s>"
+		    (touchdown--section-name (car subsections)))
+		   options)
+	     (push (format
+		    "</%s>"
+		    (touchdown--section-name (car subsections)))
+		   options)))
+      (setq subsections (cdr subsections)))
+    options))
+
+(defun touchdown--subsection-completions (section type)
+  "Return all valid completion options from SECTION for TYPE."
+  (let ((subsection (touchdown--section-subsection section type))
+	(options nil))
+    (let ((params (touchdown--section-parameters section)))
+      (while params
+	(push (touchdown--parameter-name (car params)) options)
+	(setq params (cdr params))))
+    (setq options (concat options (touchdown--section-completions subsection)))
+    options))
+
+(defun touchdown--syntax-get-subtree (tree section)
+  "Return SECTION from TREE."
+  (let ((sections (touchdown--section-sections tree))
+	(subtree nil)
+	(found nil))
+    (while (and sections (not found))
+      (cond ((equal section (touchdown--section-name (car sections)))
+	     (setq subtree (car sections)
+		   found t))
+	    (t
+	     (setq sections (cdr sections)))))
+    subtree))
+
+(defun touchdown-produce-options ()
+  "Return current valid options."
+  (interactive)
+  (let ((locations (nreverse (touchdown--where-am-i t)))
+	(options nil)
+	(tree touchdown--syntax-tree))
+    (cond ((equal locations nil)
+	   (message "root level")
+	   (message "completions: %s" (touchdown--section-completions tree))
+	   (setq options (touchdown--section-completions tree)))
+	  (t
+	   (while (and locations tree)
+	     (let ((subtree (touchdown--syntax-get-subtree tree (car locations))))
+	       (cond ((equal subtree nil)
+		      (setq locations nil))
+		     (t
+		      (setq tree subtree)))
+	       (setq locations (cdr locations)))
+	     (message "tree: %s" tree))
+	   (let ((my-type (touchdown--what-type-am-i t)))
+	     (message "type: %s" my-type)
+	     (cond ((not my-type)
+		    (setq options (touchdown--section-completions tree)))
+		   (t
+		    (setq options (touchdown--subsection-completions tree my-type)))))))
+    (message "options: %s" options)
+    options))
+
 (defun touchdown--produce-terms ()
   "Return current valid terms."
   (let ((location (car (touchdown--where-am-i t))))
@@ -1483,6 +1590,9 @@ fluentd configuration syntax, nil otherwise."
 		  (touchdown--parameters-names touchdown--plugin-input-tail-parameters))
 		 ((equal (touchdown--what-type-am-i) "forward")
 		  (touchdown--parameters-names touchdown--plugin-input-forward-parameters))))
+	  ((equal location "match")
+	   (cond ((equal (touchdown--what-type-am-i) "file")
+		  (touchdown--parameters-names touchdown--plugin-output-file-parameters))))
 	  ((equal location "parse")
 	   (list "@type"))
 	  (t
@@ -1494,6 +1604,7 @@ fluentd configuration syntax, nil otherwise."
 Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
   (let ((directives (touchdown--produce-terms))
 	(matches nil))
+    (message "directives: %s" directives)
     (while directives
       (let ((directive (car directives)))
         (cond ((string-match-p (regexp-quote str) directive)
@@ -1501,6 +1612,7 @@ Return a list of all possible matches for STR in the fluentd syntax considering 
 		     matches (push directive matches)))
 	      (t
 	       (setq directives (cdr directives))))))
+    (message "matches: %s" matches)
     matches))
 
 (defun touchdown--completion-at-point-collection (str predicate try)
