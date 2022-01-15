@@ -6,7 +6,7 @@ Major mode for highlighting and editing
 ## Roadmap
 
 - [] organize `touchdown.el` according to symbol's pupose
-- [] rename all syntax types systematically
+- [x] rename all syntax types systematically
 - [x] implement debug setting in place of per function arguments
 - [-] rename all symbols according to visibility (`touchdown--` or `touchdown-`)
 - [] remove `interactive` from all hidden functions

@@ -267,7 +267,7 @@
     "match"))))
 
 (describe
- "touchdown-mode line identation functions"
+ "touchdown-mode line indentation functions"
 
  (it
   "should calculate indentation correctly"
@@ -276,7 +276,7 @@
 " config)
 
    (expect
-    (touchdown--opening-directive-indentation)
+    (touchdown--opening-section-indentation)
     :to-throw)))
 
 

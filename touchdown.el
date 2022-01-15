@@ -103,19 +103,19 @@ Sets the comment delimiters and '<>' as a pair of grouping symbols.")
 
 ;; Specific regular expression generation functions.
 
-(defun touchdown--create-section-regexp (directive)
-  "Return a regular expression matching DIRECTIVE.
+(defun touchdown--create-section-regexp (section)
+  "Return a regular expression matching SECTION.
 
-Matches any directive type.  Match groups are:
+Matches any section type.  Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present."
   (format
    "^[[:space:]]*\\(</?\\)\\(%s\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-   directive))
+   section))
 
 (defun touchdown--create-section-opening-regexp (section)
   "Return a regular expression matching SECTION opening.
@@ -123,7 +123,7 @@ Matches any directive type.  Match groups are:
 Matches any SECTION opening.  Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present."
@@ -137,7 +137,7 @@ Matches any SECTION opening.  Match groups are:
 Matches any SECTION closing.  Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Closing bracket.
 4. Comment, if present."
   (format
@@ -185,7 +185,7 @@ Matches all parts of a section line, including trailing comments.
 Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present.")
@@ -198,7 +198,7 @@ Matches all parts of a section opening line, including trailing
 comments.  Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present.")
@@ -211,7 +211,7 @@ Matches all parts of a section closing line, including trailing
 comments.  Match groups are:
 
 1. Opening bracket.
-2. Directive.
+2. Section name.
 3. Closing bracket.
 4. Comment, if present.")
 
@@ -861,14 +861,6 @@ of `touchdown--parameter' structures."
   '((t (:inherit font-lock-function-name-face)))
   "Face for section.")
 
-;; (defface touchdown-directives
-;;   '((t (:inherit font-lock-function-name-face)))
-;;   "Face of directive.")
-
-;; (defface touchdown-subdirectives
-;;   '((t (:inherit font-lock-function-name-face)))
-;;   "Face of subdirective.")
-
 (defface touchdown-include
   '((t (:inherit font-lock-preprocessor-face)))
   "Face for file includes.")
@@ -995,34 +987,33 @@ looking for a parameter value of `true` or `false`."
     (beginning-of-line)
     (looking-at touchdown--parameter-boolean-regexp)))
 
-(defun touchdown--directive-closed-p (directive curpoint)
-  "Determine if DIRECTIVE is closed before CURPOINT."
+(defun touchdown--section-closed-p (section curpoint)
+  "Determine if SECTION is closed before CURPOINT."
   (save-excursion
-    (let ((close-directive
-           (touchdown--create-section-closing-regexp directive))
+    (let ((section-closing
+           (touchdown--create-section-closing-regexp section))
           (curline (line-number-at-pos curpoint)))
-      (when (re-search-forward close-directive curpoint t)
+      (when (re-search-forward section-closing curpoint t)
         (< (line-number-at-pos) curline)))))
 
-(defun touchdown--within-directive-p (directive)
-  "Determine if the point is currently within DIRECTIVE.
+(defun touchdown--within-section-p (section)
+  "Determine if the point is currently within SECTION.
 
-Return t if point is on or after the line of the opening tag of
-DIRECTIVE and on or before the line of the closing tag of DIRECTIVE,
-or nil otherwise."
+Return t if point is on or after the line of the SECTION opening and
+on or before the line of the SECTION closing, or nil otherwise."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-          (open-label (touchdown--create-section-opening-regexp directive))
+          (open-label (touchdown--create-section-opening-regexp section))
           (open-line nil)
-          (close-label (touchdown--create-section-closing-regexp directive))
+          (close-label (touchdown--create-section-closing-regexp section))
           (close-line nil)
           (status t))
       (if touchdown--debug
           (progn
-            (message "touchdown--within-directive-p:  current-line %s" current-line)
-            (message "touchdown--within-directive-p:  open-label %s" open-label)
-            (message "touchdown--within-directive-p:  close-label %s" close-label)))
+            (message "touchdown--within-section-p:  current-line %s" current-line)
+            (message "touchdown--within-section-p:  open-label %s" open-label)
+            (message "touchdown--within-section-p:  close-label %s" close-label)))
       (beginning-of-line)
       (cond ((looking-at open-label)
              (setq open-line (line-number-at-pos (point))))
@@ -1030,13 +1021,13 @@ or nil otherwise."
              (setq open-line (line-number-at-pos (point))))
             (t
              (if touchdown--debug
-                 (message "touchdown--within-directive-p:  opening tag %s not found" directive))
+                 (message "touchdown--within-section-p:  section opening %s not found" section))
              (setq status nil)))
       (cond ((re-search-forward close-label (point-max) t)
              (setq close-line (line-number-at-pos (point))))
             (t
              (if touchdown--debug
-                 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
+                 (message "touchdown--within-section-p:  section closing %s not found" section))
              (setq status nil)))
       (when status
         (if (and (>= current-line open-line)
@@ -1044,28 +1035,28 @@ or nil otherwise."
             (setq status t)
           (setq status nil)))
       (if touchdown--debug
-          (message "touchdown--within-directive-p:  final status %s" status))
+          (message "touchdown--within-section-p:  final status %s" status))
       status)))
 
 (defun touchdown--within-label-p ()
-  "Determine if the point is currently within a label directive.
+  "Determine if the point is currently within a label section.
 
 Return t if point is on or after the line containing '<label>' and on
 or before the line containing '</label>', or nil otherwise."
   (interactive)
   (save-excursion
-    (touchdown--within-directive-p "label")))
+    (touchdown--within-section-p "label")))
 
 (defun touchdown--at-root-level-p ()
   "Determine if the point is currently at the root level.
 
 Determine if the point is currently at the root level, outside of all
-other directives."
+other sections."
   (interactive)
   (save-excursion
-    (let ((directives (touchdown--where-am-i))
+    (let ((sections (touchdown--where-am-i))
           (status nil))
-      (cond ((equal directives nil)
+      (cond ((equal sections nil)
              (setq status t))
             (t
              (setq status nil)))
@@ -1076,14 +1067,14 @@ other directives."
 ;; Line and location data retrieval.
 
 (defun touchdown--where-am-i ()
-  "Return the current directive list, or nil for none.
+  "Return the current location as a section list, or nil for none.
 
-Return the list of nested directives currently containing point, or
-nil if the point is not within any directive."
+Return the reverse list of nested sections currently containing point,
+or nil if the point is not within any section."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-          (directives ()))
+          (sections ()))
       (goto-char (point-min))
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
         (if touchdown--debug
@@ -1092,16 +1083,16 @@ nil if the point is not within any directive."
           (progn
             (if touchdown--debug
                 (message "found opening %s" (match-string-no-properties 2)))
-            (push (match-string-no-properties 2) directives)))
+            (push (match-string-no-properties 2) sections)))
         (when (touchdown--section-closing-line-p)
           (progn
             (if touchdown--debug
                 (message "found closing %s" (match-string-no-properties 2)))
-            (setq directives (cdr directives))))
+            (setq sections (cdr sections))))
         (forward-line 1))
       (if touchdown--debug
-          (message "%s" directives))
-      directives)))
+          (message "section list: %s" sections))
+      sections)))
 
 (cl-defstruct
     (touchdown--line-description
@@ -1177,26 +1168,26 @@ either the whole-line commment or inline-comment as comment."
       line-description)))
 
 (defun touchdown--what-type-am-i ()
-  "Return the type for the current directive, or nil for none.
+  "Return the type for the current section, or nil for none.
 
-Return the type for the directive currently containing point, or nil
-if the point is not within any directive or if the directive does have
-a type."
+Return the type for the section currently containing point, or nil if
+the point is not within any section or if the section does have a
+type."
   (interactive)
   (save-excursion
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
           (type "")
           (found nil)
-          (directives (touchdown--where-am-i)))
-      (cond ((equal directives nil)
+          (sections (touchdown--where-am-i)))
+      (cond ((equal sections nil)
              (setq type nil))
             (t
              (if touchdown--debug
-                 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
-             (re-search-backward (touchdown--create-section-opening-regexp (car directives)))
+                 (message "touchdown--what-type-am-i:  section %s" (car sections)))
+             (re-search-backward (touchdown--create-section-opening-regexp (car sections)))
              (beginning-of-line)
              (while (and
-                     (not (looking-at (touchdown--create-section-closing-regexp (car directives))))
+                     (not (looking-at (touchdown--create-section-closing-regexp (car sections))))
                      (not (eobp))
                      (not found))
                (cond ((looking-at type-regexp)
@@ -1244,24 +1235,24 @@ a type."
   "Indent level."
   :type 'integer)
 
-(defun touchdown--opening-directive-indentation ()
-  "Return the indentation of the current opening directive."
+(defun touchdown--opening-section-indentation ()
+  "Return the indentation of the current section opening."
   (save-excursion
-    (let ((opening-directive touchdown--section-opening-regexp)
+    (let ((opening-section touchdown--section-opening-regexp)
           (curpoint (point)))
       (cond ((touchdown--section-closing-line-p)
-             (let* ((directive (touchdown--section-closing-name))
-                    (opening-directive
-                     (touchdown--create-section-regexp directive)))
-               (if (not (re-search-backward opening-directive nil t))
-                   (error "Opening directive %s not found" directive)
+             (let* ((section (touchdown--section-closing-name))
+                    (opening-section
+                     (touchdown--create-section-regexp section)))
+               (if (not (re-search-backward opening-section nil t))
+                   (error "Opening section %s not found" section)
                  (current-indentation))))
             (t
              (let (finish)
                (while (and (not finish)
-                           (re-search-backward opening-directive nil t))
-                 (let ((directive (match-string-no-properties 2)))
-                   (unless (touchdown--directive-closed-p directive curpoint)
+                           (re-search-backward opening-section nil t))
+                 (let ((section (match-string-no-properties 2)))
+                   (unless (touchdown--section-closed-p section curpoint)
                      (setq finish t))))
                (if (not finish)
                    0
@@ -1270,7 +1261,7 @@ a type."
 (defun touchdown-indent-line ()
   "Indent current line of a fluentd/td-agent configuration."
   (interactive)
-  (let ((indent-size (touchdown--opening-directive-indentation)))
+  (let ((indent-size (touchdown--opening-section-indentation)))
     (back-to-indentation)
     (when (/= (current-indentation) indent-size)
       (save-excursion
