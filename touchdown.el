@@ -163,22 +163,22 @@ Match groups are:
 Convert the list OPTIONS into a regular expression option group.  If
 GROUP is non-nil, wrap OPTIONS in group or a shy group if GROUP is 1."
   (let ((opts (cdr options))
-	(re (car options)))
+        (re (car options)))
     (while opts
       (setq re (concat re (format "\\|%s" (car opts)))
-	    opts (cdr opts)))
+            opts (cdr opts)))
     (cond ((and (equal group 'shy) (not (equal re "")))
-	   (setq re (format "\\(?:%s\\)" re)))
-	  ((and group (not (equal re "")))
-	   (setq re (format "\\(%s\\)" re)))
-	  (t
-	   t))
+           (setq re (format "\\(?:%s\\)" re)))
+          ((and group (not (equal re "")))
+           (setq re (format "\\(%s\\)" re)))
+          (t
+           t))
     re))
 
 ;; Generic regular expressions.
 
 (defconst touchdown--section-regexp
-  "^[[:space:]]*\\(</?\\)\\([[:word:]]\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "^[[:space:]]*\\(</?\\)\\([[:word:]]+\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
   "Regular expression for matching any section opening or closing.
 
 Matches all parts of a section line, including trailing comments.
@@ -277,7 +277,7 @@ Match groups are:
 ;; Data structures.
 (cl-defstruct
     (touchdown--section (:constructor touchdown--section-create)
-			(:copier nil))
+                        (:copier nil))
   name
   type
   parameters
@@ -285,7 +285,7 @@ Match groups are:
 
 (cl-defstruct
     (touchdown--parameter (:constructor touchdown--parameter-create)
-			  (:copier nil))
+                          (:copier nil))
   name
   type
   default
@@ -492,8 +492,8 @@ Match groups are:
     :required nil)
    (touchdown--parameter-create
     :name "exclude_path"
-    :type 'string'
-    :default ()
+    :type 'string
+    :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
@@ -775,31 +775,31 @@ and their subdirectives and parameters.")
    :name "source"
    :type "contain"
    :parameters (list (touchdown--parameter-create
-		      :name "@include"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@tag"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@id"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@label"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil))
+                      :name "@include"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@tag"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@id"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@label"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil))
    :sections (list touchdown--plugin-input-forward
-		   touchdown--plugin-input-tail))
+                   touchdown--plugin-input-tail))
   "Touchdown source section syntax.")
 
 (defvar touchdown--section-match
@@ -807,35 +807,35 @@ and their subdirectives and parameters.")
    :name "match"
    :type "contain"
    :parameters (list (touchdown--parameter-create
-		      :name "@include"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@type"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@tag"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@id"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil)
-		     (touchdown--parameter-create
-		      :name "@label"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil))
+                      :name "@include"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@type"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@tag"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@id"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil)
+                     (touchdown--parameter-create
+                      :name "@label"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil))
    :sections (list touchdown--plugin-output-file))
   "Touchdown match section syntax.")
 
@@ -844,11 +844,11 @@ and their subdirectives and parameters.")
    :name "label"
    :type "contain"
    :parameters (list (touchdown--parameter-create
-		      :name "@include"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil))
+                      :name "@include"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil))
    :sections (list touchdown--section-match))
   "Touchdown label section syntax.")
 
@@ -857,15 +857,15 @@ and their subdirectives and parameters.")
    :name "root"
    :type "contain"
    :parameters (list (touchdown--parameter-create
-		      :name "@include"
-		      :type 'string
-		      :default nil
-		      :options nil
-		      :required nil))
+                      :name "@include"
+                      :type 'string
+                      :default nil
+                      :options nil
+                      :required nil))
    :sections (list touchdown--section-source
-		   touchdown--section-match
-		   touchdown--section-label
-		   touchdown--section-system))
+                   touchdown--section-match
+                   touchdown--section-label
+                   touchdown--section-system))
   "The touchdown syntax tree.")
 
 (defun touchdown--parameters-names (parameters)
@@ -874,7 +874,7 @@ and their subdirectives and parameters.")
 Return a list of parameter names corresponding to the PARAMETERS list
 of `touchdown--parameter' structures."
   (let ((my-parameters parameters)
-	(names ()))
+        (names ()))
     (while my-parameters
       (push (touchdown--parameter-name (car my-parameters)) names)
       (setq my-parameters (cdr my-parameters)))
@@ -914,14 +914,14 @@ of `touchdown--parameter' structures."
   `((,touchdown--parameter-regexp (1 'touchdown-parameter-name)
                                   (2 'touchdown-parameter-value t nil))
     (,touchdown--include-regexp (1 'touchdown-include t nil)
-                                     (2 'touchdown-include-path t nil))
+                                (2 'touchdown-include-path t nil))
     (,touchdown--main-directive-regexp (1 'touchdown-directives)
-				       (2 'touchdown-directives nil t)
-				       (3 'touchdown-tag nil t)
-				       (4 'touchdown-directives nil t))
+                                       (2 'touchdown-directives nil t)
+                                       (3 'touchdown-tag nil t)
+                                       (4 'touchdown-directives nil t))
     (,touchdown--sub-directive-regexp (1 'touchdown-subdirectives)
-				      (2 'touchdown-subdirectives)
-				      (3 'touchdown-subdirectives))))
+                                      (2 'touchdown-subdirectives)
+                                      (3 'touchdown-subdirectives))))
 
 ;; Configuration file verification.
 
@@ -944,20 +944,20 @@ success.  Displays errors in a new temporary buffer."
   (interactive)
   (save-excursion
     (let ((filename buffer-file-name)
-	  (temp-buffer-name "*fluentd configuration check*"))
+          (temp-buffer-name "*fluentd configuration check*"))
       (get-buffer-create temp-buffer-name)
       (setq buffer-read-only nil)
       (let ((retval (call-process-shell-command
-		     (format "%s %s"
-			     touchdown-fluentd-dry-run-command
-			     filename)
-		     nil temp-buffer-name)))
-	(cond ((equal retval 0)
-	       (message "configuration file successfully parsed"))
-	      (t
-	       (switch-to-buffer-other-window temp-buffer-name)
-	       (special-mode)
-	       (setq buffer-read-only nil)))))))
+                     (format "%s %s"
+                             touchdown-fluentd-dry-run-command
+                             filename)
+                     nil temp-buffer-name)))
+        (cond ((equal retval 0)
+               (message "configuration file successfully parsed"))
+              (t
+               (switch-to-buffer-other-window temp-buffer-name)
+               (special-mode)
+               (setq buffer-read-only nil)))))))
 
 ;; Line type and location predicates.
 
@@ -1023,7 +1023,7 @@ looking for a parameter value of `true` or `false`."
   "Determine if DIRECTIVE is closed before CURPOINT."
   (save-excursion
     (let ((close-directive
-	   (touchdown--create-section-closing-regexp directive))
+           (touchdown--create-section-closing-regexp directive))
           (curline (line-number-at-pos curpoint)))
       (when (re-search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
@@ -1037,38 +1037,38 @@ or nil otherwise."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-	  (open-label (touchdown--create-section-opening-regexp directive))
-	  (open-line nil)
-	  (close-label (touchdown--create-section-closing-regexp directive))
-	  (close-line nil)
-	  (status t))
+          (open-label (touchdown--create-section-opening-regexp directive))
+          (open-line nil)
+          (close-label (touchdown--create-section-closing-regexp directive))
+          (close-line nil)
+          (status t))
       (if touchdown--debug
-	  (progn
-	    (message "touchdown--within-directive-p:  current-line %s" current-line)
-	    (message "touchdown--within-directive-p:  open-label %s" open-label)
-	    (message "touchdown--within-directive-p:  close-label %s" close-label)))
+          (progn
+            (message "touchdown--within-directive-p:  current-line %s" current-line)
+            (message "touchdown--within-directive-p:  open-label %s" open-label)
+            (message "touchdown--within-directive-p:  close-label %s" close-label)))
       (beginning-of-line)
       (cond ((looking-at open-label)
-	     (setq open-line (line-number-at-pos (point))))
-	    ((re-search-backward open-label (point-min) t)
-	     (setq open-line (line-number-at-pos (point))))
-	    (t
-	     (if touchdown--debug
-		 (message "touchdown--within-directive-p:  opening tag %s not found" directive))
-	     (setq status nil)))
+             (setq open-line (line-number-at-pos (point))))
+            ((re-search-backward open-label (point-min) t)
+             (setq open-line (line-number-at-pos (point))))
+            (t
+             (if touchdown--debug
+                 (message "touchdown--within-directive-p:  opening tag %s not found" directive))
+             (setq status nil)))
       (cond ((re-search-forward close-label (point-max) t)
-	     (setq close-line (line-number-at-pos (point))))
-	    (t
-	     (if touchdown--debug
-		 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
-	     (setq status nil)))
+             (setq close-line (line-number-at-pos (point))))
+            (t
+             (if touchdown--debug
+                 (message "touchdown--within-directive-p:  closing tag %s not found" directive))
+             (setq status nil)))
       (when status
-	(if (and (>= current-line open-line)
-		 (<= current-line close-line))
-	    (setq status t)
-	  (setq status nil)))
+        (if (and (>= current-line open-line)
+                 (<= current-line close-line))
+            (setq status t)
+          (setq status nil)))
       (if touchdown--debug
-	  (message "touchdown--within-directive-p:  final status %s" status))
+          (message "touchdown--within-directive-p:  final status %s" status))
       status)))
 
 (defun touchdown--within-label-p ()
@@ -1088,13 +1088,13 @@ other directives."
   (interactive)
   (save-excursion
     (let ((directives (touchdown--where-am-i))
-	  (status nil))
+          (status nil))
       (cond ((equal directives nil)
-	     (setq status t))
-	    (t
-	     (setq status nil)))
+             (setq status t))
+            (t
+             (setq status nil)))
       (if touchdown--debug
-	  (message "touchdown--at-root-level-p:  %s" status))
+          (message "touchdown--at-root-level-p:  %s" status))
       status)))
 
 ;; Line and location data retrieval.
@@ -1107,24 +1107,24 @@ nil if the point is not within any directive."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-	  (directives ()))
+          (directives ()))
       (goto-char (point-min))
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
-	(if touchdown--debug
-	    (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
-	(when (touchdown--section-opening-line-p)
-	  (progn
-	    (if touchdown--debug
-		(message "found opening %s" (match-string-no-properties 2)))
-	    (push (match-string-no-properties 2) directives)))
-	(when (touchdown--section-closing-line-p)
-	  (progn
-	    (if touchdown--debug
-		(message "found closing %s" (match-string-no-properties 2)))
-	    (setq directives (cdr directives))))
-	(forward-line 1))
+        (if touchdown--debug
+            (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
+        (when (touchdown--section-opening-line-p)
+          (progn
+            (if touchdown--debug
+                (message "found opening %s" (match-string-no-properties 2)))
+            (push (match-string-no-properties 2) directives)))
+        (when (touchdown--section-closing-line-p)
+          (progn
+            (if touchdown--debug
+                (message "found closing %s" (match-string-no-properties 2)))
+            (setq directives (cdr directives))))
+        (forward-line 1))
       (if touchdown--debug
-	  (message "%s" directives))
+          (message "%s" directives))
       directives)))
 
 (cl-defstruct
@@ -1149,55 +1149,55 @@ either the whole-line commment or inline-comment as comment."
   (save-excursion
     (let ((line-description nil))
       (cond ((touchdown--section-opening-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "section"
-		    :name (match-string-no-properties 2)
-		    :tag (match-string-no-properties 3)
-		    :value "open"
-		    :comment (match-string-no-properties 5))))
-	    ((touchdown--include-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "include"
-		    :name (match-string-no-properties 1)
-		    :tag nil
-		    :value (match-string-no-properties 2)
-		    :comment (match-string-no-properties 3))))
-	    ((touchdown--parameter-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "parameter"
-		    :name (match-string-no-properties 1)
-		    :tag nil
-		    :value (match-string-no-properties 2)
-		    :comment (match-string-no-properties 3))))
-	    ((touchdown--blank-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "blank"
-		    :name nil
-		    :tag nil
-		    :value nil
-		    :comment nil)))
-	    ((touchdown--comment-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "comment"
-		    :name nil
-		    :tag nil
-		    :value nil
-		    :comment (match-string-no-properties 1))))
-	    ((touchdown--section-closing-line-p)
-	     (setq line-description
-		   (touchdown--line-description-create
-		    :type "section"
-		    :name (match-string-no-properties 2)
-		    :tag nil
-		    :value "close"
-		    :comment (match-string-no-properties 4)))))
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "section"
+                    :name (match-string-no-properties 2)
+                    :tag (match-string-no-properties 3)
+                    :value "open"
+                    :comment (match-string-no-properties 5))))
+            ((touchdown--include-line-p)
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "include"
+                    :name (match-string-no-properties 1)
+                    :tag nil
+                    :value (match-string-no-properties 2)
+                    :comment (match-string-no-properties 3))))
+            ((touchdown--parameter-line-p)
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "parameter"
+                    :name (match-string-no-properties 1)
+                    :tag nil
+                    :value (match-string-no-properties 2)
+                    :comment (match-string-no-properties 3))))
+            ((touchdown--blank-line-p)
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "blank"
+                    :name nil
+                    :tag nil
+                    :value nil
+                    :comment nil)))
+            ((touchdown--comment-line-p)
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "comment"
+                    :name nil
+                    :tag nil
+                    :value nil
+                    :comment (match-string-no-properties 1))))
+            ((touchdown--section-closing-line-p)
+             (setq line-description
+                   (touchdown--line-description-create
+                    :type "section"
+                    :name (match-string-no-properties 2)
+                    :tag nil
+                    :value "close"
+                    :comment (match-string-no-properties 4)))))
       (if touchdown--debug
-	  (message "touchdown--what-am-i:  %s" line-description))
+          (message "touchdown--what-am-i:  %s" line-description))
       line-description)))
 
 (defun touchdown--what-type-am-i ()
@@ -1209,28 +1209,28 @@ a type."
   (interactive)
   (save-excursion
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
-	  (type "")
-	  (found nil)
-	  (directives (touchdown--where-am-i)))
+          (type "")
+          (found nil)
+          (directives (touchdown--where-am-i)))
       (cond ((equal directives nil)
-	     (setq type nil))
-	    (t
-	     (if touchdown--debug
-		 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
-	     (re-search-backward (touchdown--create-section-opening-regexp (car directives)))
-	     (beginning-of-line)
-	     (while (and
-		     (not (looking-at (touchdown--create-section-closing-regexp (car directives))))
-		     (not (eobp))
-		     (not found))
-	       (cond ((looking-at type-regexp)
-		      (setq type (match-string-no-properties 2)
-			    found t))
-		     (t
-		      (forward-line 1))))
-	     (if touchdown--debug
-		 (message "touchdown--what-type-am-i:  type %s" type))
-	     type)))))
+             (setq type nil))
+            (t
+             (if touchdown--debug
+                 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
+             (re-search-backward (touchdown--create-section-opening-regexp (car directives)))
+             (beginning-of-line)
+             (while (and
+                     (not (looking-at (touchdown--create-section-closing-regexp (car directives))))
+                     (not (eobp))
+                     (not found))
+               (cond ((looking-at type-regexp)
+                      (setq type (match-string-no-properties 2)
+                            found t))
+                     (t
+                      (forward-line 1))))
+             (if touchdown--debug
+                 (message "touchdown--what-type-am-i:  type %s" type))
+             type)))))
 
 (defun touchdown--section-closing-name ()
   "Return the name of the current section closing."
@@ -1276,18 +1276,18 @@ a type."
       (cond ((touchdown--section-closing-line-p)
              (let* ((directive (touchdown--section-closing-name))
                     (opening-directive
-		     (touchdown--create-section-regexp directive)))
-	       (if (not (re-search-backward opening-directive nil t))
+                     (touchdown--create-section-regexp directive)))
+               (if (not (re-search-backward opening-directive nil t))
                    (error "Opening directive %s not found" directive)
                  (current-indentation))))
             (t
              (let (finish)
-	       (while (and (not finish)
+               (while (and (not finish)
                            (re-search-backward opening-directive nil t))
                  (let ((directive (match-string-no-properties 2)))
                    (unless (touchdown--directive-closed-p directive curpoint)
                      (setq finish t))))
-	       (if (not finish)
+               (if (not finish)
                    0
                  (+ (current-indentation) touchdown-indent-level))))))))
 
@@ -1332,10 +1332,10 @@ nil otherwise."
         (match-p nil))
     (while directives
       (let ((directive (car directives)))
-	(if (string-match-p (regexp-quote str) directive)
-	    (setq match-p t
-		  directives ())
-	  (setq directives (cdr directives)))))
+        (if (string-match-p (regexp-quote str) directive)
+            (setq match-p t
+                  directives ())
+          (setq directives (cdr directives)))))
     match-p))
 
 (defun touchdown--try-completion (str predicate try)
@@ -1346,27 +1346,27 @@ fluentd syntax, t if it matches a term exactly, or the longest common
 initial sequence from all possible matches in the fluentd syntax."
   (message "touchdown try completion on string %s" str)
   (let ((matches-data nil)
-	(matches))
+        (matches))
     (if (touchdown--matches-syntax-p str)
-	(let ((directives touchdown--directives))
-	  (while directives
-	    (let ((directive (car directives)))
-	      (cond ((equal str directive)
-		     (setq directives ()
-			   matches-data t))
-		    ((string-match-p (regexp-quote str) directive)
-		     (setq directives (cdr directives)
-			   matches (push directive matches)))
-		    (t
-		     (setq directives (cdr directives))))))))
+        (let ((directives touchdown--directives))
+          (while directives
+            (let ((directive (car directives)))
+              (cond ((equal str directive)
+                     (setq directives ()
+                           matches-data t))
+                    ((string-match-p (regexp-quote str) directive)
+                     (setq directives (cdr directives)
+                           matches (push directive matches)))
+                    (t
+                     (setq directives (cdr directives))))))))
     (if (not (equal matches-data t))
-	(let ((longest (car matches))
-	      (matches (cdr matches)))
-	  (while matches
-	    (let ((match (car matches)))
-	      (setq longest (touchdown--s-shared-start match longest)
-		    matches (cdr matches))))
-	  (setq matches-data longest)))
+        (let ((longest (car matches))
+              (matches (cdr matches)))
+          (while matches
+            (let ((match (car matches)))
+              (setq longest (touchdown--s-shared-start match longest)
+                    matches (cdr matches))))
+          (setq matches-data longest)))
     (message "touchdown try completion on string %s returning %s" str matches-data)
     matches-data))
 
@@ -1379,14 +1379,14 @@ Return (ignoring PREDICATE and TRY) a list of all possible matches for
 STR in the fluentd syntax."
   (message "touchdown all completions on string %s" str)
   (let ((directives touchdown--directives)
-	(matches nil))
+        (matches nil))
     (while directives
       (let ((directive (car directives)))
         (cond ((string-match-p (regexp-quote str) directive)
-	       (setq directives (cdr directives)
-		     matches (push directive matches)))
-	      (t
-	       (setq directives (cdr directives))))))
+               (setq directives (cdr directives)
+                     matches (push directive matches)))
+              (t
+               (setq directives (cdr directives))))))
     (message "touchdown all completions on string %s returning %s" str matches)
     matches))
 
@@ -1400,105 +1400,105 @@ fluentd configuration syntax, nil otherwise."
         (match-p nil))
     (while directives
       (let ((directive (car directives)))
-	(if (string-match-p (regexp-quote str) directive)
-	    (setq match-p t
-		  directives ())
-	  (setq directives (cdr directives)))))
+        (if (string-match-p (regexp-quote str) directive)
+            (setq match-p t
+                  directives ())
+          (setq directives (cdr directives)))))
     (message "touchdown test completion on string %s returning %s" str match-p)
     match-p))
 
 (defun touchdown--section-subsection (section name)
   "Return subsection NAME from SECTION."
   (let ((subsections (touchdown--section-sections section))
-	(found nil)
-	(subsection nil))
+        (found nil)
+        (subsection nil))
     (message "section: %s" section)
     (message "subsections: %s" subsections)
     (while (and subsections (not found))
       (message "checking subsection: %s" (car subsections))
       (message "compare %s to subsection %s" name (touchdown--section-name (car subsections)))
       (cond ((equal name (touchdown--section-name (car subsections)))
-	     (setq found t
-		   subsection (car subsections)))
-	    (t
-	     (setq subsections (cdr subsections)))))
+             (setq found t
+                   subsection (car subsections)))
+            (t
+             (setq subsections (cdr subsections)))))
     subsection))
 
 (defun touchdown--section-completions (section)
   "Return all valid completion options from SECTION."
   (let ((subsections (touchdown--section-sections section))
-	(options nil))
+        (options nil))
     (let ((params (touchdown--section-parameters section)))
       (while params
-	(push (touchdown--parameter-name (car params)) options)
-	(setq params (cdr params))))
+        (push (touchdown--parameter-name (car params)) options)
+        (setq params (cdr params))))
     (while subsections
       (cond ((equal "config" (touchdown--section-type (car subsections)))
-	     (push (concat
-		    "@type "
-		    (touchdown--section-name (car subsections)))
-		   options))
-	    ((equal "contain" (touchdown--section-type (car subsections)))
-	     (push (format
-		    "<%s>"
-		    (touchdown--section-name (car subsections)))
-		   options)
-	     (push (format
-		    "</%s>"
-		    (touchdown--section-name (car subsections)))
-		   options)))
+             (push (concat
+                    "@type "
+                    (touchdown--section-name (car subsections)))
+                   options))
+            ((equal "contain" (touchdown--section-type (car subsections)))
+             (push (format
+                    "<%s>"
+                    (touchdown--section-name (car subsections)))
+                   options)
+             (push (format
+                    "</%s>"
+                    (touchdown--section-name (car subsections)))
+                   options)))
       (setq subsections (cdr subsections)))
     options))
 
 (defun touchdown--subsection-completions (section type)
   "Return all valid completion options from SECTION for TYPE."
   (let ((subsection (touchdown--section-subsection section type))
-	(options nil))
+        (options nil))
     (let ((params (touchdown--section-parameters section)))
       (while params
-	(push (touchdown--parameter-name (car params)) options)
-	(setq params (cdr params))))
+        (push (touchdown--parameter-name (car params)) options)
+        (setq params (cdr params))))
     (setq options (concat options (touchdown--section-completions subsection)))
     options))
 
 (defun touchdown--syntax-get-subtree (tree section)
   "Return SECTION from TREE."
   (let ((sections (touchdown--section-sections tree))
-	(subtree nil)
-	(found nil))
+        (subtree nil)
+        (found nil))
     (while (and sections (not found))
       (cond ((equal section (touchdown--section-name (car sections)))
-	     (setq subtree (car sections)
-		   found t))
-	    (t
-	     (setq sections (cdr sections)))))
+             (setq subtree (car sections)
+                   found t))
+            (t
+             (setq sections (cdr sections)))))
     subtree))
 
 (defun touchdown--produce-options ()
   "Return current valid options."
   (interactive)
-  (let ((locations (nreverse (touchdown--where-am-i t)))
-	(options nil)
-	(tree touchdown--syntax-tree))
+  (let ((locations (nreverse (touchdown--where-am-i)))
+        (options nil)
+        (tree touchdown--syntax-tree))
     (cond ((equal locations nil)
-	   (message "root level")
-	   (message "completions: %s" (touchdown--section-completions tree))
-	   (setq options (touchdown--section-completions tree)))
-	  (t
-	   (while (and locations tree)
-	     (let ((subtree (touchdown--syntax-get-subtree tree (car locations))))
-	       (cond ((equal subtree nil)
-		      (setq locations nil))
-		     (t
-		      (setq tree subtree)))
-	       (setq locations (cdr locations)))
-	     (message "tree: %s" tree))
-	   (let ((my-type (touchdown--what-type-am-i)))
-	     (message "type: %s" my-type)
-	     (cond ((not my-type)
-		    (setq options (touchdown--section-completions tree)))
-		   (t
-		    (setq options (touchdown--subsection-completions tree my-type)))))))
+           (message "root level")
+           (message "completions: %s" (touchdown--section-completions tree))
+           (setq options (touchdown--section-completions tree)))
+          (t
+           (while (and locations tree)
+             (let ((subtree (touchdown--syntax-get-subtree tree (car locations))))
+               (cond ((equal subtree nil)
+                      (setq locations nil))
+                     (t
+                      (setq tree subtree)))
+               (setq locations (cdr locations)))
+             (message "tree: %s" tree))
+           (let ((my-type (touchdown--what-type-am-i)))
+             (message "type: %s" my-type)
+             (cond ((not my-type)
+                    (setq options (touchdown--section-completions tree)))
+                   (t
+                    (setq options (touchdown--subsection-completions tree my-type)))))))
     (message "options: %s" options)
     options))
 
@@ -1506,36 +1506,36 @@ fluentd configuration syntax, nil otherwise."
   "Return current valid terms."
   (let ((location (car (touchdown--where-am-i))))
     (cond ((equal location nil)
-	   touchdown--directives)
-	  ((equal location "source")
-	   (cond ((equal (touchdown--what-type-am-i) nil)
-		  (list "@type" "tag" "<parse>" "</parse>"))
-		 ((equal (touchdown--what-type-am-i) "tail")
-		  (touchdown--parameters-names touchdown--plugin-input-tail-parameters))
-		 ((equal (touchdown--what-type-am-i) "forward")
-		  (touchdown--parameters-names touchdown--plugin-input-forward-parameters))))
-	  ((equal location "match")
-	   (cond ((equal (touchdown--what-type-am-i) "file")
-		  (touchdown--parameters-names touchdown--plugin-output-file-parameters))))
-	  ((equal location "parse")
-	   (list "@type"))
-	  (t
-	   touchdown--directives))))
+           touchdown--directives)
+          ((equal location "source")
+           (cond ((equal (touchdown--what-type-am-i) nil)
+                  (list "@type" "tag" "<parse>" "</parse>"))
+                 ((equal (touchdown--what-type-am-i) "tail")
+                  (touchdown--parameters-names touchdown--plugin-input-tail-parameters))
+                 ((equal (touchdown--what-type-am-i) "forward")
+                  (touchdown--parameters-names touchdown--plugin-input-forward-parameters))))
+          ((equal location "match")
+           (cond ((equal (touchdown--what-type-am-i) "file")
+                  (touchdown--parameters-names touchdown--plugin-output-file-parameters))))
+          ((equal location "parse")
+           (list "@type"))
+          (t
+           touchdown--directives))))
 
 (defun touchdown--dynamic-completion-table (str)
   "Return all possible completions for STR.
 
 Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
   (let ((directives (touchdown--produce-terms))
-	(matches nil))
+        (matches nil))
     (message "directives: %s" directives)
     (while directives
       (let ((directive (car directives)))
         (cond ((string-match-p (regexp-quote str) directive)
-	       (setq directives (cdr directives)
-		     matches (push directive matches)))
-	      (t
-	       (setq directives (cdr directives))))))
+               (setq directives (cdr directives)
+                     matches (push directive matches)))
+              (t
+               (setq directives (cdr directives))))))
     (message "matches: %s" matches)
     matches))
 
@@ -1552,37 +1552,37 @@ function."
   (let ((result nil))
     (message "touchdown capc str %s pred %s try %s" str predicate try)
     (cond ((eq try nil)
-	   (message "touchdown.el:  getting try-completion data")
-	   (setq result (touchdown--try-completion str predicate try)))
-	  ((eq try t)
-	   (message "touchdown.el:  getting all-completions data")
-	   (setq result (touchdown--all-completions str predicate try)))
-	  ((eq try 'lambda)
-	   (message "touchdown.el:  getting test-completion data")
-	   (setq result (touchdown--test-completion str predicate try)))
-	  ((eq try 'metadata)
-	   (message "touchdown.el:  getting metadata")
-	   (setq result nil))
-	  ((eq (car try) 'boundaries)
-	   (message "touchdown.el:  getting boundaries")
-	   (setq result nil))
-	  (t
-	   (message "touchdown.el:  got unexpected:  %s" try)
-	   (setq result nil)))
+           (message "touchdown.el:  getting try-completion data")
+           (setq result (touchdown--try-completion str predicate try)))
+          ((eq try t)
+           (message "touchdown.el:  getting all-completions data")
+           (setq result (touchdown--all-completions str predicate try)))
+          ((eq try 'lambda)
+           (message "touchdown.el:  getting test-completion data")
+           (setq result (touchdown--test-completion str predicate try)))
+          ((eq try 'metadata)
+           (message "touchdown.el:  getting metadata")
+           (setq result nil))
+          ((eq (car try) 'boundaries)
+           (message "touchdown.el:  getting boundaries")
+           (setq result nil))
+          (t
+           (message "touchdown.el:  got unexpected:  %s" try)
+           (setq result nil)))
     result))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."
   (list (save-excursion
-	  (skip-syntax-backward "w_.(")
-	  (point))
-	(point)
-	;; Implement try, all, test, metadata, and boundaries.
+          (skip-syntax-backward "w_.(")
+          (point))
+        (point)
+        ;; Implement try, all, test, metadata, and boundaries.
         ;; #'touchdown--completion-at-point-collection
-	;; :predicate #'touchdown--matches-syntax-p))
+        ;; :predicate #'touchdown--matches-syntax-p))
 
-	;; Let emacs implement it.
-	(completion-table-dynamic
+        ;; Let emacs implement it.
+        (completion-table-dynamic
          #'touchdown--dynamic-completion-table)))
 
 ;;; Utilities.
@@ -1599,7 +1599,7 @@ and a parse block with a blank `@type`."
 </source>
 "))
       (cond (prefix
-	     (setq string "<source>
+             (setq string "<source>
   @type # add type
 
   <parse>
@@ -1609,10 +1609,10 @@ and a parse block with a blank `@type`."
 ")))
       (move-beginning-of-line nil)
       (cond ((looking-at "^$")
-	     (insert string))
-	    (t
-	     (forward-line 1)
-	     (insert string))))))
+             (insert string))
+            (t
+             (forward-line 1)
+             (insert string))))))
 
 (defun touchdown-swap-boolean ()
   "Swap a boolean parameter value.
@@ -1624,11 +1624,11 @@ line containing a parameter with a boolean value."
     (when (touchdown--parameter-boolean-line-p)
       (beginning-of-line)
       (cond ((equal "true" (match-string-no-properties 2))
-	     (re-search-forward "\\btrue\\b" nil t 1)
-	     (replace-match "false" nil nil))
-	    ((equal "false" (match-string-no-properties 2))
-	     (re-search-forward "\\bfalse\\b" nil t 1)
-	     (replace-match "true" nil nil))))))
+             (re-search-forward "\\btrue\\b" nil t 1)
+             (replace-match "false" nil nil))
+            ((equal "false" (match-string-no-properties 2))
+             (re-search-forward "\\bfalse\\b" nil t 1)
+             (replace-match "true" nil nil))))))
 
 (defun touchdown-indent-buffer ()
   "Indent a touchdown buffer.

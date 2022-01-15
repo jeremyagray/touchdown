@@ -30,8 +30,105 @@
 (require 'helpers "tests/helpers.el")
 (require 'touchdown "touchdown.el")
 
+(setq section-strings (list
+		       "<source>"
+		       "</source>"
+		       "<system>"
+		       "</system>"
+		       "<label>"
+		       "</label>"
+		       "<match>"
+		       "<match myapp.info>"
+		       "<match myapp.info>  # comment"
+		       "</match>"
+		       "<filter>"
+		       "</filter>")
+      section-opening-strings (list
+			       "<source>"
+			       "<system>"
+			       "<label>"
+			       "<match>"
+			       "<match myapp.info>"
+			       "<match myapp.info>  # comment"
+			       "<filter>")
+      section-closing-strings (list
+			       "</source>"
+			       "</system>"
+			       "</label>"
+			       "</match>"
+			       "</filter>"))
+
 (describe
  "touchdown-mode regular expressions"
+
+ (describe
+  "touchdown--section-regexp"
+
+  (it
+   "should match sections"
+   (let ((options section-strings))
+     (while options
+       (expect
+	(string-match-p touchdown--section-regexp (car options))
+	:to-equal
+	0)
+       (setq options (cdr options)))))
+
+  (it
+   "should not match non-sections"
+   (let ((options (list "@type" "@include" "@tag" "@log_level")))
+     (while options
+       (expect
+	(string-match-p touchdown--section-regexp (car options))
+	:to-equal
+	nil)
+       (setq options (cdr options))))))
+
+ (describe
+  "touchdown--section-opening-regexp"
+
+  (it
+   "should match opening sections"
+   (let ((options section-opening-strings))
+     (while options
+       (expect
+	(string-match-p touchdown--section-opening-regexp (car options))
+	:to-equal
+	0)
+       (setq options (cdr options)))))
+
+  (it
+   "should not match closing sections"
+   (let ((options section-closing-strings))
+     (while options
+       (expect
+	(string-match-p touchdown--section-opening-regexp (car options))
+	:to-equal
+	nil)
+       (setq options (cdr options))))))
+
+ (describe
+  "touchdown--section-closing-regexp"
+
+  (it
+   "should match closing sections"
+   (let ((options section-closing-strings))
+     (while options
+       (expect
+	(string-match-p touchdown--section-closing-regexp (car options))
+	:to-equal
+	0)
+       (setq options (cdr options)))))
+
+  (it
+   "should not match opening sections"
+   (let ((options section-opening-strings))
+     (while options
+       (expect
+	(string-match-p touchdown--section-closing-regexp (car options))
+	:to-equal
+	nil)
+       (setq options (cdr options))))))
 
  (describe
   "touchdown-mode `touchdown--create-options-regexp'"
