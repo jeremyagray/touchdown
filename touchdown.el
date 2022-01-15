@@ -272,44 +272,6 @@ Match groups are:
 3. Closing bracket.
 4. Comment, if any.")
 
-;; REVIEW
-(defconst touchdown--main-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive opening.
-Matches all parts of a main directive opening line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--sub-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching an opening subdirective.
-Matches all parts of an opening subdirective line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-;; REVIEW
-(defconst touchdown--any-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching any opening directive.
-Matches all parts of an opening directive line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
 ;;; Fluentd syntax symbols.
 
 ;; Data structures.
@@ -1309,7 +1271,7 @@ a type."
 (defun touchdown--opening-directive-indentation ()
   "Return the indentation of the current opening directive."
   (save-excursion
-    (let ((opening-directive touchdown--any-directive-opening-regexp)
+    (let ((opening-directive touchdown--section-opening-regexp)
           (curpoint (point)))
       (cond ((touchdown--section-closing-line-p)
              (let* ((directive (touchdown--section-closing-name))
