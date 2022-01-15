@@ -283,7 +283,15 @@ Match groups are:
 
 ;;; Fluentd syntax symbols.
 
-;; An attepted data structure.
+;; Data structures.
+(cl-defstruct
+    (touchdown--section (:constructor touchdown--section-create)
+			(:copier nil))
+  name
+  type
+  parameters
+  sections)
+
 (cl-defstruct
     (touchdown--parameter (:constructor touchdown--parameter-create)
 			  (:copier nil))
@@ -293,6 +301,172 @@ Match groups are:
   options
   required)
 
+(defconst touchdown--system-parameters
+  (list
+   (touchdown--parameter-create
+    :name "workers"
+    :type 'integer
+    :default 1
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "root_dir"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "log_level"
+    :type 'string
+    :default nil
+    :options '("fatal" "error" "warn" "info" "debug" "trace")
+    :required nil)
+   (touchdown--parameter-create
+    :name "suppress_repeated_stacktrace"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "emit_error_log_interval"
+    :type 'time
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ignore_repeated_log_interval"
+    :type 'time
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ignore_same_log_interval"
+    :type 'time
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "suppress_config_dump"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "log_event_verbose"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "without_source"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "rpc_endpoint"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_get_dump"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "process_name"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_msgpack_time_support"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "file_permission"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "dir_permission"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "strict_config_value"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "disable_shared_socket"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)))
+
+(defconst touchdown--system-log-parameters
+  (list
+   (touchdown--parameter-create
+    :name "format"
+    :type 'string
+    :default "text"
+    :options '("text" "json")
+    :required nil)
+   (touchdown--parameter-create
+    :name "time_format"
+    :type 'string
+    :default "%Y-%m-%d %H:%M:%S %z"
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "rotate_age"
+    :type 'integer
+    :default 5
+    :options '("daily" "weekly" "monthly")
+    :required nil)
+   (touchdown--parameter-create
+    :name "rotate_size"
+    :type 'size
+    :default 1048576
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_input_metrics"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_size_metrics"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)))
+
+(defvar touchdown--section-system-log
+  (touchdown--section-create
+   :name "log"
+   :type "contain"
+   :parameters touchdown--system-log-parameters
+   :sections nil)
+  "Touchdown system log section syntax.")
+
+(defvar touchdown--section-system
+  (touchdown--section-create
+   :name "system"
+   :type "contain"
+   :parameters touchdown--system-parameters
+   :sections (list touchdown--section-system-log))
+  "Touchdown system section syntax.")
+
 (defconst touchdown--plugin-input-tail-parameters
   (list
    (touchdown--parameter-create
@@ -301,12 +475,6 @@ Match groups are:
     :default nil
     :options '("fatal" "error" "warn" "info" "debug" "trace")
     :required nil)
-   (touchdown--parameter-create
-    :name "@type"
-    :type 'string
-    :default nil
-    :options nil
-    :required t)
    (touchdown--parameter-create
     :name "emit_unmatched_lines"
     :type 'boolean
@@ -438,25 +606,15 @@ Match groups are:
     :type 'boolean
     :default nil
     :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "tag"
-    :type 'string
-    :default nil
-    :options nil
-    :required t)))
+    :required nil)))
 
-(defun touchdown--parameters-names (parameters)
-  "Return a list of parameter names from a list of parameter structures.
-
-Return a list of parameter names corresponding to the PARAMETERS list
-of `touchdown--parameter' structures."
-  (let ((my-parameters parameters)
-	(names ()))
-    (while my-parameters
-      (push (touchdown--parameter-name (car my-parameters)) names)
-      (setq my-parameters (cdr my-parameters)))
-    names))
+(defvar touchdown--plugin-input-tail
+  (touchdown--section-create
+   :name "tail"
+   :type "config"
+   :parameters touchdown--plugin-input-tail-parameters
+   :sections nil)
+  "Touchdown tail input plugin syntax.")
 
 (defconst touchdown--plugin-input-forward-parameters
   (list
@@ -542,6 +700,182 @@ of `touchdown--parameter' structures."
 
 Currently does not include protocol or the transport and security
 subdirectives and their subdirectives and parameters.")
+
+(defvar touchdown--plugin-input-forward
+  (touchdown--section-create
+   :name "forward"
+   :type "config"
+   :parameters touchdown--plugin-input-forward-parameters
+   :sections nil)
+  "Touchdown forward input plugin syntax.")
+
+(defconst touchdown--plugin-output-file-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@type"
+    :type 'string
+    :default "file"
+    :options '("file")
+    :required t)
+   (touchdown--parameter-create
+    :name "path"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "append"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "add_path_suffix"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "path_suffix"
+    :type 'string
+    :default ".log"
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "compress"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "recompress"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "@log_level"
+    :type 'string
+    :default nil
+    :options '("fatal" "error" "warn" "info" "debug" "trace")
+    :required nil)
+   (touchdown--parameter-create
+    :name "symlink_path"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   )
+  "List of fluentd file output plugin parameters.
+
+Currently does not include the format, inject, or buffer subdirectives
+and their subdirectives and parameters.")
+
+(defvar touchdown--plugin-output-file
+  (touchdown--section-create
+   :name "file"
+   :type "config"
+   :parameters touchdown--plugin-output-file-parameters
+   :sections nil)
+  "Touchdown file output plugin syntax.")
+
+(defvar touchdown--section-source
+  (touchdown--section-create
+   :name "source"
+   :type "contain"
+   :parameters (list (touchdown--parameter-create
+		      :name "@include"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@tag"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@id"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@label"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil))
+   :sections (list touchdown--plugin-input-forward
+		   touchdown--plugin-input-tail))
+  "Touchdown source section syntax.")
+
+(defvar touchdown--section-match
+  (touchdown--section-create
+   :name "match"
+   :type "contain"
+   :parameters (list (touchdown--parameter-create
+		      :name "@include"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@type"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@tag"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@id"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil)
+		     (touchdown--parameter-create
+		      :name "@label"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil))
+   :sections (list touchdown--plugin-output-file))
+  "Touchdown match section syntax.")
+
+(defvar touchdown--section-label
+  (touchdown--section-create
+   :name "label"
+   :type "contain"
+   :parameters (list (touchdown--parameter-create
+		      :name "@include"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil))
+   :sections (list touchdown--section-match))
+  "Touchdown label section syntax.")
+
+(defvar touchdown--syntax-tree
+  (touchdown--section-create
+   :name "root"
+   :type "contain"
+   :parameters (list (touchdown--parameter-create
+		      :name "@include"
+		      :type 'string
+		      :default nil
+		      :options nil
+		      :required nil))
+   :sections (list touchdown--section-source
+		   touchdown--section-match
+		   touchdown--section-label
+		   touchdown--section-system))
+  "The touchdown syntax tree.")
 
 ;; Faces and font lock.
 
