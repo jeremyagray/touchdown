@@ -72,9 +72,34 @@ return the new state value."
 
 Sets the comment delimiters and '<>' as a pair of grouping symbols.")
 
+;;; Regular expressions and syntax data.
+
+;; The fluentd syntax consists of an XML-like structure of `<...>` to
+;; </...>` delimiters that contain other XML-like delimiters and
+;; variable/value lines.  Fluentd calls the top-level XML-like pairs
+;; 'directives' (that includes `@include`) and the variable/value
+;; lines parameters (at least for ones like `@type`).  Problems arise
+;; because like in C, any includes can contain any syntax the
+;; top-level file can include, a `<label>` directive can contain
+;; `@include`, `<match>`, and `<filter>`, and directives other than
+;; `<system>` can contain other XML-like non-directives that are
+;; called sections which may contain parameters or sections, ad
+;; infinitum.  The top level is also essentially a containing
+;; directive, sometimes called `<root>`.
+
+;; To simplify things, all directives and sections will be called
+;; sections and will be stored in the `touchdown-section' structure,
+;; which will contain parameters in lists of `touchdown--parameter'
+;; structures and lists of nested `touchdown--section' structures.
+;; Sections will be identified by type, either 'contain' or 'config',
+;; with the former indicating an XML-like section and the latter a
+;; list of parameters to insert in the current section.
+
 ;; Regular expressions.
 
-(defun touchdown--create-directive-regexp (directive)
+;; Specific regular expression generation functions.
+
+(defun touchdown--create-section-regexp (directive)
   "Return a regular expression matching DIRECTIVE.
 
 Matches any directive type.  Match groups are:
@@ -88,10 +113,10 @@ Matches any directive type.  Match groups are:
    "^[[:space:]]*\\(</?\\)\\(%s\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
    directive))
 
-(defun touchdown--create-opening-directive-regexp (directive)
-  "Return a regular expression matching opening DIRECTIVE.
+(defun touchdown--create-section-opening-regexp (section)
+  "Return a regular expression matching SECTION opening.
 
-Matches any opening directive type.  Match groups are:
+Matches any SECTION opening.  Match groups are:
 
 1. Opening bracket.
 2. Directive.
@@ -100,12 +125,12 @@ Matches any opening directive type.  Match groups are:
 5. Comment, if present."
   (format
    "^[[:space:]]*\\(<\\)\\(%s\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-   directive))
+   section))
 
-(defun touchdown--create-closing-directive-regexp (directive)
-  "Return a regular expression matching closing DIRECTIVE.
+(defun touchdown--create-section-closing-regexp (section)
+  "Return a regular expression matching SECTION closing.
 
-Matches any closing directive type.  Match groups are:
+Matches any SECTION closing.  Match groups are:
 
 1. Opening bracket.
 2. Directive.
@@ -113,8 +138,21 @@ Matches any closing directive type.  Match groups are:
 4. Comment, if present."
   (format
    "^[[:space:]]*\\(</\\)\\(%s\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-   directive))
+   section))
 
+(defun touchdown--create-parameter-regexp (parameter)
+  "Return a regular expression matching a fluentd PARAMETER.
+
+Match groups are:
+
+1. Parameter name.
+2. Parameter value.
+3. Comment, if present."
+  (format
+   "^[[:space:]]*\\(%s\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+   parameter))
+
+;; REVIEW
 (defun touchdown--create-options-regexp (options &optional group)
   "Return a regular expression option group representing OPTIONS.
 
@@ -133,45 +171,13 @@ GROUP is non-nil, wrap OPTIONS in group or a shy group if GROUP is 1."
 	   t))
     re))
 
-(defun touchdown--create-parameter-regexp (parameter)
-  "Return a regular expression matching a fluentd PARAMETER.
+;; Generic regular expressions.
 
-Match groups are:
+(defconst touchdown--section-regexp
+  "^[[:space:]]*\\(</?\\)\\([[:word:]]\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching any section opening or closing.
 
-1. Parameter name.
-2. Parameter value.
-3. Comment, if present."
-  (format
-   "^[[:space:]]*\\(%s\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
-   parameter))
-
-(defconst touchdown--main-directive-regexp
-  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive.
-Matches all parts of a main directive line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
-(defconst touchdown--sub-directive-regexp
-  "^[[:space:]]*\\(</?\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a subdirective.
-Matches all parts of a subdirective line, including trailing comments.
-Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if any.")
-
-(defconst touchdown--any-directive-regexp
-  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching any directive.
-Matches all parts of a directive line, including trailing comments.
+Matches all parts of a section line, including trailing comments.
 Match groups are:
 
 1. Opening bracket.
@@ -179,79 +185,12 @@ Match groups are:
 3. Tag, if present.
 4. Closing bracket.
 5. Comment, if present.")
-
-(defconst touchdown--main-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive opening.
-Matches all parts of a main directive opening line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
-(defconst touchdown--sub-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching an opening subdirective.
-Matches all parts of an opening subdirective line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-(defconst touchdown--any-directive-opening-regexp
-  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching any opening directive.
-Matches all parts of an opening directive line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Tag, if present.
-4. Closing bracket.
-5. Comment, if present.")
-
-(defconst touchdown--main-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive closing.
-Matches all parts of a main directive closing line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-(defconst touchdown--sub-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(\\buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a subdirective closing.
-Matches all parts of a closing subdirective line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
-
-(defconst touchdown--any-directive-closing-regexp
-  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive closing.
-Matches all parts of a main directive closing line, including trailing
-comments.  Match groups are:
-
-1. Opening bracket.
-2. Directive.
-3. Closing bracket.
-4. Comment, if present.")
 
 (defconst touchdown--section-opening-regexp
   "^[[:space:]]*\\(<\\)\\([[:word:]]+\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching any opening directive.
-Matches all parts of an opening directive line, including trailing
+  "Regular expression for matching any section opening.
+
+Matches all parts of a section opening line, including trailing
 comments.  Match groups are:
 
 1. Opening bracket.
@@ -262,8 +201,9 @@ comments.  Match groups are:
 
 (defconst touchdown--section-closing-regexp
   "^[[:space:]]*\\(</\\)\\([[:word:]]+\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
-  "Regular expression for matching a main directive closing.
-Matches all parts of a main directive closing line, including trailing
+  "Regular expression for matching a section closing.
+
+Matches all parts of a section closing line, including trailing
 comments.  Match groups are:
 
 1. Opening bracket.
@@ -292,16 +232,115 @@ Match groups are:
 2. Parameter value.
 3. Comment, if present.")
 
-(defconst touchdown--boolean-parameter-regexp
+(defconst touchdown--parameter-boolean-regexp
   "^[[:space:]]*\\([@[:word:]_]+\\)[[:space:]]+\\(true\\|false\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
   "Regular expression matching fluentd parameters.
 
-Matches all parts of a parameter line, including trailing comments.
+Matches all parts of a boolean parameter line, including trailing comments.
 Match groups are:
 
 1. Parameter name.
 2. Parameter value.
 3. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--main-directive-regexp
+  "^[[:space:]]*\\(</?\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive.
+Matches all parts of a main directive line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--sub-directive-regexp
+  "^[[:space:]]*\\(</?\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a subdirective.
+Matches all parts of a subdirective line, including trailing comments.
+Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if any.")
+
+;; REVIEW
+(defconst touchdown--main-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive opening.
+Matches all parts of a main directive opening line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--sub-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(\\(?:buffer\\|parse\\|record\\)\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching an opening subdirective.
+Matches all parts of an opening subdirective line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--any-directive-opening-regexp
+  "^[[:space:]]*\\(<\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching any opening directive.
+Matches all parts of an opening directive line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Tag, if present.
+4. Closing bracket.
+5. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--main-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive closing.
+Matches all parts of a main directive closing line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--sub-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(\\buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a subdirective closing.
+Matches all parts of a closing subdirective line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
+
+;; REVIEW
+(defconst touchdown--any-directive-closing-regexp
+  "^[[:space:]]*\\(</\\)\\(source\\|match\\|filter\\|system\\|label\\|buffer\\|parse\\|record\\)\\(>\\)[[:space:]]*\\(#.*\\)?$"
+  "Regular expression for matching a main directive closing.
+Matches all parts of a main directive closing line, including trailing
+comments.  Match groups are:
+
+1. Opening bracket.
+2. Directive.
+3. Closing bracket.
+4. Comment, if present.")
 
 ;;; Fluentd syntax symbols.
 
@@ -1079,18 +1118,18 @@ line against `touchdown--parameter-regexp'."
   "Determine if the current line has a boolean parameter.
 
 Determine if the current line has a boolean parameter by matching the
-line against `touchdown--boolean-parameter-regexp', essentially
+line against `touchdown--parameter-boolean-regexp', essentially
 looking for a parameter value of `true` or `false`."
   (interactive)
   (save-excursion
     (beginning-of-line)
-    (looking-at touchdown--boolean-parameter-regexp)))
+    (looking-at touchdown--parameter-boolean-regexp)))
 
 (defun touchdown--directive-closed-p (directive curpoint)
   "Determine if DIRECTIVE is closed before CURPOINT."
   (save-excursion
     (let ((close-directive
-	   (touchdown--create-closing-directive-regexp directive))
+	   (touchdown--create-section-closing-regexp directive))
           (curline (line-number-at-pos curpoint)))
       (when (re-search-forward close-directive curpoint t)
         (< (line-number-at-pos) curline)))))
@@ -1104,9 +1143,9 @@ or nil otherwise."
   (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
-	  (open-label (touchdown--create-opening-directive-regexp directive))
+	  (open-label (touchdown--create-section-opening-regexp directive))
 	  (open-line nil)
-	  (close-label (touchdown--create-closing-directive-regexp directive))
+	  (close-label (touchdown--create-section-closing-regexp directive))
 	  (close-line nil)
 	  (status t))
       (if touchdown--debug
@@ -1301,10 +1340,10 @@ a type."
 	    (t
 	     (if touchdown--debug
 		 (message "touchdown--what-type-am-i:  directive %s" (car directives)))
-	     (re-search-backward (touchdown--create-opening-directive-regexp (car directives)))
+	     (re-search-backward (touchdown--create-section-opening-regexp (car directives)))
 	     (beginning-of-line)
 	     (while (and
-		     (not (looking-at (touchdown--create-closing-directive-regexp (car directives))))
+		     (not (looking-at (touchdown--create-section-closing-regexp (car directives))))
 		     (not (eobp))
 		     (not found))
 	       (cond ((looking-at type-regexp)
@@ -1360,7 +1399,7 @@ a type."
       (cond ((touchdown--closing-directive-line-p)
              (let* ((directive (touchdown--closing-directive-name))
                     (opening-directive
-		     (touchdown--create-directive-regexp directive)))
+		     (touchdown--create-section-regexp directive)))
 	       (if (not (re-search-backward opening-directive nil t))
                    (error "Opening directive %s not found" directive)
                  (current-indentation))))

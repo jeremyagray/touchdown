@@ -68,9 +68,9 @@
 	actual)))))
 
  (describe
-  "touchdown-mode `touchdown--create-directive-regexp'"
+  "touchdown-mode `touchdown--create-section-regexp'"
 
-  (it "should return a regular expression matching directive"
+  (it "should return a regular expression matching a section"
       (let ((data (list
 		   '("source" . "^[[:space:]]*\\(</?\\)\\(source\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("match" . "^[[:space:]]*\\(</?\\)\\(match\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
@@ -79,7 +79,7 @@
 		   '("label" . "^[[:space:]]*\\(</?\\)\\(label\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$"))))
 	(while data
 	  (let ((datum (car data)))
-	    (let ((expected (touchdown--create-directive-regexp (car datum)))
+	    (let ((expected (touchdown--create-section-regexp (car datum)))
 		  (actual (cdr datum)))
 	      (expect
 	       expected
@@ -88,9 +88,9 @@
 	      (setq data (cdr data))))))))
 
  (describe
-  "touchdown-mode `touchdown--create-opening-directive-regexp'"
+  "touchdown-mode `touchdown--create-section-opening-regexp'"
 
-  (it "should return a regular expression matching an opening directive"
+  (it "should return a regular expression matching a section opening"
       (let ((data (list
 		   '("source" . "^[[:space:]]*\\(<\\)\\(source\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("match" . "^[[:space:]]*\\(<\\)\\(match\\)\\(?:[[:space:]]+\\([^>]+\\)\\)?\\(>\\)[[:space:]]*\\(#.*\\)?$")
@@ -100,7 +100,7 @@
 	(while data
 	  (let ((datum (car data)))
 	    (let ((expected
-		   (touchdown--create-opening-directive-regexp (car datum)))
+		   (touchdown--create-section-opening-regexp (car datum)))
 		  (actual (cdr datum)))
 	      (expect
 	       expected
@@ -109,9 +109,9 @@
 	      (setq data (cdr data))))))))
 
  (describe
-  "touchdown-mode `touchdown--create-closing-directive-regexp'"
+  "touchdown-mode `touchdown--create-section-closing-regexp'"
 
-  (it "should return a regular expression matching an opening directive"
+  (it "should return a regular expression matching a section closing"
       (let ((data (list
 		   '("source" . "^[[:space:]]*\\(</\\)\\(source\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
 		   '("match" . "^[[:space:]]*\\(</\\)\\(match\\)\\(>\\)[[:space:]]*\\(#.*\\)?$")
@@ -121,7 +121,7 @@
 	(while data
 	  (let ((datum (car data)))
 	    (let ((expected
-		   (touchdown--create-closing-directive-regexp (car datum)))
+		   (touchdown--create-section-closing-regexp (car datum)))
 		  (actual (cdr datum)))
 	      (expect
 	       expected
