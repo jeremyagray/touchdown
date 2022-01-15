@@ -7,8 +7,8 @@ Major mode for highlighting and editing
 
 - [] organize `touchdown.el` according to symbol's pupose
 - [] rename all syntax types systematically
-- [] implement debug setting in place of per function arguments
-- [] rename all symbols according to visibility (`touchdown--` or `touchdown-`)
+- [x] implement debug setting in place of per function arguments
+- [-] rename all symbols according to visibility (`touchdown--` or `touchdown-`)
 - [] remove `interactive` from all hidden functions
 - [] load large sections from separate files (i.e. syntax data)
 - [-] completion

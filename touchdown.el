@@ -39,11 +39,12 @@
 
 ;; Mode settings.
 
-(defvar touchdown--debug t
+(defcustom touchdown--debug t
   "Control debugging messages from touchdown functions.
 
 Default is nil, which suppresses debugging information.  Non-nil
-enables debugging messages.")
+enables debugging messages."
+  :type 'boolean)
 
 (defun touchdown-toggle-debug ()
   "Toggle the state of `touchdown--debug'.
@@ -965,7 +966,7 @@ commands necessary, to execute the dry-run check on the file attached
 to the current buffer."
   :type 'string)
 
-(defun touchdown--verify-configuration ()
+(defun touchdown-verify-configuration ()
   "Verify a configuration with the fluentd/td-agent dry-run check.
 
 Execute command defined in `touchdown-fluentd-dry-run-command' on the
@@ -1557,7 +1558,7 @@ fluentd configuration syntax, nil otherwise."
 	     (setq sections (cdr sections)))))
     subtree))
 
-(defun touchdown-produce-options ()
+(defun touchdown--produce-options ()
   "Return current valid options."
   (interactive)
   (let ((locations (nreverse (touchdown--where-am-i t)))
@@ -1576,7 +1577,7 @@ fluentd configuration syntax, nil otherwise."
 		      (setq tree subtree)))
 	       (setq locations (cdr locations)))
 	     (message "tree: %s" tree))
-	   (let ((my-type (touchdown--what-type-am-i t)))
+	   (let ((my-type (touchdown--what-type-am-i)))
 	     (message "type: %s" my-type)
 	     (cond ((not my-type)
 		    (setq options (touchdown--section-completions tree)))
@@ -1587,7 +1588,7 @@ fluentd configuration syntax, nil otherwise."
 
 (defun touchdown--produce-terms ()
   "Return current valid terms."
-  (let ((location (car (touchdown--where-am-i t))))
+  (let ((location (car (touchdown--where-am-i))))
     (cond ((equal location nil)
 	   touchdown--directives)
 	  ((equal location "source")
@@ -1741,7 +1742,8 @@ Indent the current buffer using the fluentd/td-agent syntax."
 
   (define-key touchdown-mode-map "\C-c\C-tbs" 'touchdown-insert-source)
   (define-key touchdown-mode-map "\C-c\C-ti" 'touchdown-indent-buffer)
-  (define-key touchdown-mode-map "\C-c\C-tt" 'touchdown-swap-boolean))
+  (define-key touchdown-mode-map "\C-c\C-tt" 'touchdown-swap-boolean)
+  (define-key touchdown-mode-map "\C-c\C-tv" 'touchdown-verify-configuration))
 
 ;;;###autoload
 (add-to-list
