@@ -30,3 +30,6 @@
 
 # Testing trash.
 /coverage/
+
+# Utilities.
+checkdoc-batch.el
