@@ -28,13 +28,16 @@ LOADPATH = -L .
 
 ELPA_DIR = $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
+syntax_files = syntax.el plugins/format/file.el plugins/input/forward.el plugins/input/tail.el plugins/output/file.el plugins/parse/json.el plugins/parse/nginx.el plugins/parse/regexp.el plugins/parse/syslog.el
+
 .PHONY : test
 test : elpa
 	$(CASK) exec buttercup $(LOADPATH)
 
 .PHONY : lint
 lint : elpa
-	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) --eval "(require 'package-lint)" -f package-lint-batch-and-exit touchdown.el
+	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) --eval "(require 'checkdoc-batch)" -f checkdoc-batch-commandline touchdown.el $(syntax_files)
+	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) --eval "(require 'package-lint)" -f package-lint-batch-and-exit touchdown.el $(syntax_files)
 
 elpa : $(ELPA_DIR)
 
