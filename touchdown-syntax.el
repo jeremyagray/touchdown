@@ -73,9 +73,10 @@ of `touchdown--parameter' structures."
 
 ;;; System parameters and sections.
 
-(load "./touchdown-syntax-system")
-(load "./touchdown-syntax-input")
-(load "./touchdown-syntax-output")
+(load "./sections/system")
+(load "./plugins/input/forward")
+(load "./plugins/input/tail")
+(load "./plugins/output/file")
 
 ;;; Syntax tree.
 
@@ -107,8 +108,8 @@ of `touchdown--parameter' structures."
                       :default nil
                       :options nil
                       :required nil))
-   :sections (list touchdown--plugin-input-forward
-                   touchdown--plugin-input-tail))
+   :sections (list touchdown--input-plugin-forward
+                   touchdown--input-plugin-tail))
   "Touchdown source section syntax.")
 
 (defvar touchdown--section-filter
@@ -158,7 +159,7 @@ of `touchdown--parameter' structures."
                       :default nil
                       :options nil
                       :required nil))
-   :sections (list touchdown--plugin-output-file))
+   :sections (list touchdown--output-plugin-file))
   "Touchdown match section syntax.")
 
 (defvar touchdown--section-label

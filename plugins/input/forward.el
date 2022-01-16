@@ -1,4 +1,4 @@
-;;; touchdown-syntax-output.el --- td-agent/fluentd output plugin syntax data -*- lexical-binding: t; -*-
+;;; forward.el --- td-agent/fluentd input plugin forward syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -24,82 +24,96 @@
 
 ;;; Commentary:
 
-;; td-agent/fluentd output plugin syntax data.
+;; td-agent/fluentd input plugin forward syntax data.
 
 ;;; Code:
 
-;;; File output plugin.
+;;; Forward input plugin.
 
 ;; Parameters.
-(defconst touchdown--plugin-output-file-parameters
+(defconst touchdown--input-plugin-forward-parameters
   (list
    (touchdown--parameter-create
-    :name "@type"
+    :name "bind"
     :type 'string
-    :default "file"
-    :options '("file")
-    :required t)
+    :default "0.0.0.0"
+    :options nil
+    :required nil)
    (touchdown--parameter-create
-    :name "path"
+    :name "tag"
     :type 'string
     :default nil
     :options nil
-    :required t)
+    :required nil)
    (touchdown--parameter-create
-    :name "append"
+    :name "add_tag_prefix"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "linger_timeout"
+    :type 'integer
+    :default 0
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "resolve_hostname"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "add_path_suffix"
-    :type 'boolean
-    :default t
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "path_suffix"
-    :type 'string
-    :default ".log"
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "compress"
+    :name "deny_keepalive"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "recompress"
+    :name "send_keepalive_packet"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "@log_level"
-    :type 'string
+    :name "chunk_size_limit"
+    :type 'size
     :default nil
-    :options '("fatal" "error" "warn" "info" "debug" "trace")
+    :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "symlink_path"
+    :name "chunk_warn_size_limit"
+    :type 'size
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "skip_invalid_event"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "source_address_key"
     :type 'string
     :default nil
     :options nil
     :required nil)
-   )
-  "List of fluentd file output plugin parameters.
-
-Currently does not include the format, inject, or buffer subdirectives
-and their subdirectives and parameters.")
+   (touchdown--parameter-create
+    :name "source_hostname_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil))
+  "Fluentd forward input plugin parameters.")
 
 ;; Section.
-(defvar touchdown--plugin-output-file
+(defvar touchdown--input-plugin-forward
   (touchdown--section-create
-   :name "file"
+   :name "forward"
    :type "config"
-   :parameters touchdown--plugin-output-file-parameters
+   :parameters touchdown--input-plugin-forward-parameters
    :sections nil)
-  "Touchdown file output plugin syntax.")
+  "Touchdown forward input plugin section.")
 
-;;; touchdown-syntax-output.el ends here
+;;; forward.el ends here

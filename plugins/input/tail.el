@@ -1,4 +1,4 @@
-;;; touchdown-syntax-system.el --- td-agent/fluentd system section syntax data -*- lexical-binding: t; -*-
+;;; tail.el --- td-agent/fluentd input plugin tail syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -24,180 +24,162 @@
 
 ;;; Commentary:
 
-;; td-agent/fluentd system section syntax data.
+;; td-agent/fluentd input plugin tail syntax data.
 
 ;;; Code:
 
-;;; System parameters and sections.
+;;; Tail input plugin.
 
-;; System parameters.
-(defconst touchdown--system-parameters
+;; Parameters.
+(defconst touchdown--input-plugin-tail-parameters
   (list
    (touchdown--parameter-create
-    :name "workers"
-    :type 'integer
-    :default 1
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "root_dir"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "log_level"
+    :name "@log_level"
     :type 'string
     :default nil
     :options '("fatal" "error" "warn" "info" "debug" "trace")
     :required nil)
    (touchdown--parameter-create
-    :name "suppress_repeated_stacktrace"
+    :name "emit_unmatched_lines"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "emit_error_log_interval"
+    :name "enable_stat_watcher"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_watch_timer"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "encoding"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "exclude_path"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "follow_inodes"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "from_encoding"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ignore_repeated_permission_error"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "limit_recently_modified"
+    :type "time"
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "multiline_flush_interval"
+    :type "time"
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "open_on_every_update"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "path"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "path_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "path_timezone"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "pos_file"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "pos_file_compaction_interval"
     :type 'time
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "ignore_repeated_log_interval"
-    :type 'time
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "ignore_same_log_interval"
-    :type 'time
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "suppress_config_dump"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "log_event_verbose"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "without_source"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "rpc_endpoint"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "enable_get_dump"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "process_name"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "enable_msgpack_time_support"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "file_permission"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "dir_permission"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "strict_config_value"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "disable_shared_socket"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)))
-
-;; System log section.
-(defconst touchdown--system-log-parameters
-  (list
-   (touchdown--parameter-create
-    :name "format"
-    :type 'string
-    :default "text"
-    :options '("text" "json")
-    :required nil)
-   (touchdown--parameter-create
-    :name "time_format"
-    :type 'string
-    :default "%Y-%m-%d %H:%M:%S %z"
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "rotate_age"
-    :type 'integer
-    :default 5
-    :options '("daily" "weekly" "monthly")
-    :required nil)
-   (touchdown--parameter-create
-    :name "rotate_size"
+    :name "read_bytes_limit_per_second"
     :type 'size
-    :default 1048576
+    :default -1
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "enable_input_metrics"
+    :name "read_from_head"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "enable_size_metrics"
+    :name "read_lines_limit"
+    :type 'integer
+    :default 1000
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "refresh_interval"
+    :type 'time
+    :default 60
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "rotate_wait"
+    :type 'time
+    :default 5
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "skip_refresh_on_startup"
     :type 'boolean
     :default nil
     :options nil
-    :required nil)))
+    :required nil))
+  "Fluentd tail input plugin parameters.")
 
-;; System subsections.
-(defvar touchdown--section-system-log
+;; Section.
+(defvar touchdown--input-plugin-tail
   (touchdown--section-create
-   :name "log"
-   :type "contain"
-   :parameters touchdown--system-log-parameters
+   :name "tail"
+   :type "config"
+   :parameters touchdown--input-plugin-tail-parameters
    :sections nil)
-  "Touchdown system log section syntax.")
+  "Touchdown tail input plugin section.")
 
-;; System section.
-(defvar touchdown--section-system
-  (touchdown--section-create
-   :name "system"
-   :type "contain"
-   :parameters touchdown--system-parameters
-   :sections (list touchdown--section-system-log))
-  "Touchdown system section syntax.")
-
-;;; touchdown-syntax-system.el ends here
+;;; tail.el ends here
