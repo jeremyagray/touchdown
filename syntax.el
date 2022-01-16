@@ -73,10 +73,10 @@ of `touchdown--parameter' structures."
 
 ;;; System parameters and sections.
 
-(load "./sections/system")
-(load "./plugins/input/forward")
-(load "./plugins/input/tail")
-(load "./plugins/output/file")
+(load-file (expand-file-name "sections/system.el"))
+(load-file (expand-file-name "plugins/input/forward.el"))
+(load-file (expand-file-name "plugins/input/tail.el"))
+(load-file (expand-file-name "plugins/output/file.el"))
 
 ;;; Syntax tree.
 

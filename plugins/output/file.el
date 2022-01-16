@@ -84,7 +84,7 @@
   "Fluentd file output plugin parameters.")
 
 ;; Load format plugins.
-(load "./plugins/format/file")
+(load-file (expand-file-name "plugins/format/file.el"))
 
 ;; Format subsection.
 (defconst touchdown--output-plugin-file-format-parameters

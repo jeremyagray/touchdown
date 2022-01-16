@@ -249,7 +249,7 @@ Match groups are:
 
 ;;; Fluentd syntax symbols.
 
-(load "./syntax")
+(load-file (expand-file-name "syntax.el"))
 
 ;; Faces and font lock.
 
