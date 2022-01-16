@@ -1,4 +1,4 @@
-;;; forward.el --- td-agent/fluentd input plugin forward syntax data -*- lexical-binding: t; -*-
+;;; forward.el --- Fluentd input plugin forward syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -344,7 +344,7 @@
    :type "config"
    :parameters touchdown--input-plugin-forward-parameters
    :sections (list touchdown--input-plugin-forward-transport
-		   touchdown--input-plugin-forward-security))
+                   touchdown--input-plugin-forward-security))
   "Touchdown forward input plugin section.")
 
 ;;; forward.el ends here
