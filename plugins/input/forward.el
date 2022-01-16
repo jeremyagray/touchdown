@@ -34,6 +34,12 @@
 (defconst touchdown--input-plugin-forward-parameters
   (list
    (touchdown--parameter-create
+    :name "port"
+    :type 'integer
+    :default 24244
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
     :name "bind"
     :type 'string
     :default "0.0.0.0"
@@ -107,13 +113,234 @@
     :required nil))
   "Fluentd forward input plugin parameters.")
 
+;; Transport subsection.
+
+(defconst touchdown--input-plugin-forward-transport-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "version"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ciphers"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "insecure"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ca_path"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "cert_path"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "private_key_path"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "private_key_passphrase"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "client_cert_auth"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil))
+  "Touchdown file input plugin forward transport section parameters.")
+
+(defvar touchdown--input-plugin-forward-transport
+  (touchdown--section-create
+   :name "transport"
+   :type "config"
+   :parameters touchdown--input-plugin-forward-transport-parameters
+   :sections nil)
+  "Touchdown file input plugin forward transport section.")
+
+;; Security subsection.
+
+(defconst touchdown--input-plugin-forward-security-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "self_hostname"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "shared_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "user_auth"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "allow_anonymous_source"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil))
+  "Touchdown file input plugin forward security section parameters.")
+
+;; User subsection.
+
+(defconst touchdown--input-plugin-forward-security-user-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "username"
+    :type 'string
+    :default nil
+    :options nil
+    :required t)
+   (touchdown--parameter-create
+    :name "password"
+    :type 'string
+    :default nil
+    :options nil
+    :required t))
+  "Touchdown file input plugin forward security user section parameters.")
+
+(defvar touchdown--input-plugin-forward-security-user
+  (touchdown--section-create
+   :name "user"
+   :type "config"
+   :parameters touchdown--input-plugin-forward-security-user-parameters
+   :sections nil)
+  "Touchdown file input plugin forward security user section.")
+
+;; Client subsection.
+
+(defconst touchdown--input-plugin-forward-security-client-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "host"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "network"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "shared_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "users"
+    :type 'array
+    :default nil
+    :options nil
+    :required nil))
+  "Touchdown file input plugin forward security client section parameters.")
+
+(defvar touchdown--input-plugin-forward-security-client
+  (touchdown--section-create
+   :name "client"
+   :type "config"
+   :parameters touchdown--input-plugin-forward-security-client-parameters
+   :sections nil)
+  "Touchdown file input plugin forward security client section.")
+
+;; Security section definition.
+(defvar touchdown--input-plugin-forward-security
+  (touchdown--section-create
+   :name "security"
+   :type "config"
+   :parameters touchdown--input-plugin-forward-security-parameters
+   :sections (list touchdown--input-plugin-forward-security-user
+		   touchdown--input-plugin-forward-security-client))
+  "Touchdown file input plugin forward security section.")
+
+;; Load parser plugins.
+(load "./plugins/parse/nginx")
+(load "./plugins/parse/syslog")
+
+;; Parse subsection.
+(defconst touchdown--input-plugin-forward-parse-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "@type"
+    :type 'string
+    :default nil
+    :options nil
+    :required t))
+  "Touchdown file input plugin forward parse section parameters.")
+
+(defvar touchdown--input-plugin-forward-parse
+  (touchdown--section-create
+   :name "parse"
+   :type "contain"
+   :parameters touchdown--input-plugin-forward-parse-parameters
+   :sections (list touchdown--parse-plugin-nginx
+		   touchdown--parse-plugin-syslog))
+  "Touchdown file input plugin forward parse section.")
+
 ;; Section.
 (defvar touchdown--input-plugin-forward
   (touchdown--section-create
    :name "forward"
    :type "config"
    :parameters touchdown--input-plugin-forward-parameters
-   :sections nil)
+   :sections (list touchdown--input-plugin-forward-transport
+		   touchdown--input-plugin-forward-security))
   "Touchdown forward input plugin section.")
 
 ;;; forward.el ends here
