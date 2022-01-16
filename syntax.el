@@ -1,4 +1,4 @@
-;;; syntax.el --- td-agent/fluentd configuration file syntax data -*- lexical-binding: t; -*-
+;;; syntax.el --- Fluentd configuration file syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 

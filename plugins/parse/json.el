@@ -1,4 +1,4 @@
-;;; json.el --- td-agent/fluentd parse plugin json syntax data -*- lexical-binding: t; -*-
+;;; json.el --- Fluentd parse plugin json syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 

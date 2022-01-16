@@ -1,4 +1,4 @@
-;;; file.el --- td-agent/fluentd format file plugin syntax data -*- lexical-binding: t; -*-
+;;; file.el --- Fluentd format file plugin syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -68,8 +68,7 @@
     :type 'string
     :default "lf"
     :options '("lf" "crlf")
-    :required nil)
-)
+    :required nil))
   "Touchdown file output plugin format file plugin section parameters.")
 
 ;; Section.

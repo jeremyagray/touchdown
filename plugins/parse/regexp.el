@@ -1,4 +1,4 @@
-;;; regexp.el --- td-agent/fluentd parse plugin regexp syntax data -*- lexical-binding: t; -*-
+;;; regexp.el --- Fluentd parse plugin regexp syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 

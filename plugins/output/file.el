@@ -1,4 +1,4 @@
-;;; file.el --- td-agent/fluentd output file plugin syntax data -*- lexical-binding: t; -*-
+;;; file.el --- Fluentd output file plugin syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -80,8 +80,7 @@
     :type 'string
     :default nil
     :options nil
-    :required nil)
-   )
+    :required nil))
   "Fluentd file output plugin parameters.")
 
 ;; Load format plugins.

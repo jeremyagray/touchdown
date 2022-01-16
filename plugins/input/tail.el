@@ -1,4 +1,4 @@
-;;; tail.el --- td-agent/fluentd input plugin tail syntax data -*- lexical-binding: t; -*-
+;;; tail.el --- Fluentd input plugin tail syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 

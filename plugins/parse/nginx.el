@@ -1,4 +1,4 @@
-;;; nginx.el --- td-agent/fluentd parse plugin nginx syntax data -*- lexical-binding: t; -*-
+;;; nginx.el --- Fluentd parse plugin nginx syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 

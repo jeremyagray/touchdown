@@ -1,4 +1,4 @@
-;;; syslog.el --- td-agent/fluentd parse plugin syslog syntax data -*- lexical-binding: t; -*-
+;;; syslog.el --- Fluentd parse plugin syslog syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
