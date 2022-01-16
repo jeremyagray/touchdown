@@ -34,38 +34,26 @@
 (defconst touchdown--input-plugin-tail-parameters
   (list
    (touchdown--parameter-create
-    :name "@log_level"
+    :name "tag"
     :type 'string
     :default nil
-    :options '("fatal" "error" "warn" "info" "debug" "trace")
-    :required nil)
+    :options nil
+    :required t)
    (touchdown--parameter-create
-    :name "emit_unmatched_lines"
-    :type 'boolean
+    :name "path"
+    :type 'string
     :default nil
     :options nil
-    :required nil)
+    :required t)
    (touchdown--parameter-create
-    :name "enable_stat_watcher"
-    :type 'boolean
-    :default t
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "enable_watch_timer"
-    :type 'boolean
-    :default t
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "encoding"
+    :name "path_timezone"
     :type 'string
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
     :name "exclude_path"
-    :type 'string
+    :type 'array
     :default nil
     :options nil
     :required nil)
@@ -76,15 +64,9 @@
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "from_encoding"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "ignore_repeated_permission_error"
-    :type 'boolean
-    :default nil
+    :name "refresh_interval"
+    :type 'time
+    :default 60
     :options nil
     :required nil)
    (touchdown--parameter-create
@@ -94,32 +76,50 @@
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "multiline_flush_interval"
-    :type "time"
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "open_on_every_update"
+    :name "skip_refresh_on_startup"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "path"
-    :type 'string
+    :name "read_from_head"
+    :type 'boolean
     :default nil
     :options nil
-    :required t)
+    :required nil)
    (touchdown--parameter-create
-    :name "path_key"
+    :name "encoding"
     :type 'string
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "path_timezone"
+    :name "from_encoding"
     :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "read_lines_limit"
+    :type 'integer
+    :default 1000
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "read_bytes_limit_per_second"
+    :type 'size
+    :default -1
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "max_line_size"
+    :type 'size
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "multiline_flush_interval"
+    :type 'time
     :default nil
     :options nil
     :required nil)
@@ -136,27 +136,9 @@
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "read_bytes_limit_per_second"
-    :type 'size
-    :default -1
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "read_from_head"
-    :type 'boolean
+    :name "path_key"
+    :type 'string
     :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "read_lines_limit"
-    :type 'integer
-    :default 1000
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "refresh_interval"
-    :type 'time
-    :default 60
     :options nil
     :required nil)
    (touchdown--parameter-create
@@ -166,12 +148,72 @@
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "skip_refresh_on_startup"
+    :name "enable_watch_timer"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "enable_stat_watcher"
+    :type 'boolean
+    :default t
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "open_on_every_update"
     :type 'boolean
     :default nil
     :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "emit_unmatched_lines"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "ignore_repeated_permission_error"
+    :type 'boolean
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "@log_level"
+    :type 'string
+    :default nil
+    :options '("fatal" "error" "warn" "info" "debug" "trace")
     :required nil))
   "Fluentd tail input plugin parameters.")
+
+;; Load parser plugins.
+(load "./plugins/parse/nginx")
+(load "./plugins/parse/syslog")
+
+;; Parse subsection.
+(defconst touchdown--input-plugin-tail-parse-parameters
+  (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "@type"
+    :type 'string
+    :default nil
+    :options nil
+    :required t))
+  "Touchdown file input plugin tail parse section parameters.")
+
+(defvar touchdown--input-plugin-tail-parse
+  (touchdown--section-create
+   :name "parse"
+   :type "contain"
+   :parameters touchdown--input-plugin-tail-parse-parameters
+   :sections (list touchdown--parse-plugin-nginx
+		   touchdown--parse-plugin-syslog))
+  "Touchdown file output plugin parse section.")
 
 ;; Section.
 (defvar touchdown--input-plugin-tail
@@ -179,7 +221,7 @@
    :name "tail"
    :type "config"
    :parameters touchdown--input-plugin-tail-parameters
-   :sections nil)
+   :sections (list touchdown--input-plugin-tail-parse))
   "Touchdown tail input plugin section.")
 
 ;;; tail.el ends here
