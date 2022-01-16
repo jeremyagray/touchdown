@@ -249,7 +249,7 @@ Match groups are:
 
 ;;; Fluentd syntax symbols.
 
-(load "./touchdown-syntax")
+(load "./syntax")
 
 ;; Faces and font lock.
 

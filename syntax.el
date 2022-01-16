@@ -1,4 +1,4 @@
-;;; touchdown-syntax.el --- td-agent/fluentd configuration file syntax data -*- lexical-binding: t; -*-
+;;; syntax.el --- td-agent/fluentd configuration file syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -193,4 +193,4 @@ of `touchdown--parameter' structures."
                    touchdown--section-system))
   "The touchdown syntax tree.")
 
-;;; touchdown-syntax.el ends here
+;;; syntax.el ends here
