@@ -186,7 +186,9 @@
   "Fluentd tail input plugin parameters.")
 
 ;; Load parser plugins.
+(load "./plugins/parse/json")
 (load "./plugins/parse/nginx")
+(load "./plugins/parse/regexp")
 (load "./plugins/parse/syslog")
 
 ;; Parse subsection.
@@ -211,7 +213,9 @@
    :name "parse"
    :type "contain"
    :parameters touchdown--input-plugin-tail-parse-parameters
-   :sections (list touchdown--parse-plugin-nginx
+   :sections (list touchdown--parse-plugin-json
+		   touchdown--parse-plugin-nginx
+		   touchdown--parse-plugin-regexp
 		   touchdown--parse-plugin-syslog))
   "Touchdown file input plugin tail parse section.")
 

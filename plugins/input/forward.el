@@ -300,11 +300,13 @@
    :type "config"
    :parameters touchdown--input-plugin-forward-security-parameters
    :sections (list touchdown--input-plugin-forward-security-user
-		   touchdown--input-plugin-forward-security-client))
+                   touchdown--input-plugin-forward-security-client))
   "Touchdown file input plugin forward security section.")
 
 ;; Load parser plugins.
+(load "./plugins/parse/json")
 (load "./plugins/parse/nginx")
+(load "./plugins/parse/regexp")
 (load "./plugins/parse/syslog")
 
 ;; Parse subsection.
@@ -329,8 +331,10 @@
    :name "parse"
    :type "contain"
    :parameters touchdown--input-plugin-forward-parse-parameters
-   :sections (list touchdown--parse-plugin-nginx
-		   touchdown--parse-plugin-syslog))
+   :sections (list touchdown--parse-plugin-json
+                   touchdown--parse-plugin-nginx
+                   touchdown--parse-plugin-regexp
+                   touchdown--parse-plugin-syslog))
   "Touchdown file input plugin forward parse section.")
 
 ;; Section.
