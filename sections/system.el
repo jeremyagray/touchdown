@@ -1,4 +1,4 @@
-;;; touchdown-syntax-system.el --- td-agent/fluentd system section syntax data -*- lexical-binding: t; -*-
+;;; system.el --- td-agent/fluentd system section syntax data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 by Jeremy A GRAY.
 
@@ -33,6 +33,12 @@
 ;; System parameters.
 (defconst touchdown--system-parameters
   (list
+   (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
    (touchdown--parameter-create
     :name "workers"
     :type 'integer
@@ -200,4 +206,4 @@
    :sections (list touchdown--section-system-log))
   "Touchdown system section syntax.")
 
-;;; touchdown-syntax-system.el ends here
+;;; system.el ends here

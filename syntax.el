@@ -91,7 +91,7 @@ of `touchdown--parameter' structures."
                       :options nil
                       :required nil)
                      (touchdown--parameter-create
-                      :name "@tag"
+                      :name "@type"
                       :type 'string
                       :default nil
                       :options nil
@@ -137,12 +137,6 @@ of `touchdown--parameter' structures."
                       :required nil)
                      (touchdown--parameter-create
                       :name "@type"
-                      :type 'string
-                      :default nil
-                      :options nil
-                      :required nil)
-                     (touchdown--parameter-create
-                      :name "@tag"
                       :type 'string
                       :default nil
                       :options nil

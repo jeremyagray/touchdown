@@ -213,7 +213,7 @@
    :parameters touchdown--input-plugin-tail-parse-parameters
    :sections (list touchdown--parse-plugin-nginx
 		   touchdown--parse-plugin-syslog))
-  "Touchdown file output plugin parse section.")
+  "Touchdown file input plugin tail parse section.")
 
 ;; Section.
 (defvar touchdown--input-plugin-tail

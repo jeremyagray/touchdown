@@ -116,6 +116,12 @@
 (defconst touchdown--output-plugin-file-buffer-parameters
   (list
    (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
     :name "@type"
     :type 'string
     :default '("file" "memory")
@@ -309,6 +315,12 @@
 (defconst touchdown--output-plugin-file-inject-parameters
   (list
    (touchdown--parameter-create
+    :name "@include"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
     :name "hostname_key"
     :type 'string
     :default nil
@@ -389,4 +401,4 @@
 		   touchdown--section-output-plugin-file-inject))
   "Touchdown file output plugin syntax.")
 
-;;; touchdown-syntax-output.el ends here
+;;; file.el ends here

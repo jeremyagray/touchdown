@@ -76,7 +76,7 @@
 (defvar touchdown--section-format-plugin-file
   (touchdown--section-create
    :name "file"
-   :type "contain"
+   :type "config"
    :parameters touchdown--format-plugin-file-parameters
    :sections nil)
   "Touchdown file format plugin file section.")
