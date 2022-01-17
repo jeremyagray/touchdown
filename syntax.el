@@ -74,6 +74,7 @@ of `touchdown--parameter' structures."
 ;;; System parameters and sections.
 
 (load-file (expand-file-name "sections/system.el"))
+(load-file (expand-file-name "plugins/filter/record.el"))
 (load-file (expand-file-name "plugins/input/forward.el"))
 (load-file (expand-file-name "plugins/input/tail.el"))
 (load-file (expand-file-name "plugins/output/file.el"))
@@ -116,7 +117,7 @@ of `touchdown--parameter' structures."
                       :default nil
                       :options nil
                       :required nil))
-   :sections nil)
+   :sections (list touchdown--filter-plugin-record))
   "Touchdown filter section syntax.")
 
 (defvar touchdown--section-match
