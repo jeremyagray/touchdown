@@ -666,7 +666,15 @@ type."
     (when (< (current-column) (current-indentation))
       (back-to-indentation))))
 
-;; Completion.
+(defun touchdown-indent-buffer ()
+  "Indent a touchdown buffer.
+
+Indent the current buffer using the fluentd/td-agent syntax."
+  (interactive)
+  (save-excursion
+    (indent-region (buffer-end -1) (buffer-end 1))))
+
+;;; Completion.
 
 ;; Completion functions are currently using `touchdown--directives' as
 ;; the only source of terms for completion.  The list should be built
@@ -801,6 +809,8 @@ function."
            (message "touchdown.el:  got unexpected:  %s" try)
            (setq result nil)))
     result))
+
+;;; Current Emacs mediated (by `completion-table-dynamic`) completion.
 
 (defun touchdown--section-subsection (section sub)
   "Return subsection SUB from SECTION."
@@ -979,13 +989,7 @@ line containing a parameter with a boolean value."
              (re-search-forward "\\bfalse\\b" nil t 1)
              (replace-match "true" nil nil))))))
 
-(defun touchdown-indent-buffer ()
-  "Indent a touchdown buffer.
-
-Indent the current buffer using the fluentd/td-agent syntax."
-  (interactive)
-  (save-excursion
-    (indent-region (buffer-end -1) (buffer-end 1))))
+;;; Mode definition and autoloading.
 
 ;;;###autoload
 (define-derived-mode touchdown-mode fundamental-mode "Touchdown"
