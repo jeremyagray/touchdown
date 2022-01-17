@@ -94,13 +94,7 @@
     :type 'string
     :default nil
     :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "@type"
-    :type 'string
-    :default nil
-    :options nil
-    :required t))
+    :required nil))
   "Touchdown file output plugin format section parameters.")
 
 (defvar touchdown--section-output-plugin-file-format

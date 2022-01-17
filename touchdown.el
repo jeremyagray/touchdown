@@ -675,6 +675,8 @@ type."
 ;; dependent way so that completion suggests completions from the
 ;; appropriate set of possibilities.
 
+;;; Deprecated manual API completion.
+
 (defconst touchdown--directives
   '("@include" "<source>" "<match" "<filter>" "<system>" "<label " "</source>" "</match>" "</filter>" "</system>" "</label>")
   "List of fluentd main directives.")
@@ -733,8 +735,6 @@ initial sequence from all possible matches in the fluentd syntax."
     (message "touchdown try completion on string %s returning %s" str matches-data)
     matches-data))
 
-(touchdown--try-completion "@include" nil nil)
-
 (defun touchdown--all-completions (str predicate try)
   "Return all possible completions for STR in the fluentd syntax.
 
@@ -770,138 +770,6 @@ fluentd configuration syntax, nil otherwise."
     (message "touchdown test completion on string %s returning %s" str match-p)
     match-p))
 
-(defun touchdown--section-subsection (section name)
-  "Return subsection NAME from SECTION."
-  (let ((subsections (touchdown--section-sections section))
-        (found nil)
-        (subsection nil))
-    (message "section: %s" section)
-    (message "subsections: %s" subsections)
-    (while (and subsections (not found))
-      (message "checking subsection: %s" (car subsections))
-      (message "compare %s to subsection %s" name (touchdown--section-name (car subsections)))
-      (cond ((equal name (touchdown--section-name (car subsections)))
-             (setq found t
-                   subsection (car subsections)))
-            (t
-             (setq subsections (cdr subsections)))))
-    subsection))
-
-(defun touchdown--section-completions (section)
-  "Return all valid completion options from SECTION."
-  (let ((subsections (touchdown--section-sections section))
-        (options nil))
-    (let ((params (touchdown--section-parameters section)))
-      (while params
-        (push (touchdown--parameter-name (car params)) options)
-        (setq params (cdr params))))
-    (while subsections
-      (cond ((equal "config" (touchdown--section-type (car subsections)))
-             (push (concat
-                    "@type "
-                    (touchdown--section-name (car subsections)))
-                   options))
-            ((equal "contain" (touchdown--section-type (car subsections)))
-             (push (format
-                    "<%s>"
-                    (touchdown--section-name (car subsections)))
-                   options)
-             (push (format
-                    "</%s>"
-                    (touchdown--section-name (car subsections)))
-                   options)))
-      (setq subsections (cdr subsections)))
-    options))
-
-(defun touchdown--subsection-completions (section type)
-  "Return all valid completion options from SECTION for TYPE."
-  (let ((subsection (touchdown--section-subsection section type))
-        (options nil))
-    (let ((params (touchdown--section-parameters section)))
-      (while params
-        (push (touchdown--parameter-name (car params)) options)
-        (setq params (cdr params))))
-    (setq options (concat options (touchdown--section-completions subsection)))
-    options))
-
-(defun touchdown--syntax-get-subtree (tree section)
-  "Return SECTION from TREE."
-  (let ((sections (touchdown--section-sections tree))
-        (subtree nil)
-        (found nil))
-    (while (and sections (not found))
-      (cond ((equal section (touchdown--section-name (car sections)))
-             (setq subtree (car sections)
-                   found t))
-            (t
-             (setq sections (cdr sections)))))
-    subtree))
-
-(defun touchdown--produce-options ()
-  "Return current valid options."
-  (interactive)
-  (let ((locations (nreverse (touchdown--where-am-i)))
-        (options nil)
-        (tree touchdown--syntax-tree))
-    (cond ((equal locations nil)
-           (message "root level")
-           (message "completions: %s" (touchdown--section-completions tree))
-           (setq options (touchdown--section-completions tree)))
-          (t
-           (while (and locations tree)
-             (let ((subtree (touchdown--syntax-get-subtree tree (car locations))))
-               (cond ((equal subtree nil)
-                      (setq locations nil))
-                     (t
-                      (setq tree subtree)))
-               (setq locations (cdr locations)))
-             (message "tree: %s" tree))
-           (let ((my-type (touchdown--what-type-am-i)))
-             (message "type: %s" my-type)
-             (cond ((not my-type)
-                    (setq options (touchdown--section-completions tree)))
-                   (t
-                    (setq options (touchdown--subsection-completions tree my-type)))))))
-    (message "options: %s" options)
-    options))
-
-(defun touchdown--produce-terms ()
-  "Return current valid terms."
-  (let ((location (car (touchdown--where-am-i))))
-    (cond ((equal location nil)
-           touchdown--directives)
-          ((equal location "source")
-           (cond ((equal (touchdown--what-type-am-i) nil)
-                  (list "@type" "tag" "<parse>" "</parse>"))
-                 ((equal (touchdown--what-type-am-i) "tail")
-                  (touchdown--parameters-names touchdown--plugin-input-tail-parameters))
-                 ((equal (touchdown--what-type-am-i) "forward")
-                  (touchdown--parameters-names touchdown--plugin-input-forward-parameters))))
-          ((equal location "match")
-           (cond ((equal (touchdown--what-type-am-i) "file")
-                  (touchdown--parameters-names touchdown--plugin-output-file-parameters))))
-          ((equal location "parse")
-           (list "@type"))
-          (t
-           touchdown--directives))))
-
-(defun touchdown--dynamic-completion-table (str)
-  "Return all possible completions for STR.
-
-Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
-  (let ((directives (touchdown--produce-terms))
-        (matches nil))
-    (message "directives: %s" directives)
-    (while directives
-      (let ((directive (car directives)))
-        (cond ((string-match-p (regexp-quote str) directive)
-               (setq directives (cdr directives)
-                     matches (push directive matches)))
-              (t
-               (setq directives (cdr directives))))))
-    (message "matches: %s" matches)
-    matches))
-
 (defun touchdown--completion-at-point-collection (str predicate try)
   "Return completion data for the fluentd configuration syntax.
 
@@ -933,6 +801,124 @@ function."
            (message "touchdown.el:  got unexpected:  %s" try)
            (setq result nil)))
     result))
+
+(defun touchdown--section-subsection (section sub)
+  "Return subsection SUB from SECTION."
+  (let ((subs (touchdown--section-sections section))
+        (found nil)
+        (subsection nil))
+    (when (not (equal subs nil))
+      (while (and subs (not found))
+        (cond ((equal sub (touchdown--section-name (car subs)))
+               (setq found t
+                     subsection (car subs)))
+              (t
+               (setq subs (cdr subs))))))
+    subsection))
+
+(defun touchdown--section-parameters-completions (section)
+  "Return the parameters of SECTION as a list of completions."
+  (let ((options nil)
+        (params (touchdown--parameters-names (touchdown--section-parameters section))))
+    (while params
+      (push (car params) options)
+      (setq params (cdr params)))
+    (message "section parameters completions: %s" options)
+    options))
+
+(defun touchdown--section-subsection-completions (section)
+  "Return the subsections of SECTION as a list of completions."
+  (let ((options nil)
+        (subs (touchdown--section-sections section)))
+    (while subs
+      (cond ((equal "contain" (touchdown--section-type (car subs)))
+             (push (format "<%s>" (touchdown--section-name (car subs))) options)
+             (push (format "</%s>" (touchdown--section-name (car subs))) options))
+            (t
+             (push (format "@type %s" (touchdown--section-name (car subs))) options)))
+      (setq subs (cdr subs)))
+    (message "section subsection completions: %s" options)
+    options))
+
+(defun touchdown--section-plugin-completions (section type)
+  "Return the plugin TYPE of SECTION as a list of completions.
+
+Return the plugin parameters and sections of plugin TYPE as a list of
+completions."
+  (let ((options nil)
+        (subsection (touchdown--section-subsection section type)))
+    ;; (message "subsection: %s" subsection)
+    (unless (equal subsection nil)
+      (unless (equal type nil)
+        ;; (message "supposedly non-nil type: %s" type)
+        ;; (message "supposedly non-nil subsection: %s" subsection)
+        ;; (message "@type %s" (touchdown--section-name subsection))
+        (setq options
+              (append
+               (touchdown--section-parameters-completions subsection)
+               (touchdown--section-subsection-completions subsection)))))
+    (message "section plugin completions: %s" options)
+    options))
+
+(defun touchdown--section-completions (section type)
+  "Return valid completion options from SECTION according to TYPE.
+
+If TYPE is nil, return an option list constructed from the section's
+parameters and its subsections.  If TYPE is non-nil, return an option
+list constructed from the section's parameters and the plugin matching
+the TYPE."
+  (let ((options nil))
+    (cond ((equal type nil)
+           (setq options
+                 (append
+                  (touchdown--section-parameters-completions section)
+                  (touchdown--section-subsection-completions section))))
+          (t
+           (setq options
+                 (append
+                  (touchdown--section-parameters-completions section)
+                  (touchdown--section-plugin-completions section type)))))
+    (message "section completions: %s" options)
+    options))
+
+(defun touchdown--produce-options ()
+  "Return current valid options."
+  (interactive)
+  (let ((locations (nreverse (touchdown--where-am-i)))
+        (options nil)
+        (section touchdown--syntax-tree))
+    (cond ((equal locations nil)
+           (message "root level")
+           (message "completions: %s" (touchdown--section-completions section nil))
+           (setq options (touchdown--section-completions section nil)))
+          (t
+           (let ((section touchdown--syntax-tree)
+                 (type (touchdown--what-type-am-i)))
+             (while locations
+               (message "walking to: %s" (car locations))
+               (setq section (touchdown--section-subsection section (car locations))
+                     locations (cdr locations)))
+             (setq options (touchdown--section-completions section type))))
+    (message "options: %s" options)
+    options)))
+
+(defun touchdown--dynamic-completion-table (str)
+  "Return all possible completions for STR.
+
+Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
+  ;; (let ((directives (touchdown--produce-terms))
+  (let ((directives (touchdown--produce-options))
+        (matches nil))
+    (message "directives: %s" directives)
+    (while directives
+      (let ((directive (car directives)))
+        (cond ((string-match-p (regexp-quote str) directive)
+               (setq directives (cdr directives)
+                     matches (push directive matches)))
+              (t
+               (setq directives (cdr directives))))))
+    (message "matches: %s" matches)
+    matches))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."

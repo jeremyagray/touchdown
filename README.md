@@ -5,24 +5,19 @@ Major mode for highlighting and editing
 
 ## Roadmap
 
-- [] organize `touchdown.el` according to symbol's pupose
-- [x] rename all syntax types systematically
-- [x] implement debug setting in place of per function arguments
 - [-] rename all symbols according to visibility (`touchdown--` or `touchdown-`)
-- [] remove `interactive` from all hidden functions
-- [] load large sections from separate files (i.e. syntax data)
 - [-] completion
-  - [x] directives
-  - [] core plugin parameters
-  - [] tags
-  - [] labels
-  - [] parameter values
-    - [] tags
-	- [] paths
   - [] add syntax information for plugins and parameters
+  - [] use parameter information for completing parameter lines
+  - [x] use line identification functions to walk syntax data
+- [] organize `touchdown.el` according to symbol's pupose
+- [] remove `interactive` from all hidden functions
 - [] line identification and walking
   - [] add line identification predicates
 - [] implement full test coverage
+- [x] load large sections from separate files (i.e. syntax data)
+- [x] rename all syntax types systematically
+- [x] implement debug setting in place of per function arguments
 - [x] add explicit regular expressions for second-level directives
 - [x] add explicit regular expressions for top-level directives
 - [x] add undercover.el coverage

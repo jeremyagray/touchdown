@@ -62,11 +62,11 @@
 
 Return a list of parameter names corresponding to the PARAMETERS list
 of `touchdown--parameter' structures."
-  (let ((my-parameters parameters)
+  (let ((params parameters)
         (names ()))
-    (while my-parameters
-      (push (touchdown--parameter-name (car my-parameters)) names)
-      (setq my-parameters (cdr my-parameters)))
+    (while params
+      (push (touchdown--parameter-name (car params)) names)
+      (setq params (cdr params)))
     names))
 
 ;;; Parameter lists.
@@ -86,12 +86,6 @@ of `touchdown--parameter' structures."
    :type "contain"
    :parameters (list (touchdown--parameter-create
                       :name "@include"
-                      :type 'string
-                      :default nil
-                      :options nil
-                      :required nil)
-                     (touchdown--parameter-create
-                      :name "@type"
                       :type 'string
                       :default nil
                       :options nil
@@ -131,12 +125,6 @@ of `touchdown--parameter' structures."
    :type "contain"
    :parameters (list (touchdown--parameter-create
                       :name "@include"
-                      :type 'string
-                      :default nil
-                      :options nil
-                      :required nil)
-                     (touchdown--parameter-create
-                      :name "@type"
                       :type 'string
                       :default nil
                       :options nil

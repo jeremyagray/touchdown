@@ -199,13 +199,7 @@
     :type 'string
     :default nil
     :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "@type"
-    :type 'string
-    :default nil
-    :options nil
-    :required t))
+    :required nil))
   "Touchdown file input plugin tail parse section parameters.")
 
 (defvar touchdown--input-plugin-tail-parse
