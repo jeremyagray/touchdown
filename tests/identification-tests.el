@@ -106,7 +106,7 @@
      nil)))
 
   (it
-   "should return nil without `@type` on an open section followed by a closed section of a different kind"
+   "should return nil without `@type` on an open section followed by nested, closed sections of different kinds"
    (with-touchdown-temp-buffer
     "@include file.conf
 

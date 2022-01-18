@@ -73,11 +73,11 @@ of `touchdown--parameter' structures."
 
 ;;; System parameters and sections.
 
-(load-file (expand-file-name "sections/system.el"))
-(load-file (expand-file-name "plugins/filter/record.el"))
-(load-file (expand-file-name "plugins/input/forward.el"))
-(load-file (expand-file-name "plugins/input/tail.el"))
-(load-file (expand-file-name "plugins/output/file.el"))
+(load-file (expand-file-name "sections/system.el" touchdown--directory))
+(load-file (expand-file-name "plugins/filter/record.el" touchdown--directory))
+(load-file (expand-file-name "plugins/input/forward.el" touchdown--directory))
+(load-file (expand-file-name "plugins/input/tail.el" touchdown--directory))
+(load-file (expand-file-name "plugins/output/file.el" touchdown--directory))
 
 ;;; Syntax tree.
 

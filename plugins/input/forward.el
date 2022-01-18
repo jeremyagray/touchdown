@@ -304,10 +304,10 @@
   "Touchdown file input plugin forward security section.")
 
 ;; Load parser plugins.
-(load-file (expand-file-name "plugins/parse/json.el"))
-(load-file (expand-file-name "plugins/parse/nginx.el"))
-(load-file (expand-file-name "plugins/parse/regexp.el"))
-(load-file (expand-file-name "plugins/parse/syslog.el"))
+(load-file (expand-file-name "plugins/parse/json.el" touchdown--directory))
+(load-file (expand-file-name "plugins/parse/nginx.el" touchdown--directory))
+(load-file (expand-file-name "plugins/parse/regexp.el" touchdown--directory))
+(load-file (expand-file-name "plugins/parse/syslog.el" touchdown--directory))
 
 ;; Parse subsection.
 (defconst touchdown--input-plugin-forward-parse-parameters

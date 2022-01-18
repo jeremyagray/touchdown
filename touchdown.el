@@ -249,7 +249,11 @@ Match groups are:
 
 ;;; Fluentd syntax symbols.
 
-(load-file (expand-file-name "syntax.el"))
+(defconst touchdown--directory
+  (file-name-directory (or load-file-name (buffer-file-name)))
+  "Directory containing touchdown.el, for loading other files.")
+
+(load-file (expand-file-name "syntax.el" touchdown--directory))
 
 ;; Faces and font lock.
 
@@ -960,9 +964,9 @@ the TYPE."
                (setq section (touchdown--section-subsection section (car locations))
                      locations (cdr locations)))
              (message "completing on section %s, type %s" (touchdown--section-name section) type)
-             (setq options (touchdown--section-completions section type))))
+             (setq options (touchdown--section-completions section type)))))
     (message "options: %s" options)
-    options)))
+    options))
 
 (defun touchdown--dynamic-completion-table (str)
   "Return all possible completions for STR.

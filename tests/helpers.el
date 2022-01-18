@@ -34,7 +34,19 @@
 (setq undercover-force-coverage t)
 
 (undercover
- "touchdown.el"
+ (:files
+  "touchdown.el"
+  "syntax.el"
+  "sections/system.el"
+  "plugins/filter/record.el"
+  "plugins/format/file.el"
+  "plugins/input/forward.el"
+  "plugins/input/tail.el"
+  "plugins/output/file.el"
+  "plugins/parse/json.el"
+  "plugins/parse/nginx.el"
+  "plugins/parse/regexp.el"
+  "plugins/parse/syslog.el")
  (:report-format 'simplecov)
  (:send-report nil))
 
