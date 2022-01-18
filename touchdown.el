@@ -39,12 +39,11 @@
 
 ;; Mode settings.
 
-(defcustom touchdown--debug t
+(defvar touchdown--debug t
   "Control debugging messages from touchdown functions.
 
 Default is nil, which suppresses debugging information.  Non-nil
-enables debugging messages."
-  :type 'boolean)
+enables debugging messages.")
 
 (defun touchdown-toggle-debug ()
   "Toggle the state of `touchdown--debug'.
@@ -371,7 +370,6 @@ Match groups are:
 
 Determine if the current line is a parameter line by matching the
 line against `touchdown--parameter-regexp'."
-  (interactive)
   (save-excursion
     (beginning-of-line)
     (looking-at touchdown--parameter-regexp)))
@@ -382,7 +380,6 @@ line against `touchdown--parameter-regexp'."
 Determine if the current line has a boolean parameter by matching the
 line against `touchdown--parameter-boolean-regexp', essentially
 looking for a parameter value of `true` or `false`."
-  (interactive)
   (save-excursion
     (beginning-of-line)
     (looking-at touchdown--parameter-boolean-regexp)))
@@ -401,7 +398,6 @@ looking for a parameter value of `true` or `false`."
 
 Return t if point is on or after the line of the SECTION opening and
 on or before the line of the SECTION closing, or nil otherwise."
-  (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
           (open-label (touchdown--create-section-opening-regexp section))
@@ -443,7 +439,6 @@ on or before the line of the SECTION closing, or nil otherwise."
 
 Return t if point is on or after the line containing '<label>' and on
 or before the line containing '</label>', or nil otherwise."
-  (interactive)
   (save-excursion
     (touchdown--within-section-p "label")))
 
@@ -452,7 +447,6 @@ or before the line containing '</label>', or nil otherwise."
 
 Determine if the point is currently at the root level, outside of all
 other sections."
-  (interactive)
   (save-excursion
     (let ((sections (touchdown--where-am-i))
           (status nil))
@@ -471,7 +465,6 @@ other sections."
 
 Return the reverse list of nested sections currently containing point,
 or nil if the point is not within any section."
-  (interactive)
   (save-excursion
     (let ((current-line (line-number-at-pos (point)))
           (sections ()))
@@ -512,7 +505,6 @@ Return a description for the current line, including the type of line
 sections and parameters\), the tag or label for sections, the value
 \(open or close for sections, parameter value for parameters\), and
 either the whole-line commment or inline-comment as comment."
-  (interactive)
   (save-excursion
     (let ((line-description nil))
       (cond ((touchdown--section-opening-line-p)
@@ -573,7 +565,6 @@ either the whole-line commment or inline-comment as comment."
 Return the type for the section currently containing point, or nil if
 the point is not within any section or if the section does have a
 type."
-  (interactive)
   (save-excursion
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
           (type nil)
@@ -947,7 +938,6 @@ the TYPE."
 
 (defun touchdown--produce-options ()
   "Return current valid options."
-  (interactive)
   (let ((locations (nreverse (touchdown--where-am-i)))
         (options nil)
         (section touchdown--syntax-tree))
