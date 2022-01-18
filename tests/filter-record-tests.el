@@ -49,11 +49,11 @@
      (expect
       (touchdown--section-completions section nil)
       :to-equal
-      '("@include" "@type record_transformer"))
+      '("@include" "@type record_transformer" "</filter>"))
      (expect
       (touchdown--section-completions section "record_transformer")
       :to-equal
-      '("@include" "enable_ruby" "auto_typecast" "renew_record" "renew_time_key" "keep_keys" "remove_keys" "</record>" "<record>"))
+      '("@include" "enable_ruby" "auto_typecast" "renew_record" "renew_time_key" "keep_keys" "remove_keys" "<record>"))
      (expect
       (touchdown--section-name subsection)
       :to-equal

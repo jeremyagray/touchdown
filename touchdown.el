@@ -572,8 +572,8 @@ type."
   (interactive)
   (save-excursion
     (let ((type-regexp (touchdown--create-parameter-regexp "@type"))
-          (type "")
-          (found nil)
+          (type nil)
+          (stop nil)
           (sections (touchdown--where-am-i)))
       (cond ((equal sections nil)
              (setq type nil))
@@ -582,17 +582,64 @@ type."
                  (message "touchdown--what-type-am-i:  section %s" (car sections)))
              (re-search-backward (touchdown--create-section-opening-regexp (car sections)))
              (beginning-of-line)
-             (while (and
-                     (not (looking-at (touchdown--create-section-closing-regexp (car sections))))
-                     (not (eobp))
-                     (not found))
-               (cond ((looking-at type-regexp)
-                      (setq type (match-string-no-properties 2)
-                            found t))
-                     (t
-                      (forward-line 1))))
-             (if touchdown--debug
-                 (message "touchdown--what-type-am-i:  type %s" type))
+             (let ((other nil))
+               (while (and
+                       (not (eobp))
+                       (not stop))
+                 (forward-line 1)
+                 (let ((desc (touchdown--what-am-i)))
+                   (cond
+                    ;; @type line, in same section.
+                    ((and
+                      (not other)
+                      (equal
+                       (touchdown--line-description-type desc)
+                       "parameter")
+                      (equal
+                       (touchdown--line-description-name desc)
+                       "@type"))
+                     (setq type (touchdown--line-description-value desc)
+                           stop t))
+                    ;; Section opening or closing of same type.
+                    ((and
+                      (not other)
+                      (equal
+                       (touchdown--line-description-type desc)
+                       "section")
+                      (equal
+                       (touchdown--line-description-name desc)
+                       (car sections)))
+                     (setq stop t))
+                    ;; Section opening of different type.
+                    ((and
+                      (not other)
+                      (equal
+                       (touchdown--line-description-type desc)
+                       "section")
+                      (not
+                       (equal
+                        (touchdown--line-description-name desc)
+                        (car sections)))
+                      (equal
+                       (touchdown--line-description-value desc)
+                       "open"))
+                     (setq other t))
+                    ;; Section closing of different type.
+                    ((and
+                      other
+                      (equal
+                       (touchdown--line-description-type desc)
+                       "section")
+                      (not
+                       (equal
+                        (touchdown--line-description-name desc)
+                        (car sections)))
+                      (equal
+                       (touchdown--line-description-value desc)
+                       "close"))
+                     (setq other nil))))))
+             (when touchdown--debug
+               (message "touchdown--what-type-am-i:  type %s" type))
              type)))))
 
 (defun touchdown--section-closing-name ()
@@ -842,8 +889,8 @@ function."
         (subs (touchdown--section-sections section)))
     (while subs
       (cond ((equal "contain" (touchdown--section-type (car subs)))
-             (push (format "<%s>" (touchdown--section-name (car subs))) options)
-             (push (format "</%s>" (touchdown--section-name (car subs))) options))
+             (push (format "<%s>" (touchdown--section-name (car subs))) options))
+             ;; (push (format "</%s>" (touchdown--section-name (car subs))) options))
             (t
              (push (format "@type %s" (touchdown--section-name (car subs))) options)))
       (setq subs (cdr subs)))
@@ -882,7 +929,10 @@ the TYPE."
            (setq options
                  (append
                   (touchdown--section-parameters-completions section)
-                  (touchdown--section-subsection-completions section))))
+                  (touchdown--section-subsection-completions section)
+                  (let ((name (touchdown--section-name section)))
+                    (unless (equal name "root")
+                      (list (format "</%s>" name)))))))
           (t
            (setq options
                  (append
@@ -906,8 +956,10 @@ the TYPE."
                  (type (touchdown--what-type-am-i)))
              (while locations
                (message "walking to: %s" (car locations))
+               (message "type: %s" type)
                (setq section (touchdown--section-subsection section (car locations))
                      locations (cdr locations)))
+             (message "completing on section %s, type %s" (touchdown--section-name section) type)
              (setq options (touchdown--section-completions section type))))
     (message "options: %s" options)
     options)))
@@ -916,7 +968,6 @@ the TYPE."
   "Return all possible completions for STR.
 
 Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
-  ;; (let ((directives (touchdown--produce-terms))
   (let ((directives (touchdown--produce-options))
         (matches nil))
     (message "directives: %s" directives)

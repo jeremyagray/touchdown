@@ -34,6 +34,92 @@
  "touchdown-mode syntax completion"
 
  (describe
+  "touchdown-mode root level completion"
+
+  (it
+   "should return the root level completions"
+   (with-touchdown-temp-buffer
+    "@include root.conf
+
+<source>
+</source>
+"
+
+   (forward-cursor-on "@include")
+   (forward-line 1)
+   (message "%s" (touchdown--dynamic-completion-table ""))
+   (expect
+    (touchdown--dynamic-completion-table "")
+    :to-equal
+    '("<source>" "<filter>" "<match>" "<label>" "<system>" "@include"))
+
+   (expect
+    (touchdown--dynamic-completion-table "@")
+    :to-equal
+    '("@include"))
+
+   (expect
+    (touchdown--dynamic-completion-table "@in")
+    :to-equal
+    '("@include"))
+
+   (expect
+    (touchdown--dynamic-completion-table "@type")
+    :to-equal
+    nil)
+
+   (expect
+    (touchdown--dynamic-completion-table "<s")
+    :to-equal
+    '("<source>" "<system>"))
+
+   (expect
+    (touchdown--dynamic-completion-table "<so")
+    :to-equal
+    '("<source>"))
+
+   (expect
+    (touchdown--dynamic-completion-table "<sy")
+    :to-equal
+    '("<system>"))
+
+   (expect
+    (touchdown--dynamic-completion-table "<f")
+    :to-equal
+    '("<filter>"))
+
+   (expect
+    (touchdown--dynamic-completion-table "<m")
+    :to-equal
+    '("<match>"))
+
+   (expect
+    (touchdown--dynamic-completion-table "<l")
+    :to-equal
+    '("<label>")))))
+
+ (describe
+  "touchdown-mode source completion"
+
+  (it
+   "should return the source completions with a source opening"
+   (with-touchdown-temp-buffer
+    "@include root.conf
+
+<source>
+
+</source>
+"
+
+   (forward-cursor-on "<source>")
+   (forward-line 1)
+   (message "%s" (touchdown--dynamic-completion-table ""))
+   (expect
+    (touchdown--dynamic-completion-table "")
+    :to-equal
+    '("</source>" "@type forward" "@type tail" "@label" "@id" "@include")))))
+
+ (describe
   "touchdown-mode `try-completion'"
 
   (it
