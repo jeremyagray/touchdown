@@ -141,6 +141,328 @@
     (expect
      (touchdown--what-type-am-i)
      :to-equal
-     "syslog")))))
+     "syslog"))))
+
+ (describe
+  "touchdown-mode what-am-i"
+
+  (it
+   "should return nil without `@type` on closed section"
+   (with-touchdown-temp-buffer
+    "# this is a comment line
+@include some/file.conf
+
+<source>
+  @type syslog
+  tag syslog
+
+  <parse>
+    @type syslog
+  </parse>
+</source>
+
+<label @SYSLOG>
+  @id syslog  # another comment
+</label>
+"
+    (forward-cursor-on "#")
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "comment")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       "this is a comment line"))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "include")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "@include")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "some/file.conf")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "blank")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "source")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "open")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "parameter")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "@type")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "syslog")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "parameter")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "tag")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "syslog")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 2)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "parse")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "open")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "parameter")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "@type")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "syslog")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "parse")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "close")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "source")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "close")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 2)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "label")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       "@SYSLOG")
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "open")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "parameter")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "@id")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "syslog")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       "# another comment"))
+
+    (forward-line 1)
+    (let ((desc (touchdown--what-am-i)))
+      (expect
+       (touchdown--line-description-type desc)
+       :to-equal
+       "section")
+      (expect
+       (touchdown--line-description-name desc)
+       :to-equal
+       "label")
+      (expect
+       (touchdown--line-description-tag desc)
+       :to-equal
+       nil)
+      (expect
+       (touchdown--line-description-value desc)
+       :to-equal
+       "close")
+      (expect
+       (touchdown--line-description-comment desc)
+       :to-equal
+       nil))
+      ))))
 
 ;;; identification-tests.el ends here
