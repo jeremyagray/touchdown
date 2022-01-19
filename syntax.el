@@ -76,6 +76,7 @@ of `touchdown--parameter' structures."
 (load-file (expand-file-name "sections/system.el" touchdown--directory))
 (load-file (expand-file-name "plugins/filter/record.el" touchdown--directory))
 (load-file (expand-file-name "plugins/input/forward.el" touchdown--directory))
+(load-file (expand-file-name "plugins/input/syslog.el" touchdown--directory))
 (load-file (expand-file-name "plugins/input/tail.el" touchdown--directory))
 (load-file (expand-file-name "plugins/output/file.el" touchdown--directory))
 
@@ -104,6 +105,7 @@ of `touchdown--parameter' structures."
                       :options nil
                       :required nil))
    :sections (list touchdown--input-plugin-forward
+                   touchdown--input-plugin-syslog
                    touchdown--input-plugin-tail))
   "Touchdown source section syntax.")
 

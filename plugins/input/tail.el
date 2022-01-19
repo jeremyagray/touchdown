@@ -185,33 +185,8 @@
     :required nil))
   "Fluentd tail input plugin parameters.")
 
-;; Load parser plugins.
-(load-file (expand-file-name "plugins/parse/json.el" touchdown--directory))
-(load-file (expand-file-name "plugins/parse/nginx.el" touchdown--directory))
-(load-file (expand-file-name "plugins/parse/regexp.el" touchdown--directory))
-(load-file (expand-file-name "plugins/parse/syslog.el" touchdown--directory))
-
-;; Parse subsection.
-(defconst touchdown--input-plugin-tail-parse-parameters
-  (list
-   (touchdown--parameter-create
-    :name "@include"
-    :type 'string
-    :default nil
-    :options nil
-    :required nil))
-  "Touchdown file input plugin tail parse section parameters.")
-
-(defvar touchdown--input-plugin-tail-parse
-  (touchdown--section-create
-   :name "parse"
-   :type "contain"
-   :parameters touchdown--input-plugin-tail-parse-parameters
-   :sections (list touchdown--parse-plugin-json
-		   touchdown--parse-plugin-nginx
-		   touchdown--parse-plugin-regexp
-		   touchdown--parse-plugin-syslog))
-  "Touchdown file input plugin tail parse section.")
+;; Load input helper plugins.
+(load-file (expand-file-name "plugins/input/parse.el" touchdown--directory))
 
 ;; Section.
 (defvar touchdown--input-plugin-tail
@@ -219,7 +194,7 @@
    :name "tail"
    :type "config"
    :parameters touchdown--input-plugin-tail-parameters
-   :sections (list touchdown--input-plugin-tail-parse))
+   :sections (list touchdown--input-plugin-parse))
   "Touchdown tail input plugin section.")
 
 ;;; tail.el ends here

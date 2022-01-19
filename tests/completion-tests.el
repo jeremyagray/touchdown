@@ -117,7 +117,7 @@
    (expect
     (touchdown--dynamic-completion-table "")
     :to-equal
-    '("</source>" "@type forward" "@type tail" "@label" "@id" "@include")))))
+    '("</source>" "@type forward" "@type syslog" "@type tail" "@label" "@id" "@include")))))
 
  (describe
   "touchdown-mode `try-completion'"
