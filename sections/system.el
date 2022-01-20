@@ -52,7 +52,7 @@
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "log_level"
+    :name "@log_level"
     :type 'string
     :default "info"
     :options '("fatal" "error" "warn" "info" "debug" "trace")

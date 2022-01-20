@@ -635,6 +635,8 @@ type."
             (forward-line 1)
             (let ((desc (touchdown--what-am-i)))
               (cond
+	       ;; No line description.
+	       ((equal desc nil))
                ;; @type line, in same section.
                ((and
                  (not other)
@@ -987,8 +989,29 @@ the TYPE."
     (message "section completions: %s" options)
     options))
 
+(defun touchdown--parameter-completions (section name)
+  "Return valid completion options from SECTION parameter NAME.
+
+Return completion options from parameter NAME in SECTION.  This will
+be a list containing `true` and `false` for boolean parameters, the
+default value if one is defined, a list of options for enum parameters
+without a default, or nil for everything else."
+  (let ((param
+          (touchdown--parameter-get section name))
+        (options nil))
+    (cond ((equal (touchdown--parameter-type param) 'boolean)
+           (setq options (list "true" "false")))
+          ((touchdown--parameter-default param)
+           (setq options (touchdown--parameter-default param)))
+          ((touchdown--parameter-options param)
+           (setq options (touchdown--parameter-options param)))
+          (t
+           (setq options nil)))
+    options))
+
 (defun touchdown--produce-options ()
   "Return current valid options."
+  (save-excursion)
   (when touchdown--debug
     (message "touchdown--produce-options"))
   (let ((locations (nreverse (touchdown--where-am-i)))
@@ -1005,8 +1028,6 @@ the TYPE."
              (message "level: %s" locations))
            (let ((type (touchdown--what-type-am-i)))
              (message "type %s; locations: %s" type locations)
-             ;; (when (equal type (car locations))
-             ;;   (setq locations (cdr locations)))
              (when (equal type (car (reverse locations)))
                (setq locations (reverse (cdr (reverse locations)))))
              (while locations
@@ -1018,7 +1039,14 @@ the TYPE."
                      locations (cdr locations)))
              (when touchdown--debug
                (message "completing on section %s, type %s" (touchdown--section-name section) type))
-             (setq options (touchdown--section-completions section type)))))
+             ;; (setq options (touchdown--section-completions section type))
+             (let* ((start (progn (skip-syntax-backward "w_.(") (point)))
+                    (end (progn (skip-syntax-forward "w_.(") (point)))
+                    (str (buffer-substring start end)))
+               (if (touchdown--parameter-get section str)
+                   (setq options (touchdown--parameter-completions section str))
+                 (setq options (touchdown--section-completions section type))))
+	     )))
     (when touchdown--debug
       (message "options: %s" options))
     options))

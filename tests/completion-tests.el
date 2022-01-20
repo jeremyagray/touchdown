@@ -319,6 +319,100 @@
      '("@include" "hostname_key" "hostname" "worker_id_key" "tag_key" "time_key" "time_type" "time_format" "localtime" "utc" "timezone" "</inject>")))))
 
  (describe
+  "touchdown-mode parameter completion"
+
+  (it
+   "should complete boolean parameters"
+   (with-touchdown-temp-buffer
+    "@include root.conf
+
+<system>
+  suppress_repeated_stacktrace
+</system>
+"
+
+    (forward-cursor-on "<system>")
+    (forward-line 1)
+    (end-of-line)
+    (expect
+     (touchdown--dynamic-completion-table "")
+     :to-equal
+     '("true" "false")))))
+
+;;   (it
+;;    "should complete `true` for a boolean parameter"
+;;    (with-touchdown-temp-buffer
+;;     "@include root.conf
+
+;; <system>
+;;   suppress_repeated_stacktrace t
+;; </system>
+;; "
+
+;;     (forward-cursor-on "<system>")
+;;     (forward-line 1)
+;;     (end-of-line)
+;;     (expect
+;;      (touchdown--dynamic-completion-table "")
+;;      :to-equal
+;;      "true")))
+
+;;   (it
+;;    "should complete `false` for a boolean parameter"
+;;    (with-touchdown-temp-buffer
+;;     "@include root.conf
+
+;; <system>
+;;   suppress_repeated_stacktrace f
+;; </system>
+;; "
+
+;;     (forward-cursor-on "<system>")
+;;     (forward-line 1)
+;;     (end-of-line)
+;;     (expect
+;;      (touchdown--dynamic-completion-table "")
+;;      :to-equal
+;;      '("false")))))
+
+;;  (describe
+;;   "touchdown-mode parameter completion"
+
+;;   (it
+;;    "should complete enum parameters"
+;;    (with-touchdown-temp-buffer
+;;     "@include root.conf
+
+;; <system>
+;;   @log_level
+;; </system>
+;; "
+;;     (forward-cursor-on "<system>")
+;;     (forward-line 1)
+;;     (end-of-line)
+;;     (expect
+;;      (touchdown--dynamic-completion-table "")
+;;      :to-equal
+;;      '("fatal" "error" "warn" "info" "debug" "trace"))))
+
+;;   (it
+;;    "should complete options on enum parameters"
+;;    (with-touchdown-temp-buffer
+;;     "@include root.conf
+
+;; <system>
+;;   @log_level f
+;; </system>
+;; "
+;;     (forward-cursor-on "<system>")
+;;     (forward-line 1)
+;;     (end-of-line)
+;;     (expect
+;;      (touchdown--dynamic-completion-table "")
+;;      :to-equal
+;;        "fatal"))))
+
+ (describe
   "touchdown-mode `try-completion'"
 
   (it
