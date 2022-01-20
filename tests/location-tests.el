@@ -165,7 +165,6 @@
     :to-be
     nil)
    (forward-cursor-on (regexp-quote "<label"))
-   (message "line: %s" (thing-at-point 'line))
    (expect
     (touchdown--within-label-p)
     :to-be

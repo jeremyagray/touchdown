@@ -47,7 +47,6 @@
 
     (forward-cursor-on "@include")
     (forward-line 1)
-    (message "%s" (touchdown--dynamic-completion-table ""))
     (expect
      (touchdown--dynamic-completion-table "")
      :to-equal
@@ -113,7 +112,6 @@
 
     (forward-cursor-on "<source>")
     (forward-line 1)
-    (message "%s" (touchdown--dynamic-completion-table ""))
     (expect
      (touchdown--dynamic-completion-table "")
      :to-equal

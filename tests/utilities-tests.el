@@ -38,9 +38,10 @@
  (it
   "should toggle `touchdown--debug` from t to nil and nil to t"
 
-  (let ((first touchdown--debug)
-	(second nil)
-	(third nil))
+  (let* ((inhibit-message t)
+	 (first touchdown--debug)
+	 (second nil)
+	 (third nil))
     (touchdown-toggle-debug)
     (setq second touchdown--debug)
     (touchdown-toggle-debug)
@@ -61,9 +62,10 @@
  (it
   "should return the correct state"
 
-  (let ((first (touchdown-toggle-debug))
-	(second (touchdown-toggle-debug))
-	(third (touchdown-toggle-debug)))
+  (let* ((inhibit-message t)
+	 (first (touchdown-toggle-debug))
+	 (second (touchdown-toggle-debug))
+	 (third (touchdown-toggle-debug)))
     (expect
      first
      :to-equal
