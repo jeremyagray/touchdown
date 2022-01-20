@@ -72,12 +72,12 @@
   "Touchdown file output plugin format file plugin section parameters.")
 
 ;; Section.
-(defvar touchdown--section-format-plugin-file
+(defvar touchdown--format-plugin-file
   (touchdown--section-create
    :name "file"
    :type "config"
    :parameters touchdown--format-plugin-file-parameters
    :sections nil)
-  "Touchdown file format plugin file section.")
+  "Touchdown format plugin file section.")
 
 ;;; file.el ends here

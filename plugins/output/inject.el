@@ -1,6 +1,6 @@
-;;; file.el --- Fluentd output file plugin syntax data -*- lexical-binding: t; -*-
+;;; inject.el --- Fluentd output plugin inject helper syntax data -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021-2022 by Jeremy A GRAY.
+;; Copyright (C) 2022 by Jeremy A GRAY.
 
 ;; Author: Jeremy A GRAY <gray@flyquackswim.com>
 ;; Maintainer: Jeremy A GRAY <gray@flyquackswim.com>
@@ -24,82 +24,92 @@
 
 ;;; Commentary:
 
-;; td-agent/fluentd output file plugin syntax data.
+;; Fluentd output plugin inject helper syntax data.
 
 ;;; Code:
 
-;;; Output file plugin.
+;;; Inject helper.
 
 ;; Parameters.
-(defconst touchdown--output-plugin-file-parameters
+
+(defconst touchdown--output-plugin-inject-parameters
   (list
    (touchdown--parameter-create
-    :name "path"
+    :name "@include"
     :type 'string
-    :default nil
-    :options nil
-    :required t)
-   (touchdown--parameter-create
-    :name "append"
-    :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "add_path_suffix"
+    :name "hostname_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "hostname"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "worker_id_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "tag_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "time_key"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "time_type"
+    :type 'string
+    :default "float"
+    :options '("float" "unixtime" "unixtime_millis" "unixtime_micros" "unixtime_nanos" "string")
+    :required nil)
+   (touchdown--parameter-create
+    :name "time_format"
+    :type 'string
+    :default nil
+    :options nil
+    :required nil)
+   (touchdown--parameter-create
+    :name "localtime"
     :type 'boolean
     :default t
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "path_suffix"
-    :type 'string
-    :default ".log"
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "compress"
+    :name "utc"
     :type 'boolean
     :default nil
     :options nil
     :required nil)
    (touchdown--parameter-create
-    :name "recompress"
-    :type 'boolean
-    :default nil
-    :options nil
-    :required nil)
-   (touchdown--parameter-create
-    :name "@log_level"
-    :type 'string
-    :default "info"
-    :options '("fatal" "error" "warn" "info" "debug" "trace")
-    :required nil)
-   (touchdown--parameter-create
-    :name "symlink_path"
+    :name "timezone"
     :type 'string
     :default nil
     :options nil
     :required nil))
-  "Fluentd file output plugin parameters.")
-
-;; Load format plugins.
-(load-file (expand-file-name "plugins/format/format.el" touchdown--directory))
-
-;; Load output plugins.
-(load-file (expand-file-name "plugins/output/buffer.el" touchdown--directory))
-(load-file (expand-file-name "plugins/output/inject.el" touchdown--directory))
+    "Touchdown output plugin inject helper section parameters.")
 
 ;; Section.
 
-(defvar touchdown--output-plugin-file
+(defvar touchdown--output-plugin-inject
   (touchdown--section-create
-   :name "file"
-   :type "config"
-   :parameters touchdown--output-plugin-file-parameters
-   :sections (list touchdown--format-plugin
-		   touchdown--output-plugin-buffer
-		   touchdown--output-plugin-inject))
-  "Touchdown file output plugin syntax.")
+   :name "inject"
+   :type "contain"
+   :parameters touchdown--output-plugin-inject-parameters
+   :sections nil)
+  "Touchdown output plugin inject helper section.")
 
-;;; file.el ends here
+;;; inject.el ends here

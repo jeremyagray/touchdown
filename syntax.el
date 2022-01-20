@@ -79,6 +79,7 @@ of `touchdown--parameter' structures."
 (load-file (expand-file-name "plugins/input/syslog.el" touchdown--directory))
 (load-file (expand-file-name "plugins/input/tail.el" touchdown--directory))
 (load-file (expand-file-name "plugins/output/file.el" touchdown--directory))
+(load-file (expand-file-name "plugins/output/mongo.el" touchdown--directory))
 
 ;;; Syntax tree.
 
@@ -144,7 +145,8 @@ of `touchdown--parameter' structures."
                       :default nil
                       :options nil
                       :required nil))
-   :sections (list touchdown--output-plugin-file))
+   :sections (list touchdown--output-plugin-file
+		   touchdown--output-plugin-mongo))
   "Touchdown match section syntax.")
 
 (defvar touchdown--section-label
