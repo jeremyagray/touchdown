@@ -34,6 +34,93 @@
  "touchdown-mode location tests"
 
  (describe
+  "touchdown-mode `touchdown--where-am-i`"
+
+  (it
+   "should provide the location list"
+   (with-touchdown-temp-buffer
+    "@include file.conf
+
+<source>
+  @type syslog
+
+  <parse>
+    @type syslog
+  </parse>
+</source>
+
+"
+    (forward-cursor-on "@include")
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     nil)
+
+    ;; blank line
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     nil)
+
+    ;; <source>
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     nil)
+
+    ;; @type syslog
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "source"))
+
+    ;; blank line
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "syslog" "source"))
+
+    ;; <parse>
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "syslog" "source"))
+
+    ;; @type syslog
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "parse" "syslog" "source"))
+
+    ;; </parse>
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "syslog" "parse" "syslog" "source"))
+
+    ;; </section>
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     (list "syslog" "source"))
+
+    ;; blank line
+    (forward-line 1)
+    (expect
+     (touchdown--where-am-i)
+     :to-equal
+     nil)
+    )))
+
+ (describe
   "touchdown-mode `touchdown--within-label-p'"
 
   (setq label-config "<match mongodb>

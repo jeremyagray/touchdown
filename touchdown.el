@@ -155,6 +155,18 @@ Match groups are:
    "^[[:space:]]*\\(%s\\)[[:space:]]+\\(.+?\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
    parameter))
 
+(defun touchdown--create-parameter-type-regexp (type)
+  "Return a regular expression matching a parameter `@type` TYPE.
+
+Match groups are:
+
+1. Parameter name.
+2. Parameter value.
+3. Comment, if present."
+  (format
+   "^[[:space:]]*\\(@type\\)[[:space:]]+\\(%s\\)\\(?:[[:space:]]*\\|\\(?:[[:space:]]+\\(#.*\\)\\)?\\)?$"
+   type))
+
 ;; REVIEW
 (defun touchdown--create-options-regexp (options &optional group)
   "Return a regular expression option group representing OPTIONS.
@@ -374,6 +386,12 @@ line against `touchdown--parameter-regexp'."
     (beginning-of-line)
     (looking-at touchdown--parameter-regexp)))
 
+(defun touchdown--parameter-type-line-p ()
+  "Determine if the current line is a `@type` parameter line."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at (touchdown--create-parameter-regexp "@type"))))
+
 (defun touchdown--parameter-boolean-line-p ()
   "Determine if the current line has a boolean parameter.
 
@@ -470,21 +488,37 @@ or nil if the point is not within any section."
           (sections ()))
       (goto-char (point-min))
       (while (and (< (line-number-at-pos (point)) current-line) (not (eobp)))
-        (if touchdown--debug
-            (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
+        (when touchdown--debug
+          (message "section list: %s" sections)
+          (message "line: %s current-line: %s" (line-number-at-pos (point)) current-line))
         (when (touchdown--section-opening-line-p)
           (progn
-            (if touchdown--debug
+            (when touchdown--debug
                 (message "found opening %s" (match-string-no-properties 2)))
+            (push (match-string-no-properties 2) sections)))
+        (when (touchdown--parameter-type-line-p)
+          (progn
+            (when touchdown--debug
+                (message "found @type %s" (match-string-no-properties 2)))
             (push (match-string-no-properties 2) sections)))
         (when (touchdown--section-closing-line-p)
           (progn
-            (if touchdown--debug
+            (when touchdown--debug
                 (message "found closing %s" (match-string-no-properties 2)))
-            (setq sections (cdr sections))))
+            (cond ((equal (match-string-no-properties 2) (car sections))
+                   (when touchdown--debug
+                     (message "no type, popping %s" (car sections)))
+                   (setq sections (cdr sections)))
+                  ((equal (match-string-no-properties 2) (cadr sections))
+                   (when touchdown--debug
+                     (message
+                      "type %s, popping %s"
+                      (car sections)
+                      (cadr sections)))
+                   (setq sections (cddr sections))))))
         (forward-line 1))
-      (if touchdown--debug
-          (message "section list: %s" sections))
+      (when touchdown--debug
+        (message "section list: %s" sections))
       sections)))
 
 (cl-defstruct
@@ -570,72 +604,89 @@ type."
           (type nil)
           (stop nil)
           (sections (touchdown--where-am-i)))
-      (cond ((equal sections nil)
-             (setq type nil))
-            (t
-             (if touchdown--debug
-                 (message "touchdown--what-type-am-i:  section %s" (car sections)))
-             (re-search-backward (touchdown--create-section-opening-regexp (car sections)))
-             (beginning-of-line)
-             (let ((other nil))
-               (while (and
-                       (not (eobp))
-                       (not stop))
-                 (forward-line 1)
-                 (let ((desc (touchdown--what-am-i)))
-                   (cond
-                    ;; @type line, in same section.
-                    ((and
-                      (not other)
-                      (equal
-                       (touchdown--line-description-type desc)
-                       "parameter")
-                      (equal
-                       (touchdown--line-description-name desc)
-                       "@type"))
-                     (setq type (touchdown--line-description-value desc)
-                           stop t))
-                    ;; Section opening or closing of same type.
-                    ((and
-                      (not other)
-                      (equal
-                       (touchdown--line-description-type desc)
-                       "section")
-                      (equal
-                       (touchdown--line-description-name desc)
-                       (car sections)))
-                     (setq stop t))
-                    ;; Section opening of different type.
-                    ((and
-                      (not other)
-                      (equal
-                       (touchdown--line-description-type desc)
-                       "section")
-                      (not
-                       (equal
-                        (touchdown--line-description-name desc)
-                        (car sections)))
-                      (equal
-                       (touchdown--line-description-value desc)
-                       "open"))
-                     (setq other t))
-                    ;; Section closing of different type.
-                    ((and
-                      other
-                      (equal
-                       (touchdown--line-description-type desc)
-                       "section")
-                      (not
-                       (equal
-                        (touchdown--line-description-name desc)
-                        (car sections)))
-                      (equal
-                       (touchdown--line-description-value desc)
-                       "close"))
-                     (setq other nil))))))
-             (when touchdown--debug
-               (message "touchdown--what-type-am-i:  type %s" type))
-             type)))))
+      (when touchdown--debug
+        (message
+         "touchdown--what-type-am-i:  sections %s; type %s" sections type))
+      ;; Check if last section is a plugin.
+      (let ((sects (reverse sections))
+            (tree touchdown--syntax-tree))
+        (while sects
+          (setq tree (touchdown--section-subsection tree (car sects))
+                sects (cdr sects)))
+        (when (equal (touchdown--section-type tree) "config")
+          (setq type (car sections)
+                sections (cdr sections))))
+
+      ;; (cond ((equal sections nil)
+      ;;        (setq type nil))
+      ;;       (t
+      (unless (or type (not sections))
+        (when touchdown--debug
+          (message "touchdown--what-type-am-i:  section %s" (car sections)))
+        ;; (re-search-backward (touchdown--create-section-opening-regexp (car sections)))
+        (or
+         (re-search-backward (touchdown--create-section-opening-regexp (car sections)) (point-min) t)
+         (re-search-backward (touchdown--create-parameter-type-regexp (car sections)) (point-min) t))
+        (beginning-of-line)
+        (let ((other nil))
+          (while (and
+                  (not (eobp))
+                  (not stop))
+            (forward-line 1)
+            (let ((desc (touchdown--what-am-i)))
+              (cond
+               ;; @type line, in same section.
+               ((and
+                 (not other)
+                 (equal
+                  (touchdown--line-description-type desc)
+                  "parameter")
+                 (equal
+                  (touchdown--line-description-name desc)
+                  "@type"))
+                (setq type (touchdown--line-description-value desc)
+                      stop t))
+               ;; Section opening or closing of same type.
+               ((and
+                 (not other)
+                 (equal
+                  (touchdown--line-description-type desc)
+                  "section")
+                 (equal
+                  (touchdown--line-description-name desc)
+                  (car sections)))
+                (setq stop t))
+               ;; Section opening of different type.
+               ((and
+                 (not other)
+                 (equal
+                  (touchdown--line-description-type desc)
+                  "section")
+                 (not
+                  (equal
+                   (touchdown--line-description-name desc)
+                   (car sections)))
+                 (equal
+                  (touchdown--line-description-value desc)
+                  "open"))
+                (setq other t))
+               ;; Section closing of different type.
+               ((and
+                 other
+                 (equal
+                  (touchdown--line-description-type desc)
+                  "section")
+                 (not
+                  (equal
+                   (touchdown--line-description-name desc)
+                   (car sections)))
+                 (equal
+                  (touchdown--line-description-value desc)
+                  "close"))
+                (setq other nil)))))))
+      (when touchdown--debug
+        (message "touchdown--what-type-am-i:  type %s" type))
+      type)))
 
 (defun touchdown--section-closing-name ()
   "Return the name of the current section closing."
@@ -859,7 +910,7 @@ function."
   (let ((subs (touchdown--section-sections section))
         (found nil)
         (subsection nil))
-    (when (not (equal subs nil))
+    (unless (equal subs nil)
       (while (and subs (not found))
         (cond ((equal sub (touchdown--section-name (car subs)))
                (setq found t
@@ -938,30 +989,46 @@ the TYPE."
 
 (defun touchdown--produce-options ()
   "Return current valid options."
+  (when touchdown--debug
+    (message "touchdown--produce-options"))
   (let ((locations (nreverse (touchdown--where-am-i)))
         (options nil)
         (section touchdown--syntax-tree))
     (cond ((equal locations nil)
-           (message "root level")
-           (message "completions: %s" (touchdown--section-completions section nil))
-           (setq options (touchdown--section-completions section nil)))
+           (when touchdown--debug
+             (message "root level"))
+           (setq options (touchdown--section-completions section nil))
+           (when touchdown--debug
+             (message "completions: %s" options)))
           (t
-           (let ((section touchdown--syntax-tree)
-                 (type (touchdown--what-type-am-i)))
+           (when touchdown--debug
+             (message "level: %s" locations))
+           (let ((type (touchdown--what-type-am-i)))
+             (message "type %s; locations: %s" type locations)
+             ;; (when (equal type (car locations))
+             ;;   (setq locations (cdr locations)))
+             (when (equal type (car (reverse locations)))
+               (setq locations (reverse (cdr (reverse locations)))))
              (while locations
-               (message "walking to: %s" (car locations))
-               (message "type: %s" type)
+               (when touchdown--debug
+                 (message "locations: %s" locations)
+                 (message "walking to: %s" (car locations))
+                 (message "type: %s" type))
                (setq section (touchdown--section-subsection section (car locations))
                      locations (cdr locations)))
-             (message "completing on section %s, type %s" (touchdown--section-name section) type)
+             (when touchdown--debug
+               (message "completing on section %s, type %s" (touchdown--section-name section) type))
              (setq options (touchdown--section-completions section type)))))
-    (message "options: %s" options)
+    (when touchdown--debug
+      (message "options: %s" options))
     options))
 
 (defun touchdown--dynamic-completion-table (str)
   "Return all possible completions for STR.
 
 Return a list of all possible matches for STR in the fluentd syntax considering the current location of the point."
+  (when touchdown--debug
+    (message "touchdown--dynamic-completion-table"))
   (let ((directives (touchdown--produce-options))
         (matches nil))
     (message "directives: %s" directives)
@@ -973,7 +1040,7 @@ Return a list of all possible matches for STR in the fluentd syntax considering 
               (t
                (setq directives (cdr directives))))))
     (message "matches: %s" matches)
-    matches))
+    (nreverse matches)))
 
 (defun touchdown--completion-at-point ()
   "Touchdown mode completion at point function."

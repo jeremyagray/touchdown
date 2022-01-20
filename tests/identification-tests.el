@@ -141,7 +141,24 @@
     (expect
      (touchdown--what-type-am-i)
      :to-equal
-     "syslog"))))
+     "syslog")))
+
+  (it
+   "should return type with `@type` on closed section, after `@type` line"
+   (with-touchdown-temp-buffer
+    "@include root.conf
+
+<match>
+  @type file
+  path some_file
+</match>
+"
+    (forward-cursor-on "<match>")
+    (forward-line 2)
+    (expect
+     (touchdown--what-type-am-i)
+     :to-equal
+     "file"))))
 
  (describe
   "touchdown-mode what-am-i"
