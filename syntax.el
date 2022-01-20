@@ -69,6 +69,18 @@ of `touchdown--parameter' structures."
       (setq params (cdr params)))
     names))
 
+(defun touchdown--parameter-get (section name)
+  "Return a parameter named NAME from SECTION."
+  (let ((param nil)
+	(stop nil)
+	(params (touchdown--section-parameters section)))
+    (while (and params (not stop))
+      (when (equal (touchdown--parameter-name (car params)) name)
+	(setq param (car params)
+	      stop t))
+      (setq params (cdr params)))
+    param))
+
 ;;; Parameter lists.
 
 ;;; System parameters and sections.
